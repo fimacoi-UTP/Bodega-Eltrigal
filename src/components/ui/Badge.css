@@ -1,0 +1,73 @@
+/* Badge · etiquetas de estado */
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+  font-weight: var(--peso-semi);
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--radio-pastilla);
+  border: 1px solid transparent;
+}
+
+.ui-badge--sm {
+  font-size: var(--texto-2xs);
+  padding: 3px var(--esp-2);
+}
+
+.ui-badge--md {
+  font-size: var(--texto-xs);
+  padding: var(--esp-1) var(--esp-3);
+}
+
+.ui-badge__punto {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  flex-shrink: 0;
+}
+
+/* --- Variantes ---------------------------------------------------------- */
+.ui-badge--neutro {
+  background-color: var(--neutro-100);
+  color: var(--neutro-600);
+  border-color: var(--neutro-200);
+}
+
+.ui-badge--marca {
+  background-color: var(--color-primario-suave);
+  color: var(--ladrillo-700);
+  border-color: var(--ladrillo-100);
+}
+
+.ui-badge--acento {
+  background-color: var(--trigo-50);
+  color: var(--trigo-800);
+  border-color: var(--trigo-100);
+}
+
+.ui-badge--exito {
+  background-color: var(--campo-50);
+  color: var(--campo-700);
+  border-color: var(--campo-100);
+}
+
+.ui-badge--advertencia {
+  background-color: var(--ambar-50);
+  color: var(--ambar-600);
+  border-color: var(--ambar-100);
+}
+
+.ui-badge--peligro {
+  background-color: var(--rojo-50);
+  color: var(--rojo-600);
+  border-color: var(--rojo-100);
+}
+
+.ui-badge--info {
+  background-color: var(--azul-50);
+  color: var(--azul-600);
+  border-color: var(--azul-100);
+}

@@ -1,0 +1,39 @@
+/* EstadoVacio · listas sin resultados */
+
+.ui-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--esp-3);
+  padding: var(--esp-10) var(--esp-4);
+  max-width: 420px;
+  margin-inline: auto;
+}
+
+.ui-vacio__icono {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  font-size: 28px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--color-superficie-suave);
+  border: 1px solid var(--color-borde);
+}
+
+.ui-vacio__titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semi);
+  color: var(--color-texto);
+}
+
+.ui-vacio__descripcion {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+  text-wrap: pretty;
+}
+
+.ui-vacio__accion {
+  margin-top: var(--esp-2);
+}

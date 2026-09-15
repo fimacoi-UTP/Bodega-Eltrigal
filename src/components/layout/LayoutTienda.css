@@ -1,0 +1,14 @@
+/* LayoutTienda · esqueleto de la tienda web */
+
+.layout-tienda {
+  display: flex;
+  flex-direction: column;
+  /* 100dvh (y no 100vh) para que la barra del navegador móvil no descuadre
+     la altura al aparecer y desaparecer. */
+  min-height: 100dvh;
+}
+
+.layout-tienda__contenido {
+  flex: 1; /* empuja el footer hacia abajo aunque haya poco contenido */
+  width: 100%;
+}

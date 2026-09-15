@@ -1,0 +1,124 @@
+/* Modal · MOBILE-FIRST: en celular es una hoja que sube desde abajo,
+   en pantallas grandes se centra como ventana clásica. */
+
+.ui-modal__fondo {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background-color: rgba(26, 23, 20, 0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: flex-end; /* móvil: pegado abajo */
+  justify-content: center;
+  padding: 0;
+  animation: ui-modal-aparecer var(--transicion) both;
+}
+
+.ui-modal {
+  width: 100%;
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-superficie);
+  border-radius: var(--radio-xl) var(--radio-xl) 0 0;
+  box-shadow: var(--sombra-xl);
+  animation: ui-modal-subir var(--transicion-lenta) both;
+}
+
+.ui-modal:focus {
+  outline: none;
+}
+
+.ui-modal__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  padding: var(--esp-4) var(--esp-5);
+  border-bottom: 1px solid var(--color-borde);
+  flex-shrink: 0;
+}
+
+.ui-modal__titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semi);
+}
+
+.ui-modal__cerrar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radio-sm);
+  color: var(--color-texto-tenue);
+  font-size: var(--texto-sm);
+  transition:
+    background-color var(--transicion-rapida),
+    color var(--transicion-rapida);
+}
+
+.ui-modal__cerrar:hover {
+  background-color: var(--color-superficie-suave);
+  color: var(--color-texto);
+}
+
+.ui-modal__cuerpo {
+  padding: var(--esp-5);
+  overflow-y: auto; /* el cuerpo hace scroll, la cabecera y el pie se quedan */
+  flex: 1;
+}
+
+.ui-modal__pie {
+  display: flex;
+  gap: var(--esp-3);
+  justify-content: flex-end;
+  padding: var(--esp-4) var(--esp-5);
+  border-top: 1px solid var(--color-borde);
+  background-color: var(--color-superficie-suave);
+  flex-shrink: 0;
+}
+
+/* --- Tablet y desktop: ventana centrada --------------------------------- */
+@media (min-width: 640px) {
+  .ui-modal__fondo {
+    align-items: center;
+    padding: var(--esp-6);
+  }
+
+  .ui-modal {
+    border-radius: var(--radio-xl);
+    max-height: 85dvh;
+    animation-name: ui-modal-escalar;
+  }
+
+  .ui-modal--sm {
+    max-width: 400px;
+  }
+  .ui-modal--md {
+    max-width: 560px;
+  }
+  .ui-modal--lg {
+    max-width: 800px;
+  }
+}
+
+/* --- Animaciones -------------------------------------------------------- */
+@keyframes ui-modal-aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ui-modal-subir {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ui-modal-escalar {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}

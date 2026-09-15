@@ -1,0 +1,478 @@
+/* ============================================================================
+ * Navbar de la tienda web · MOBILE-FIRST
+ * En celular: hamburguesa + logo + carrito. La navegación vive en el cajón.
+ * Desde 900px: aparece la navegación horizontal y se esconde la hamburguesa.
+ * ==========================================================================*/
+
+/* --- Cinta superior ----------------------------------------------------- */
+.cinta {
+  background-color: var(--ladrillo-800);
+  color: var(--ladrillo-100);
+  font-size: var(--texto-2xs);
+}
+
+.cinta__contenido {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-4);
+  height: 30px;
+  text-align: center;
+}
+
+.cinta__extra {
+  display: none; /* en móvil no hay espacio para las dos cosas */
+}
+
+@media (min-width: 640px) {
+  .cinta__contenido {
+    justify-content: space-between;
+  }
+  .cinta__extra {
+    display: inline;
+  }
+}
+
+/* --- Barra principal ---------------------------------------------------- */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-navegacion);
+  background-color: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+  box-shadow: var(--sombra-xs);
+}
+
+.navbar__contenido {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  height: var(--alto-navbar);
+}
+
+/* --- Hamburguesa -------------------------------------------------------- */
+.navbar__hamburguesa {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: calc(var(--esp-2) * -1);
+  border-radius: var(--radio-md);
+  color: var(--color-texto);
+  flex-shrink: 0;
+  transition: background-color var(--transicion-rapida);
+}
+
+.navbar__hamburguesa:hover {
+  background-color: var(--color-superficie-suave);
+}
+
+.navbar__icono-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 20px;
+  height: 16px;
+}
+
+.navbar__icono-menu span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  border-radius: 2px;
+  background-color: currentColor;
+  transition:
+    transform var(--transicion),
+    opacity var(--transicion);
+}
+
+/* La hamburguesa se convierte en X al abrir */
+.navbar__icono-menu--x span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.navbar__icono-menu--x span:nth-child(2) {
+  opacity: 0;
+}
+.navbar__icono-menu--x span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* --- Navegación de escritorio ------------------------------------------- */
+.navbar__nav {
+  display: none; /* oculta en móvil: está en el cajón */
+  align-items: center;
+  gap: var(--esp-1);
+  margin-left: var(--esp-4);
+}
+
+.navbar__enlace {
+  position: relative;
+  padding: var(--esp-2) var(--esp-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-suave);
+  border-radius: var(--radio-md);
+  transition:
+    color var(--transicion-rapida),
+    background-color var(--transicion-rapida);
+}
+
+.navbar__enlace:hover {
+  color: var(--color-primario);
+  background-color: var(--color-primario-suave);
+}
+
+.navbar__enlace--activo {
+  color: var(--color-primario);
+  font-weight: var(--peso-semi);
+}
+
+.navbar__enlace--activo::after {
+  content: "";
+  position: absolute;
+  left: var(--esp-3);
+  right: var(--esp-3);
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--color-acento);
+}
+
+/* --- Acciones ----------------------------------------------------------- */
+.navbar__acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-left: auto;
+}
+
+.navbar__accion {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radio-md);
+  color: var(--color-texto);
+  transition: background-color var(--transicion-rapida);
+}
+
+.navbar__accion:hover {
+  background-color: var(--color-superficie-suave);
+  color: var(--color-primario);
+}
+
+.navbar__accion svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Contador del carrito (lo activará el módulo de carrito) */
+.navbar__contador {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: var(--peso-negrita);
+  color: var(--color-sobre-primario);
+  background-color: var(--color-primario);
+  border: 2px solid var(--color-superficie);
+  border-radius: var(--radio-pastilla);
+}
+
+/* --- Usuario ------------------------------------------------------------ */
+.navbar__usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding-left: var(--esp-2);
+  border-left: 1px solid var(--color-borde);
+}
+
+.navbar__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--color-primario-suave);
+  color: var(--ladrillo-700);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-negrita);
+  letter-spacing: 0.02em;
+}
+
+.navbar__usuario-datos {
+  display: none;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.navbar__usuario-nombre {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  color: var(--color-texto);
+}
+
+.navbar__usuario-rol {
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-tenue);
+}
+
+.navbar__enlace-panel,
+.navbar__ingresar {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 var(--esp-4);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  border-radius: var(--radio-md);
+  background-color: var(--color-primario);
+  color: var(--color-sobre-primario);
+  transition: background-color var(--transicion-rapida);
+  white-space: nowrap;
+}
+
+.navbar__enlace-panel:hover,
+.navbar__ingresar:hover {
+  background-color: var(--color-primario-hover);
+  color: var(--color-sobre-primario);
+}
+
+.navbar__enlace-panel {
+  display: none; /* en móvil está dentro del cajón */
+}
+
+.navbar__salir {
+  display: none;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-tenue);
+  padding: var(--esp-2);
+  border-radius: var(--radio-sm);
+}
+
+.navbar__salir:hover {
+  color: var(--color-peligro);
+}
+
+/* --- Escritorio --------------------------------------------------------- */
+@media (min-width: 900px) {
+  .navbar__hamburguesa {
+    display: none;
+  }
+  .navbar__nav {
+    display: flex;
+  }
+  .navbar__usuario-datos {
+    display: flex;
+  }
+  .navbar__enlace-panel {
+    display: inline-flex;
+  }
+  .navbar__salir {
+    display: inline-flex;
+  }
+}
+
+/* ============================================================================
+ * CAJÓN LATERAL (menú móvil)
+ * ==========================================================================*/
+
+.cajon__fondo {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-cajon);
+  background-color: rgba(26, 23, 20, 0.45);
+  animation: cajon-fondo var(--transicion) both;
+}
+
+.cajon {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: calc(var(--z-cajon) + 1);
+  width: min(86vw, 320px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+  padding: var(--esp-4);
+  overflow-y: auto;
+  background-color: var(--color-superficie);
+  box-shadow: var(--sombra-xl);
+  /* Fuera de pantalla por defecto; entra al abrirse. */
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform var(--transicion-lenta),
+    visibility var(--transicion-lenta);
+}
+
+.cajon--abierto {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.cajon__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--esp-4);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.cajon__cerrar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radio-md);
+  color: var(--color-texto-tenue);
+  font-size: var(--texto-sm);
+}
+
+.cajon__cerrar:hover {
+  background-color: var(--color-superficie-suave);
+  color: var(--color-texto);
+}
+
+.cajon__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.cajon__enlace {
+  display: block;
+  padding: var(--esp-3);
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto);
+  border-radius: var(--radio-md);
+  transition: background-color var(--transicion-rapida);
+}
+
+.cajon__enlace:hover {
+  background-color: var(--color-superficie-suave);
+  color: var(--color-texto);
+}
+
+.cajon__enlace--activo {
+  background-color: var(--color-primario-suave);
+  color: var(--color-primario);
+  font-weight: var(--peso-semi);
+}
+
+.cajon__seccion {
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--color-borde);
+}
+
+.cajon__titulo-seccion {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-texto-tenue);
+  margin-bottom: var(--esp-3);
+}
+
+.cajon__categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.cajon__categoria {
+  padding: var(--esp-2) var(--esp-3);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-suave);
+  background-color: var(--color-superficie-suave);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-pastilla);
+  transition:
+    background-color var(--transicion-rapida),
+    color var(--transicion-rapida);
+}
+
+.cajon__categoria:hover {
+  background-color: var(--color-primario-suave);
+  border-color: var(--color-primario-borde);
+  color: var(--color-primario);
+}
+
+.cajon__pie {
+  margin-top: auto;
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--color-borde);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.cajon__usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+}
+
+.cajon__usuario-nombre {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  margin-bottom: 3px;
+}
+
+.cajon__ingresar,
+.cajon__salir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  border-radius: var(--radio-md);
+}
+
+.cajon__ingresar {
+  background-color: var(--color-primario);
+  color: var(--color-sobre-primario);
+}
+
+.cajon__ingresar:hover {
+  background-color: var(--color-primario-hover);
+  color: var(--color-sobre-primario);
+}
+
+.cajon__salir {
+  border: 1px solid var(--color-borde-fuerte);
+  color: var(--color-texto-suave);
+}
+
+.cajon__salir:hover {
+  border-color: var(--color-peligro);
+  color: var(--color-peligro);
+}
+
+@keyframes cajon-fondo {
+  from {
+    opacity: 0;
+  }
+}
+
+/* En escritorio el cajón no existe */
+@media (min-width: 900px) {
+  .cajon,
+  .cajon__fondo {
+    display: none;
+  }
+}

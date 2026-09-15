@@ -1,0 +1,142 @@
+/* Boton · usa SOLO tokens de src/styles/tokens.css */
+
+.ui-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  font-family: var(--fuente-base);
+  font-weight: var(--peso-semi);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: var(--radio-md);
+  cursor: pointer;
+  transition:
+    background-color var(--transicion-rapida),
+    border-color var(--transicion-rapida),
+    color var(--transicion-rapida),
+    box-shadow var(--transicion-rapida),
+    transform var(--transicion-rapida);
+  /* Área táctil mínima cómoda en celular */
+  min-height: 42px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ui-boton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ui-boton:disabled,
+.ui-boton[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- Tamaños ------------------------------------------------------------ */
+.ui-boton--sm {
+  min-height: 34px;
+  padding: 0 var(--esp-3);
+  font-size: var(--texto-sm);
+  border-radius: var(--radio-sm);
+}
+
+.ui-boton--md {
+  min-height: 42px;
+  padding: 0 var(--esp-5);
+  font-size: var(--texto-sm);
+}
+
+.ui-boton--lg {
+  min-height: 50px;
+  padding: 0 var(--esp-6);
+  font-size: var(--texto-base);
+  border-radius: var(--radio-lg);
+}
+
+/* --- Variantes ---------------------------------------------------------- */
+.ui-boton--primario {
+  background-color: var(--color-primario);
+  color: var(--color-sobre-primario);
+  box-shadow: var(--sombra-xs);
+}
+.ui-boton--primario:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--color-primario-hover);
+  color: var(--color-sobre-primario);
+  box-shadow: var(--sombra-sm);
+}
+
+.ui-boton--secundario {
+  background-color: var(--color-acento);
+  color: var(--neutro-900);
+  box-shadow: var(--sombra-xs);
+}
+.ui-boton--secundario:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--trigo-300);
+  color: var(--neutro-900);
+}
+
+.ui-boton--contorno {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde-fuerte);
+  color: var(--color-texto);
+}
+.ui-boton--contorno:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--color-superficie-suave);
+  border-color: var(--color-primario);
+  color: var(--color-primario);
+}
+
+.ui-boton--fantasma {
+  background-color: transparent;
+  color: var(--color-texto-suave);
+}
+.ui-boton--fantasma:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--color-superficie-suave);
+  color: var(--color-texto);
+}
+
+.ui-boton--peligro {
+  background-color: var(--color-peligro);
+  color: var(--neutro-0);
+}
+.ui-boton--peligro:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--rojo-500);
+  color: var(--neutro-0);
+}
+
+/* --- Modificadores ------------------------------------------------------ */
+.ui-boton--bloque {
+  width: 100%;
+}
+
+.ui-boton__icono {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.1em;
+}
+
+/* --- Spinner de carga --------------------------------------------------- */
+.ui-boton__spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: ui-boton-giro 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes ui-boton-giro {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-boton__spinner {
+    animation-duration: 1.6s;
+  }
+}

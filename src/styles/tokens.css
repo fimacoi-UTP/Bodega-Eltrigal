@@ -1,0 +1,239 @@
+/* ============================================================================
+ * SISTEMA DE DISEÑO · Bodega El Trigal
+ * ----------------------------------------------------------------------------
+ * Todos los tokens (colores, tipografía, espaciados, radios, sombras) viven
+ * AQUÍ y en ningún otro lado. Cualquier componente del proyecto debe usar estas
+ * variables en vez de escribir valores fijos ("hardcodeados").
+ *
+ *   ✅ color: var(--color-primario);
+ *   ❌ color: #B0441F;
+ *
+ * ¿Por qué? Porque si mañana el grupo decide cambiar el color de marca, se
+ * cambia en una sola línea y todo el proyecto se actualiza. Eso es coherencia
+ * visual y es lo que mantiene los 5 módulos viéndose como UNA sola plataforma.
+ *
+ * PALETA: cálida y confiable, inspirada en el trigo (de ahí "El Trigal"),
+ * el ladrillo de las casas piuranas y el verde del campo.
+ * ==========================================================================*/
+
+:root {
+  /* ---------------------------------------------------------------------- */
+  /* 1. PALETA CRUDA (escalas de color · no usar directo si hay un token     */
+  /*    semántico equivalente más abajo)                                     */
+  /* ---------------------------------------------------------------------- */
+
+  /* Ladrillo — color de marca principal */
+  --ladrillo-50: #fdf4f1;
+  --ladrillo-100: #fae3dc;
+  --ladrillo-200: #f3c5b7;
+  --ladrillo-300: #e9a08a;
+  --ladrillo-400: #dc7554;
+  --ladrillo-500: #c9532f;
+  --ladrillo-600: #b0441f;
+  --ladrillo-700: #8f3719;
+  --ladrillo-800: #74301a;
+  --ladrillo-900: #5f2b1a;
+
+  /* Trigo — color de acento (ofertas, destacados, detalles) */
+  --trigo-50: #fef9ec;
+  --trigo-100: #fcefc7;
+  --trigo-200: #f9de8e;
+  --trigo-300: #f5c94f;
+  --trigo-400: #f0b429;
+  --trigo-500: #e09a0e;
+  --trigo-600: #c27803;
+  --trigo-700: #9c5b07;
+  --trigo-800: #7f470d;
+  --trigo-900: #6b3b0e;
+
+  /* Campo — verde para estados positivos (stock disponible, venta exitosa) */
+  --campo-50: #eefaf3;
+  --campo-100: #d3f2e0;
+  --campo-200: #a8e5c2;
+  --campo-400: #45b579;
+  --campo-500: #2f9e5f;
+  --campo-600: #237a4a;
+  --campo-700: #1b5e3a;
+
+  /* Neutros cálidos — grises con un toque de tierra, no grises fríos */
+  --neutro-0: #ffffff;
+  --neutro-50: #faf8f5;
+  --neutro-100: #f4f0ea;
+  --neutro-200: #e7e1d8;
+  --neutro-300: #d5ccc0;
+  --neutro-400: #a99e8f;
+  --neutro-500: #7c7264;
+  --neutro-600: #5c5348;
+  --neutro-700: #433c34;
+  --neutro-800: #2b2621;
+  --neutro-900: #1a1714;
+
+  /* Funcionales */
+  --rojo-50: #fef2f2;
+  --rojo-100: #fee2e2;
+  --rojo-500: #dc2626;
+  --rojo-600: #b91c1c;
+  --ambar-50: #fffbeb;
+  --ambar-100: #fef3c7;
+  --ambar-500: #d97706;
+  --ambar-600: #b45309;
+  --azul-50: #eff6ff;
+  --azul-100: #dbeafe;
+  --azul-500: #2563eb;
+  --azul-600: #1d4ed8;
+
+  /* ---------------------------------------------------------------------- */
+  /* 2. TOKENS SEMÁNTICOS (los que se usan en el día a día)                  */
+  /* ---------------------------------------------------------------------- */
+
+  /* Superficies y fondos */
+  --color-fondo: var(--neutro-50);
+  --color-superficie: var(--neutro-0);
+  --color-superficie-suave: var(--neutro-100);
+  --color-superficie-hover: var(--neutro-100);
+
+  /* Bordes */
+  --color-borde: var(--neutro-200);
+  --color-borde-fuerte: var(--neutro-300);
+
+  /* Texto */
+  --color-texto: var(--neutro-800);
+  --color-texto-suave: var(--neutro-600);
+  --color-texto-tenue: var(--neutro-500);
+  --color-texto-invertido: var(--neutro-0);
+
+  /* Marca / acciones principales */
+  --color-primario: var(--ladrillo-600);
+  --color-primario-hover: var(--ladrillo-700);
+  --color-primario-activo: var(--ladrillo-800);
+  --color-primario-suave: var(--ladrillo-50);
+  --color-primario-borde: var(--ladrillo-200);
+  --color-sobre-primario: var(--neutro-0);
+
+  /* Acento */
+  --color-acento: var(--trigo-400);
+  --color-acento-fuerte: var(--trigo-600);
+  --color-acento-suave: var(--trigo-50);
+
+  /* Estados */
+  --color-exito: var(--campo-600);
+  --color-exito-suave: var(--campo-50);
+  --color-advertencia: var(--ambar-600);
+  --color-advertencia-suave: var(--ambar-50);
+  --color-peligro: var(--rojo-600);
+  --color-peligro-suave: var(--rojo-50);
+  --color-info: var(--azul-600);
+  --color-info-suave: var(--azul-50);
+
+  /* Anillo de foco (accesibilidad: siempre visible al navegar con teclado) */
+  --color-foco: var(--ladrillo-400);
+  --anillo-foco: 0 0 0 3px var(--ladrillo-100);
+
+  /* ---------------------------------------------------------------------- */
+  /* 3. TIPOGRAFÍA                                                           */
+  /* ---------------------------------------------------------------------- */
+  --fuente-base: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --fuente-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+    "Liberation Mono", monospace;
+
+  --texto-2xs: 0.6875rem; /* 11px */
+  --texto-xs: 0.75rem; /*  12px */
+  --texto-sm: 0.875rem; /* 14px */
+  --texto-base: 1rem; /*    16px */
+  --texto-lg: 1.125rem; /* 18px */
+  --texto-xl: 1.25rem; /*  20px */
+  --texto-2xl: 1.5rem; /*  24px */
+  --texto-3xl: 1.875rem; /* 30px */
+  --texto-4xl: 2.25rem; /* 36px */
+
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-semi: 600;
+  --peso-negrita: 700;
+  --peso-extra: 800;
+
+  --interlineado-ajustado: 1.2;
+  --interlineado-base: 1.55;
+  --interlineado-amplio: 1.7;
+
+  /* ---------------------------------------------------------------------- */
+  /* 4. ESPACIADO (escala de 4px)                                            */
+  /* ---------------------------------------------------------------------- */
+  --esp-1: 0.25rem; /*  4px */
+  --esp-2: 0.5rem; /*   8px */
+  --esp-3: 0.75rem; /* 12px */
+  --esp-4: 1rem; /*     16px */
+  --esp-5: 1.25rem; /* 20px */
+  --esp-6: 1.5rem; /*  24px */
+  --esp-8: 2rem; /*     32px */
+  --esp-10: 2.5rem; /* 40px */
+  --esp-12: 3rem; /*   48px */
+  --esp-16: 4rem; /*   64px */
+  --esp-20: 5rem; /*   80px */
+
+  /* ---------------------------------------------------------------------- */
+  /* 5. RADIOS Y SOMBRAS                                                     */
+  /* ---------------------------------------------------------------------- */
+  --radio-sm: 6px;
+  --radio-md: 10px;
+  --radio-lg: 14px;
+  --radio-xl: 20px;
+  --radio-pastilla: 999px;
+
+  /* Sombras con tinte cálido (no negro puro) para que combinen con la paleta */
+  --sombra-xs: 0 1px 2px rgba(67, 60, 52, 0.06);
+  --sombra-sm: 0 1px 3px rgba(67, 60, 52, 0.08), 0 1px 2px rgba(67, 60, 52, 0.04);
+  --sombra-md: 0 4px 12px rgba(67, 60, 52, 0.08), 0 2px 4px rgba(67, 60, 52, 0.04);
+  --sombra-lg: 0 12px 28px rgba(67, 60, 52, 0.12), 0 4px 8px rgba(67, 60, 52, 0.05);
+  --sombra-xl: 0 24px 48px rgba(67, 60, 52, 0.16);
+
+  /* ---------------------------------------------------------------------- */
+  /* 6. MOVIMIENTO                                                           */
+  /* ---------------------------------------------------------------------- */
+  --transicion-rapida: 120ms ease;
+  --transicion: 200ms ease;
+  --transicion-lenta: 320ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ---------------------------------------------------------------------- */
+  /* 7. CAPAS (z-index) — centralizadas para no pelearnos entre módulos      */
+  /* ---------------------------------------------------------------------- */
+  --z-base: 1;
+  --z-navegacion: 100;
+  --z-cajon: 200; /* drawer / menú lateral móvil */
+  --z-modal: 300;
+  --z-aviso: 400;
+
+  /* ---------------------------------------------------------------------- */
+  /* 8. MEDIDAS DE LAYOUT                                                    */
+  /* ---------------------------------------------------------------------- */
+  --ancho-contenedor: 1200px;
+  --ancho-contenedor-angosto: 720px;
+  --alto-navbar: 58px;
+  --ancho-sidebar: 248px;
+  --gutter: var(--esp-4); /* margen lateral en móvil */
+}
+
+/* Escalado del layout en pantallas grandes (MOBILE-FIRST: esto es la mejora,
+   no el punto de partida). */
+@media (min-width: 768px) {
+  :root {
+    --alto-navbar: 68px;
+    --gutter: var(--esp-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: var(--esp-8);
+  }
+}
+
+/* Respeto por quienes prefieren menos animación (accesibilidad) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transicion-rapida: 0ms;
+    --transicion: 0ms;
+    --transicion-lenta: 0ms;
+  }
+}

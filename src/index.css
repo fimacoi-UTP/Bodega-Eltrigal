@@ -1,0 +1,9 @@
+/* ============================================================================
+ * PUNTO DE ENTRADA DE ESTILOS
+ * ----------------------------------------------------------------------------
+ * El orden importa: primero los tokens (las variables), luego los estilos base
+ * que los consumen. Cada componente importa su propio .css aparte.
+ * ==========================================================================*/
+
+@import "./styles/tokens.css";
+@import "./styles/base.css";

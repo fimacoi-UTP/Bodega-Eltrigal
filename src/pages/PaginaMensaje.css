@@ -1,0 +1,57 @@
+/* Estilos compartidos por las páginas de mensaje (404 y sin acceso) */
+
+.mensaje {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70dvh;
+  padding: var(--esp-8) var(--gutter);
+}
+
+.mensaje__caja {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--esp-4);
+  max-width: 480px;
+}
+
+.mensaje__icono {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  font-size: 32px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--color-primario-suave);
+  border: 1px solid var(--color-primario-borde);
+}
+
+.mensaje__codigo {
+  font-size: clamp(3rem, 2rem + 5vw, 4.5rem);
+  font-weight: var(--peso-extra);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--color-primario);
+  opacity: 0.85;
+}
+
+.mensaje__titulo {
+  font-size: var(--texto-2xl);
+}
+
+.mensaje__texto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.mensaje__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--esp-3);
+  margin-top: var(--esp-2);
+}

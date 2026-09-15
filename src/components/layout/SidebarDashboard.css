@@ -1,0 +1,206 @@
+/* ============================================================================
+ * SidebarDashboard · MOBILE-FIRST
+ * En celular es un cajón que se desliza desde la izquierda.
+ * Desde 1024px queda fijo y siempre visible.
+ * ==========================================================================*/
+
+.panel-lateral {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: calc(var(--z-cajon) + 1);
+  width: min(82vw, var(--ancho-sidebar));
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  padding: var(--esp-4);
+  overflow-y: auto;
+  background-color: var(--neutro-900);
+  color: var(--neutro-300);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform var(--transicion-lenta),
+    visibility var(--transicion-lenta);
+}
+
+.panel-lateral--abierto {
+  transform: translateX(0);
+  visibility: visible;
+  box-shadow: var(--sombra-xl);
+}
+
+/* --- Cabecera ----------------------------------------------------------- */
+.panel-lateral__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+}
+
+/* El logo cambia de color sobre el fondo oscuro */
+.panel-lateral .logo__nombre {
+  color: var(--neutro-0);
+}
+.panel-lateral .logo__lema {
+  color: var(--neutro-500);
+}
+
+.panel-lateral__cerrar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radio-md);
+  color: var(--neutro-400);
+  font-size: var(--texto-sm);
+  flex-shrink: 0;
+}
+
+.panel-lateral__cerrar:hover {
+  background-color: var(--neutro-800);
+  color: var(--neutro-0);
+}
+
+.panel-lateral__etiqueta {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--neutro-600);
+  padding-inline: var(--esp-3);
+}
+
+/* --- Navegación --------------------------------------------------------- */
+.panel-lateral__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.panel-lateral__enlace {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--neutro-400);
+  border-radius: var(--radio-md);
+  transition:
+    background-color var(--transicion-rapida),
+    color var(--transicion-rapida);
+}
+
+.panel-lateral__enlace:hover {
+  background-color: var(--neutro-800);
+  color: var(--neutro-0);
+}
+
+.panel-lateral__enlace--activo {
+  background-color: var(--color-primario);
+  color: var(--neutro-0);
+  font-weight: var(--peso-semi);
+}
+
+.panel-lateral__enlace--activo:hover {
+  background-color: var(--color-primario);
+  color: var(--neutro-0);
+}
+
+.panel-lateral__icono {
+  width: 20px;
+  text-align: center;
+  font-size: var(--texto-sm);
+  flex-shrink: 0;
+}
+
+/* --- Pie ---------------------------------------------------------------- */
+.panel-lateral__pie {
+  margin-top: auto;
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--neutro-800);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.panel-lateral__usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-width: 0;
+}
+
+.panel-lateral__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--neutro-800);
+  color: var(--color-acento);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-negrita);
+}
+
+.panel-lateral__usuario-datos {
+  min-width: 0;
+}
+
+.panel-lateral__usuario-nombre {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  color: var(--neutro-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-lateral__usuario-rol {
+  font-size: var(--texto-2xs);
+  color: var(--color-acento);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.panel-lateral__volver {
+  font-size: var(--texto-sm);
+  color: var(--neutro-400);
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--radio-md);
+  transition:
+    background-color var(--transicion-rapida),
+    color var(--transicion-rapida);
+}
+
+.panel-lateral__volver:hover {
+  background-color: var(--neutro-800);
+  color: var(--color-acento);
+}
+
+.panel-lateral__nota {
+  font-size: var(--texto-2xs);
+  color: var(--neutro-600);
+  padding-inline: var(--esp-3);
+}
+
+/* --- Escritorio: sidebar fijo ------------------------------------------- */
+@media (min-width: 1024px) {
+  .panel-lateral {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    width: var(--ancho-sidebar);
+    transform: none;
+    visibility: visible;
+    box-shadow: none;
+    flex-shrink: 0;
+  }
+
+  .panel-lateral__cerrar {
+    display: none;
+  }
+}

@@ -1,0 +1,113 @@
+/* Input y Select · campos de formulario */
+
+.ui-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  width: 100%;
+}
+
+.ui-campo__etiqueta {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto);
+}
+
+.ui-campo__requerido {
+  color: var(--color-peligro);
+  margin-left: 2px;
+}
+
+.ui-campo__caja {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-md);
+  transition:
+    border-color var(--transicion-rapida),
+    box-shadow var(--transicion-rapida);
+}
+
+.ui-campo__caja:focus-within {
+  border-color: var(--color-primario);
+  box-shadow: var(--anillo-foco);
+}
+
+.ui-campo__caja--error {
+  border-color: var(--color-peligro);
+}
+
+.ui-campo__caja--error:focus-within {
+  box-shadow: 0 0 0 3px var(--rojo-100);
+}
+
+.ui-campo__prefijo {
+  padding-inline: var(--esp-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-tenue);
+  border-right: 1px solid var(--color-borde);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.ui-campo__input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: var(--esp-3);
+  /* 16px exactos: si es menor, iOS hace zoom automático al enfocar el campo.
+     No lo bajen aunque visualmente se vea grande en el escritorio. */
+  font-size: var(--texto-base);
+  color: var(--color-texto);
+  background: transparent;
+  border: none;
+  border-radius: var(--radio-md);
+}
+
+.ui-campo__input:focus {
+  outline: none; /* el anillo lo dibuja .ui-campo__caja:focus-within */
+}
+
+.ui-campo__input::placeholder {
+  color: var(--color-texto-tenue);
+  opacity: 0.75;
+}
+
+.ui-campo__input:disabled {
+  color: var(--color-texto-tenue);
+  cursor: not-allowed;
+}
+
+.ui-campo__caja:has(.ui-campo__input:disabled) {
+  background-color: var(--color-superficie-suave);
+}
+
+/* Select con su flechita dibujada en CSS */
+.ui-campo__select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: var(--esp-10);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%237c7264' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--esp-3) center;
+  background-size: 16px;
+}
+
+/* Mensajes */
+.ui-campo__error,
+.ui-campo__ayuda {
+  font-size: var(--texto-xs);
+  line-height: 1.4;
+}
+
+.ui-campo__error {
+  color: var(--color-peligro);
+  font-weight: var(--peso-medio);
+}
+
+.ui-campo__ayuda {
+  color: var(--color-texto-tenue);
+}

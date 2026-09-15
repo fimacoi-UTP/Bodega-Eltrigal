@@ -1,0 +1,42 @@
+[
+  {
+    "id": "usr-001",
+    "nombre": "María Sandoval",
+    "correo": "cliente@trigal.pe",
+    "clave": "cliente123",
+    "rol": "CLIENTE",
+    "telefono": "969 111 222",
+    "direccion": "Calle Los Algarrobos 456, Castilla, Piura",
+    "activo": true
+  },
+  {
+    "id": "usr-002",
+    "nombre": "Luis Trigoso",
+    "correo": "admin@trigal.pe",
+    "clave": "admin123",
+    "rol": "ADMIN",
+    "telefono": "969 333 444",
+    "direccion": "Av. Grau 1234, Urb. Santa Isabel, Piura",
+    "activo": true
+  },
+  {
+    "id": "usr-003",
+    "nombre": "Rosa Chero",
+    "correo": "cajero@trigal.pe",
+    "clave": "cajero123",
+    "rol": "CAJERO",
+    "telefono": "969 555 666",
+    "direccion": "Av. Grau 1234, Urb. Santa Isabel, Piura",
+    "activo": true
+  },
+  {
+    "id": "usr-004",
+    "nombre": "Jorge Farfán",
+    "correo": "jorge@trigal.pe",
+    "clave": "jorge123",
+    "rol": "CLIENTE",
+    "telefono": "969 777 888",
+    "direccion": "Urb. Miraflores Mz. B Lt. 12, Castilla, Piura",
+    "activo": true
+  }
+]
