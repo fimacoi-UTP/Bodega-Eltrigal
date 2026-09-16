@@ -144,3 +144,21 @@ export const BODEGA = {
 
 /** Moneda con la que trabaja todo el sistema. */
 export const MONEDA = { codigo: "PEN", simbolo: "S/" };
+
+/* ---------------------------------------------------------------------------
+ * INVENTARIO
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Umbral POR DEFECTO para considerar que a un producto se le está acabando el
+ * stock. Se usa en el módulo de inventario del dashboard.
+ *
+ * Ojo con la precedencia: cada producto puede traer su propio `stockMinimo`
+ * (el arroz se repone con 10, el balón de gas con 3), y ese valor MANDA sobre
+ * esta constante. `UMBRAL_STOCK_BAJO` es solo la red de seguridad para los
+ * productos que aún no tienen mínimo definido, por ejemplo los recién creados.
+ *
+ * La regla está implementada en una sola función, `umbralDe(producto)`, en
+ * src/pages/dashboard/gestion/utilesInventario.js
+ */
+export const UMBRAL_STOCK_BAJO = 10;
