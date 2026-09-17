@@ -1,0 +1,236 @@
+/**
+ * ============================================================================
+ * ESTILOS · VentasPage
+ * ============================================================================
+ */
+
+.ventas-page__titulo {
+  margin-bottom: var(--esp-4);
+  color: var(--color-texto);
+}
+
+.ventas-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 1024px) {
+  .ventas-page__grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.ventas-page__principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.ventas-page__resultados {
+  margin-top: var(--esp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ventas-page__resultado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--esp-3);
+  background-color: var(--color-superficie);
+  border-radius: var(--radio-md);
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida);
+}
+
+.ventas-page__resultado:hover {
+  background-color: var(--color-borde);
+}
+
+.ventas-page__resultado-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.ventas-page__resultado-nombre {
+  color: var(--color-texto);
+  font-weight: 500;
+}
+
+.ventas-page__resultado-precio {
+  color: var(--color-texto-suave);
+}
+
+.ventas-page__carrito {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-4);
+}
+
+.ventas-page__item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-3);
+  background-color: var(--color-superficie);
+  border-radius: var(--radio-md);
+}
+
+.ventas-page__item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.ventas-page__item-nombre {
+  color: var(--color-texto);
+  font-weight: 500;
+}
+
+.ventas-page__item-precio {
+  color: var(--color-texto-suave);
+  font-size: 0.875rem;
+}
+
+.ventas-page__item-controles {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.ventas-page__item-cantidad {
+  min-width: var(--esp-6);
+  text-align: center;
+  font-weight: 500;
+  color: var(--color-texto);
+}
+
+.ventas-page__item-subtotal {
+  min-width: var(--esp-16);
+  text-align: right;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.ventas-page__total {
+  padding: var(--esp-3);
+  background-color: var(--color-acento);
+  border-radius: var(--radio-md);
+  text-align: right;
+  font-size: 1.25rem;
+  color: var(--color-texto);
+}
+
+.ventas-page__pago {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin-top: var(--esp-4);
+}
+
+.ventas-page__vuelto {
+  padding: var(--esp-3);
+  background-color: var(--color-exito);
+  border-radius: var(--radio-md);
+  text-align: center;
+  color: var(--color-texto);
+}
+
+.ventas-page__historial {
+  position: sticky;
+  top: var(--esp-4);
+}
+
+.ventas-page__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.ventas-page__venta {
+  padding: var(--esp-3);
+  background-color: var(--color-superficie);
+  border-radius: var(--radio-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.ventas-page__venta--anulada {
+  opacity: 0.6;
+  background-color: var(--color-peligro);
+}
+
+.ventas-page__venta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ventas-page__venta-hora {
+  color: var(--color-texto-suave);
+  font-size: 0.875rem;
+}
+
+.ventas-page__venta-total {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.ventas-page__venta-cajero {
+  color: var(--color-texto-tenue);
+  font-size: 0.875rem;
+}
+
+.ventas-page__ticket {
+  padding: var(--esp-4);
+  background-color: var(--color-superficie);
+  border-radius: var(--radio-md);
+  margin-bottom: var(--esp-4);
+}
+
+.ventas-page__ticket h3 {
+  margin-bottom: var(--esp-2);
+  color: var(--color-texto);
+}
+
+.ventas-page__ticket p {
+  margin-bottom: var(--esp-1);
+  color: var(--color-texto-suave);
+}
+
+.ventas-page__ticket hr {
+  margin: var(--esp-3) 0;
+  border: none;
+  border-top: 1px solid var(--color-borde);
+}
+
+.ventas-page__ticket-item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--esp-2) 0;
+  color: var(--color-texto);
+}
+
+.ventas-page__ticket-total {
+  text-align: right;
+  font-size: 1.25rem;
+  color: var(--color-texto);
+}
+
+.ventas-page__modal-botones {
+  display: flex;
+  gap: var(--esp-3);
+  justify-content: flex-end;
+  margin-top: var(--esp-4);
+}
