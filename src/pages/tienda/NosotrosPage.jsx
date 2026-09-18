@@ -1,41 +1,23 @@
+import React from 'react';
+import { Card } from '../../components/ui';
+
 /**
- * ============================================================================
- * 🚧 CASCARÓN · Nosotros
- * ============================================================================
- * Página informativa sobre la bodega. Es la más sencilla del proyecto, pero no
- * por eso menos importante: es la que da confianza al cliente que compra por
- * primera vez.
- *
- * Los datos de contacto y horario ya están centralizados en la constante
- * BODEGA (src/constantes.js). Úsenla en vez de escribirlos a mano, así si
- * cambia un teléfono se cambia en un solo lugar.
- * ==========================================================================*/
-
-import CascaronModulo from "../../components/comunes/CascaronModulo";
-
-export function NosotrosPage() {
+ * Vista de la página de historia de la bodega (/nosotros).
+ */
+export const NosotrosPage = () => {
   return (
-    <div className="contenedor">
-      <CascaronModulo
-        nombre="Nosotros"
-        descripcion="La historia de la Bodega El Trigal: quiénes somos, desde cuándo atendemos al barrio y por qué los vecinos nos eligen."
-        archivo="src/pages/tienda/NosotrosPage.jsx"
-        tareas={[
-          "Sección de portada con una foto o ilustración de la bodega.",
-          "Historia del negocio: cuándo abrió, quién la atiende, qué la hace del barrio.",
-          "Valores o promesas: precios justos, productos frescos, atención cercana.",
-          "Datos reales de contacto tomados de la constante BODEGA.",
-          "Enlace a la página de Ubicación para cerrar el recorrido.",
-          "Reemplazar los datos de ejemplo de BODEGA por los reales de la bodega.",
-        ]}
-        herramientas={[
-          "BODEGA de src/constantes.js (nombre, dirección, horario, teléfono)",
-          "<Card>, <Boton>, <Badge>",
-          "Clases .contenedor, .seccion y .rejilla de styles/base.css",
-        ]}
-      />
+    <div style={{ padding: 'var(--esp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--esp-4)' }}>
+      <Card>
+        <h1 style={{ color: 'var(--color-primario)', marginBottom: 'var(--esp-3)' }}>Sobre Nosotros</h1>
+        <p style={{ color: 'var(--color-texto)', lineHeight: '1.6', marginBottom: 'var(--esp-2)' }}>
+          La <strong>Bodega El Trigal</strong> fue fundada el 10 de enero de 1994. Nacimos como un emprendimiento familiar con la visión de abastecer y brindar la mejor atención a nuestros vecinos de Piura.
+        </p>
+        <p style={{ color: 'var(--color-texto)', lineHeight: '1.6' }}>
+          Con más de 30 años de trayectoria ininterrumpida en nuestra urbanización, nos hemos consolidado gracias a la confianza de la comunidad, garantizando productos frescos, de alta calidad y un trato cálido y cercano.
+        </p>
+      </Card>
     </div>
   );
-}
+};
 
 export default NosotrosPage;
