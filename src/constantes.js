@@ -144,3 +144,48 @@ export const BODEGA = {
 
 /** Moneda con la que trabaja todo el sistema. */
 export const MONEDA = { codigo: "PEN", simbolo: "S/" };
+
+/* ---------------------------------------------------------------------------
+ * INVENTARIO
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Umbral POR DEFECTO para considerar que a un producto se le está acabando el
+ * stock. Se usa en el módulo de inventario del dashboard.
+ *
+ * Ojo con la precedencia: cada producto puede traer su propio `stockMinimo`
+ * (el arroz se repone con 10, el balón de gas con 3), y ese valor MANDA sobre
+ * esta constante. `UMBRAL_STOCK_BAJO` es solo la red de seguridad para los
+ * productos que aún no tienen mínimo definido, por ejemplo los recién creados.
+ *
+ * La regla está implementada en una sola función, `umbralDe(producto)`, en
+ * src/pages/dashboard/gestion/utilesInventario.js
+ */
+export const UMBRAL_STOCK_BAJO = 10;
+
+
+/* ---------------------------------------------------------------------------
+ * PROMOCIONES
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Tipos de promociones disponibles.
+ *
+ * 🪝 GANCHO — PATRÓN DECORATOR (rama: promociones)
+ * Cada tipo de promoción es un decorador que envuelve el precio base y le
+ * agrega su efecto. Quien implemente el módulo de promociones debe crear
+ * una función decoradora por tipo en src/pages/dashboard/promociones/decoradores.js.
+ */
+export const TIPOS_PROMOCION = {
+  PORCENTAJE: "PORCENTAJE",   // Descuento por porcentaje (ej: 15%)
+  MONTO_FIJO: "MONTO_FIJO",   // Descuento por monto fijo (ej: S/ 5.00)
+  DOS_X_UNO: "DOS_X_UNO",     // 2x1: el segundo producto es gratis
+  COMBO: "COMBO",             // Combo: precio especial por varios productos
+};
+
+export const ETIQUETAS_TIPO_PROMOCION = {
+  [TIPOS_PROMOCION.PORCENTAJE]: "Porcentaje",
+  [TIPOS_PROMOCION.MONTO_FIJO]: "Monto fijo",
+  [TIPOS_PROMOCION.DOS_X_UNO]: "2x1",
+  [TIPOS_PROMOCION.COMBO]: "Combo",
+};

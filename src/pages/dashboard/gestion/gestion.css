@@ -1,0 +1,515 @@
+/* ============================================================================
+ * MÓDULO DE INVENTARIO Y GESTIÓN DE PRODUCTOS
+ * ----------------------------------------------------------------------------
+ * Estilos compartidos por InventarioPage y ProductosPage.
+ * Prefijo de clases: .gestion__*  (para no chocar con los otros módulos)
+ *
+ * MOBILE-FIRST: lo que se ve sin media query es cómo se ve a 375px.
+ * Las @media (min-width) solo agregan mejoras en pantallas grandes.
+ * Todos los valores salen de los tokens de src/styles/tokens.css.
+ * ==========================================================================*/
+
+.gestion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+}
+
+/* ---------------------------------------------------------------------------
+ * CABECERA DE LA PÁGINA
+ * ------------------------------------------------------------------------ */
+.gestion__cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.gestion__cabecera-textos {
+  min-width: 0;
+}
+
+.gestion__titulo {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-negrita);
+  letter-spacing: -0.015em;
+  color: var(--color-texto);
+}
+
+.gestion__descripcion {
+  margin-top: var(--esp-1);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+  text-wrap: pretty;
+}
+
+@media (min-width: 768px) {
+  .gestion__cabecera {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--esp-4);
+  }
+
+  .gestion__cabecera-accion {
+    flex-shrink: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * TARJETAS DE RESUMEN
+ * 2 columnas en celular, 4 desde tablet.
+ * ------------------------------------------------------------------------ */
+.gestion__resumen {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3);
+}
+
+@media (min-width: 768px) {
+  .gestion__resumen {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--esp-4);
+  }
+}
+
+.gestion__dato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  min-width: 0;
+}
+
+.gestion__dato-etiqueta {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-texto-tenue);
+}
+
+.gestion__dato-valor {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-extra);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.gestion__dato-valor--alerta {
+  color: var(--color-advertencia);
+}
+
+.gestion__dato-valor--peligro {
+  color: var(--color-peligro);
+}
+
+.gestion__dato-nota {
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-tenue);
+}
+
+/* ---------------------------------------------------------------------------
+ * BARRA DE FILTROS
+ * Apilados en celular; en fila desde tablet.
+ * ------------------------------------------------------------------------ */
+.gestion__filtros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.gestion__filtro-busqueda {
+  flex: 2 1 260px;
+}
+
+.gestion__filtro-select {
+  flex: 1 1 180px;
+}
+
+/* El botón de alternar queda alineado con los campos, no con sus etiquetas. */
+.gestion__filtro-alternar {
+  display: flex;
+  align-items: flex-end;
+}
+
+@media (min-width: 768px) {
+  .gestion__filtros {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+}
+
+.gestion__resultados {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+
+.gestion__resultados strong {
+  color: var(--color-texto);
+  font-weight: var(--peso-semi);
+}
+
+/* Contador que va pegado encima de la tabla, dentro de la Card sin padding. */
+.gestion__resultados--barra {
+  padding: var(--esp-3) var(--esp-4);
+  border-bottom: 1px solid var(--color-borde);
+  background-color: var(--color-superficie-suave);
+}
+
+/* ---------------------------------------------------------------------------
+ * TABLA
+ * Se monta sobre .ui-tabla / .ui-tabla-scroll del sistema de diseño.
+ * ------------------------------------------------------------------------ */
+
+/* Columnas que se esconden en pantallas chicas para que la tabla no obligue a
+   desplazarse horizontalmente en un celular. La información importante de esas
+   columnas se repite bajo el nombre del producto (.gestion__producto-meta). */
+.gestion__col-sm,
+.gestion__col-md,
+.gestion__col-lg {
+  display: none;
+}
+
+@media (min-width: 560px) {
+  .gestion__col-sm {
+    display: table-cell;
+  }
+}
+
+@media (min-width: 768px) {
+  .gestion__col-md {
+    display: table-cell;
+  }
+}
+
+@media (min-width: 992px) {
+  .gestion__col-lg {
+    display: table-cell;
+  }
+}
+
+/* Celda del producto: muestra el color, el nombre y, en móvil, los datos de
+   las columnas ocultas. */
+.gestion__producto {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-width: 0;
+}
+
+.gestion__swatch {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radio-md);
+  border: 1px solid var(--color-borde);
+  box-shadow: var(--sombra-xs);
+}
+
+.gestion__producto-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.gestion__producto-nombre {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  color: var(--color-texto);
+  /* La tabla base usa nowrap; aquí sí dejamos que el nombre baje de línea. */
+  white-space: normal;
+  line-height: 1.3;
+}
+
+.gestion__producto-meta {
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-tenue);
+  white-space: normal;
+}
+
+/* En pantallas donde ya se ven las columnas de categoría y precio, no hace
+   falta repetir esos datos debajo del nombre. */
+@media (min-width: 768px) {
+  .gestion__producto-meta {
+    display: none;
+  }
+}
+
+.gestion__celda-nombre {
+  min-width: 190px;
+}
+
+/* Fila que necesita atención: franja de color a la izquierda. */
+.gestion__fila--alerta td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-advertencia);
+}
+
+.gestion__fila--agotado td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-peligro);
+}
+
+.gestion__fila--inactivo {
+  opacity: 0.6;
+}
+
+/* Número de stock destacado */
+.gestion__stock {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-negrita);
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.gestion__stock-unidad {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-normal);
+  color: var(--color-texto-tenue);
+  margin-left: var(--esp-1);
+}
+
+.gestion__acciones {
+  display: flex;
+  gap: var(--esp-2);
+  justify-content: flex-end;
+}
+
+/* ---------------------------------------------------------------------------
+ * FORMULARIOS DENTRO DEL MODAL
+ * ------------------------------------------------------------------------ */
+.gestion__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.gestion__fila-campos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 560px) {
+  .gestion__fila-campos--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.gestion__leyenda {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-texto-tenue);
+  padding-top: var(--esp-2);
+  border-top: 1px solid var(--color-borde);
+}
+
+/* Área de texto con el mismo aspecto que los <Input> del sistema */
+.gestion__textarea {
+  width: 100%;
+  min-height: 78px;
+  padding: var(--esp-3);
+  font-family: var(--fuente-base);
+  font-size: var(--texto-base);
+  line-height: 1.5;
+  color: var(--color-texto);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-md);
+  resize: vertical;
+  transition:
+    border-color var(--transicion-rapida),
+    box-shadow var(--transicion-rapida);
+}
+
+.gestion__textarea:focus {
+  outline: none;
+  border-color: var(--color-primario);
+  box-shadow: var(--anillo-foco);
+}
+
+.gestion__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.gestion__campo-etiqueta {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto);
+}
+
+/* Casilla de verificación */
+.gestion__check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  padding: var(--esp-3);
+  background-color: var(--color-superficie-suave);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  cursor: pointer;
+  transition: border-color var(--transicion-rapida);
+}
+
+.gestion__check:hover {
+  border-color: var(--color-borde-fuerte);
+}
+
+.gestion__check input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-primario);
+  cursor: pointer;
+}
+
+.gestion__check-texto {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto);
+}
+
+.gestion__check-nota {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-normal);
+  color: var(--color-texto-tenue);
+}
+
+/* Paleta de colores sugeridos */
+.gestion__colores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.gestion__color {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radio-md);
+  border: 2px solid var(--color-borde);
+  transition:
+    transform var(--transicion-rapida),
+    border-color var(--transicion-rapida);
+}
+
+.gestion__color:hover {
+  transform: scale(1.08);
+}
+
+.gestion__color--elegido {
+  border-color: var(--color-texto);
+  box-shadow: var(--anillo-foco);
+}
+
+/* ---------------------------------------------------------------------------
+ * MODAL DE AJUSTE DE STOCK
+ * ------------------------------------------------------------------------ */
+.gestion__ajuste-producto {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-3);
+  background-color: var(--color-superficie-suave);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* Selector Ingreso / Merma */
+.gestion__segmentos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-2);
+}
+
+.gestion__segmento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--esp-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  color: var(--color-texto-suave);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-md);
+  transition:
+    border-color var(--transicion-rapida),
+    background-color var(--transicion-rapida),
+    color var(--transicion-rapida);
+}
+
+.gestion__segmento:hover {
+  border-color: var(--color-primario);
+}
+
+.gestion__segmento-nota {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-normal);
+  color: var(--color-texto-tenue);
+}
+
+.gestion__segmento--activo {
+  background-color: var(--color-primario-suave);
+  border-color: var(--color-primario);
+  color: var(--color-primario);
+}
+
+.gestion__segmento--activo .gestion__segmento-nota {
+  color: var(--ladrillo-700);
+}
+
+/* Vista previa del resultado del ajuste */
+.gestion__previa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-4);
+  padding: var(--esp-4);
+  background-color: var(--color-superficie-suave);
+  border: 1px dashed var(--color-borde-fuerte);
+  border-radius: var(--radio-md);
+}
+
+.gestion__previa-bloque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-1);
+}
+
+.gestion__previa-etiqueta {
+  font-size: var(--texto-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-texto-tenue);
+}
+
+.gestion__previa-valor {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-extra);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto);
+}
+
+.gestion__previa-valor--sube {
+  color: var(--color-exito);
+}
+
+.gestion__previa-valor--baja {
+  color: var(--color-peligro);
+}
+
+.gestion__previa-flecha {
+  font-size: var(--texto-xl);
+  color: var(--color-texto-tenue);
+}

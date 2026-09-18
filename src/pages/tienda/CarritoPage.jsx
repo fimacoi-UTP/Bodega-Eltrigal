@@ -5,7 +5,7 @@
  * ⚠️ IMPORTANTE para quien tome este módulo: el carrito necesita su propio
  * contexto, porque su estado tiene que sobrevivir mientras el usuario navega
  * entre el catálogo, el detalle y el checkout.
- *
+ *CarritoContext	+	CarritoProvider:	estado	del	carrito	(agregar,	quitar,	cambiar	cantidad,	vaciar,	total).	Móntalo	en	App.jsx	junto	a	los	otros providers.
  * Creen `src/context/CarritoContext.jsx` copiando la estructura de
  * InventarioContext.jsx, y monten el provider en src/App.jsx DENTRO de
  * <InventarioProvider> (el carrito consulta precios y stock).

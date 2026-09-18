@@ -1,0 +1,136 @@
+/**
+ * ============================================================================
+ * ESTILOS · PromocionesPage
+ * ============================================================================
+ */
+
+.promociones-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--esp-4);
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+}
+
+.promociones-page__titulo {
+  color: var(--color-texto);
+  margin: 0;
+}
+
+.promociones-page__lista {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 768px) {
+  .promociones-page__lista {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .promociones-page__lista {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.promociones-page__card {
+  height: 100%;
+}
+
+.promociones-page__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.promociones-page__card-header h3 {
+  margin: 0;
+  color: var(--color-texto);
+  font-size: 1.125rem;
+}
+
+.promociones-page__detalles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-4);
+}
+
+.promociones-page__detalle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.promociones-page__detalle-etiqueta {
+  color: var(--color-texto-suave);
+  font-size: 0.875rem;
+}
+
+.promociones-page__detalle span:last-child {
+  color: var(--color-texto);
+  font-weight: 500;
+}
+
+.promociones-page__preview {
+  margin-bottom: var(--esp-4);
+}
+
+.promociones-page__acciones {
+  display: flex;
+  gap: var(--esp-2);
+}
+
+.promociones-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.promociones-page__form-botones {
+  display: flex;
+  gap: var(--esp-3);
+  justify-content: flex-end;
+  margin-top: var(--esp-4);
+}
+
+.promociones-page__preview-modal {
+  padding: var(--esp-4);
+}
+
+.promociones-page__preview-producto {
+  margin-bottom: var(--esp-3);
+}
+
+.promociones-page__preview-producto strong {
+  display: block;
+  color: var(--color-texto);
+  font-size: 1.125rem;
+  margin-bottom: var(--esp-1);
+}
+
+.promociones-page__preview-producto div {
+  color: var(--color-texto-suave);
+}
+
+.promociones-page__preview-detalle {
+  margin: var(--esp-3) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.promociones-page__preview-linea {
+  color: var(--color-texto-suave);
+  padding-left: var(--esp-3);
+}
+
+.promociones-page__preview-final {
+  text-align: right;
+  font-size: 1.5rem;
+  color: var(--color-primario);
+}

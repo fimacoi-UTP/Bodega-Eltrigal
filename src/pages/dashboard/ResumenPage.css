@@ -1,0 +1,99 @@
+/**
+ * ============================================================================
+ * ESTILOS · ResumenPage
+ * ============================================================================
+ */
+
+.resumen-page__titulo {
+  margin-bottom: var(--esp-4);
+  color: var(--color-texto);
+}
+
+.resumen-page__indicadores {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-4);
+}
+
+@media (min-width: 768px) {
+  .resumen-page__indicadores {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.resumen-page__indicador {
+  text-align: center;
+}
+
+.resumen-page__indicador-valor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primario);
+  margin-bottom: var(--esp-1);
+}
+
+.resumen-page__indicador-etiqueta {
+  color: var(--color-texto-suave);
+  font-size: 0.875rem;
+}
+
+.resumen-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 768px) {
+  .resumen-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .resumen-page__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.resumen-page__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.resumen-page__item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-3);
+  background-color: var(--color-superficie);
+  border-radius: var(--radio-md);
+}
+
+.resumen-page__item-rank {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-acento);
+  min-width: var(--esp-8);
+  text-align: center;
+}
+
+.resumen-page__item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.resumen-page__item-nombre {
+  color: var(--color-texto);
+  font-weight: 500;
+}
+
+.resumen-page__item-sub {
+  color: var(--color-texto-tenue);
+  font-size: 0.875rem;
+}
