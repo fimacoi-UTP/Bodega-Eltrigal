@@ -162,3 +162,30 @@ export const MONEDA = { codigo: "PEN", simbolo: "S/" };
  * src/pages/dashboard/gestion/utilesInventario.js
  */
 export const UMBRAL_STOCK_BAJO = 10;
+
+
+/* ---------------------------------------------------------------------------
+ * PROMOCIONES
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Tipos de promociones disponibles.
+ *
+ * 🪝 GANCHO — PATRÓN DECORATOR (rama: promociones)
+ * Cada tipo de promoción es un decorador que envuelve el precio base y le
+ * agrega su efecto. Quien implemente el módulo de promociones debe crear
+ * una función decoradora por tipo en src/pages/dashboard/promociones/decoradores.js.
+ */
+export const TIPOS_PROMOCION = {
+  PORCENTAJE: "PORCENTAJE",   // Descuento por porcentaje (ej: 15%)
+  MONTO_FIJO: "MONTO_FIJO",   // Descuento por monto fijo (ej: S/ 5.00)
+  DOS_X_UNO: "DOS_X_UNO",     // 2x1: el segundo producto es gratis
+  COMBO: "COMBO",             // Combo: precio especial por varios productos
+};
+
+export const ETIQUETAS_TIPO_PROMOCION = {
+  [TIPOS_PROMOCION.PORCENTAJE]: "Porcentaje",
+  [TIPOS_PROMOCION.MONTO_FIJO]: "Monto fijo",
+  [TIPOS_PROMOCION.DOS_X_UNO]: "2x1",
+  [TIPOS_PROMOCION.COMBO]: "Combo",
+};
