@@ -1,0 +1,221 @@
+/* ============================================================================
+ * HomePage.css · Estilos de la página principal (Catálogo)
+ * ----------------------------------------------------------------------------
+ * Mobile-first utilizando tokens de diseño.
+ * ==========================================================================*/
+
+/* ---------------------------------------------------------------------------
+ * HERO / BIENVENIDA
+ * ------------------------------------------------------------------------ */
+.catalogo-hero {
+  position: relative;
+  background: linear-gradient(135deg, var(--ladrillo-50) 0%, var(--trigo-50) 100%);
+  border: 1px solid var(--color-primario-borde);
+  border-radius: var(--radio-xl);
+  padding: var(--esp-6) var(--esp-4);
+  margin-top: var(--esp-4);
+  margin-bottom: var(--esp-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .catalogo-hero {
+    padding: var(--esp-10) var(--esp-8);
+    margin-top: var(--esp-6);
+  }
+}
+
+.catalogo-hero__contenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  max-width: 720px;
+}
+
+.catalogo-hero__insignia {
+  align-self: flex-start;
+}
+
+.catalogo-hero__titulo {
+  font-size: clamp(1.5rem, 1.2rem + 1.6vw, var(--texto-3xl));
+  color: var(--color-texto);
+  line-height: var(--interlineado-ajustado);
+  font-weight: var(--peso-extra);
+}
+
+.catalogo-hero__destaque {
+  color: var(--color-primario);
+}
+
+.catalogo-hero__descripcion {
+  font-size: var(--texto-base);
+  color: var(--color-texto-suave);
+  line-height: var(--interlineado-base);
+}
+
+/* Puntos de confianza en el hero */
+.catalogo-hero__beneficios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+  margin-top: var(--esp-2);
+}
+
+.catalogo-hero__beneficio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+  color: var(--color-texto);
+  background-color: var(--color-superficie);
+  padding: var(--esp-1) var(--esp-3);
+  border-radius: var(--radio-pastilla);
+  border: 1px solid var(--color-borde);
+  box-shadow: var(--sombra-xs);
+}
+
+/* ---------------------------------------------------------------------------
+ * AVISO FLOTANTE DE PRODUCTO AGREGADO
+ * ------------------------------------------------------------------------ */
+.catalogo-aviso-agregado {
+  margin-bottom: var(--esp-6);
+  animation: deslizarAbajo 200ms ease;
+}
+
+@keyframes deslizarAbajo {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.catalogo-aviso-agregado__contenido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * FILTROS Y BUSCADOR
+ * ------------------------------------------------------------------------ */
+.catalogo-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  margin-bottom: var(--esp-6);
+}
+
+.catalogo-filtros__barra-superior {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+@media (min-width: 640px) {
+  .catalogo-filtros__barra-superior {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.catalogo-filtros__buscador {
+  flex: 1;
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .catalogo-filtros__buscador {
+    max-width: 440px;
+  }
+}
+
+/* Pastillas de categorías con scroll horizontal en móvil */
+.catalogo-categorias-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--esp-2);
+  scrollbar-width: thin;
+}
+
+.catalogo-categorias {
+  display: flex;
+  gap: var(--esp-2);
+  white-space: nowrap;
+}
+
+.catalogo-categoria-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+  padding: var(--esp-2) var(--esp-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-suave);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-pastilla);
+  cursor: pointer;
+  transition: all var(--transicion-rapida);
+}
+
+.catalogo-categoria-btn:hover {
+  border-color: var(--color-primario-borde);
+  color: var(--color-primario);
+  background-color: var(--color-superficie-hover);
+}
+
+.catalogo-categoria-btn--activa {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: var(--color-sobre-primario) !important;
+  font-weight: var(--peso-semi);
+}
+
+.catalogo-categoria-btn--activa:hover {
+  background-color: var(--color-primario-hover);
+  border-color: var(--color-primario-hover);
+}
+
+.catalogo-categoria-btn__conteo {
+  font-size: var(--texto-xs);
+  opacity: 0.8;
+}
+
+/* Barra de resultados y resumen */
+.catalogo-resumen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  padding-bottom: var(--esp-2);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.catalogo-resumen__limpiar {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+  color: var(--color-primario);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.catalogo-resumen__limpiar:hover {
+  color: var(--color-primario-hover);
+}

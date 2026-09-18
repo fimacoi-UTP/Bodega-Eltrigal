@@ -1,0 +1,168 @@
+/* ============================================================================
+ * TarjetaProducto.css · Estilos de la tarjeta de catálogo
+ * ----------------------------------------------------------------------------
+ * Diseño mobile-first con tokens CSS del proyecto.
+ * ==========================================================================*/
+
+.catalogo-tarjeta {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--radio-lg);
+  border: 1px solid var(--color-borde);
+  background-color: var(--color-superficie);
+  overflow: hidden;
+  transition: transform var(--transicion), box-shadow var(--transicion), border-color var(--transicion);
+  position: relative;
+}
+
+.catalogo-tarjeta:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-borde-fuerte);
+  box-shadow: var(--sombra-md);
+}
+
+/* Área superior: Imagen o fondo ilustrado */
+.catalogo-tarjeta__visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-superficie-suave);
+  overflow: hidden;
+}
+
+.catalogo-tarjeta__enlace-visual {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.catalogo-tarjeta__imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transicion-lenta);
+}
+
+.catalogo-tarjeta:hover .catalogo-tarjeta__imagen {
+  transform: scale(1.04);
+}
+
+/* Fallback visual cuando no hay imagen o falla la carga */
+.catalogo-tarjeta__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  padding: var(--esp-4);
+  text-align: center;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.25) 0%, rgba(0, 0, 0, 0.05) 100%);
+}
+
+.catalogo-tarjeta__icono-categoria {
+  font-size: 2.25rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.catalogo-tarjeta__categoria-texto {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-texto-suave);
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: var(--esp-1) var(--esp-2);
+  border-radius: var(--radio-pastilla);
+  backdrop-filter: blur(4px);
+}
+
+/* Badges flotantes sobre el visual */
+.catalogo-tarjeta__insignias {
+  position: absolute;
+  top: var(--esp-3);
+  left: var(--esp-3);
+  right: var(--esp-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  gap: var(--esp-2);
+}
+
+/* Cuerpo de la tarjeta */
+.catalogo-tarjeta__cuerpo {
+  display: flex;
+  flex-direction: column;
+  padding: var(--esp-4);
+  flex: 1;
+  gap: var(--esp-1);
+}
+
+.catalogo-tarjeta__marca {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-tenue);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.catalogo-tarjeta__nombre {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-negrita);
+  line-height: var(--interlineado-ajustado);
+  color: var(--color-texto);
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: var(--esp-1);
+  transition: color var(--transicion-rapida);
+}
+
+.catalogo-tarjeta__nombre:hover {
+  color: var(--color-primario);
+}
+
+.catalogo-tarjeta__precio-fila {
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-2);
+  margin-top: auto;
+  padding-top: var(--esp-3);
+}
+
+.catalogo-tarjeta__precio {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-extra);
+  color: var(--color-primario);
+  line-height: 1;
+}
+
+.catalogo-tarjeta__unidad {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+
+/* Pie de la tarjeta con acciones */
+.catalogo-tarjeta__pie {
+  padding: 0 var(--esp-4) var(--esp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.catalogo-tarjeta__boton-agregado {
+  background-color: var(--color-exito) !important;
+  border-color: var(--color-exito) !important;
+}
