@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useInventario } from "../../hooks/useInventario";
+import { useCarrito } from "../../context/CarritoContext";
 import { Badge } from "../ui";
 import Logo from "./Logo";
 import { RUTAS, aRuta } from "../../routes/rutas";
@@ -31,6 +32,12 @@ export function Navbar() {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const { usuario, estaAutenticado, esPersonal, cerrarSesion } = useAuth();
   const { categorias } = useInventario();
+  const { items } = useCarrito();
+
+  /* Cantidad total de unidades en el carrito (no nº de productos distintos).
+     Se deriva aquí con un reduce en vez de agregarle un campo al
+     CarritoProvider, para no tocar el módulo de otro integrante. */
+  const cantidadTotal = items.reduce((suma, item) => suma + item.cantidad, 0);
   const navegar = useNavigate();
 
   /**
@@ -103,11 +110,17 @@ export function Navbar() {
 
           {/* --- Acciones de la derecha --- */}
           <div className="navbar__acciones">
-            {/* Carrito.
-                TODO rama carrito: cuando exista el CarritoContext, mostrar aquí
-                el contador de items:
-                  {cantidadTotal > 0 && <span className="navbar__contador">{cantidadTotal}</span>} */}
-            <Link to={RUTAS.CARRITO} className="navbar__accion" aria-label="Ver carrito">
+            {/* Carrito · el contador sale del CarritoContext, así que se
+                actualiza solo al agregar desde el catálogo (patrón Observer). */}
+            <Link
+              to={RUTAS.CARRITO}
+              className="navbar__accion"
+              aria-label={
+                cantidadTotal > 0
+                  ? `Ver carrito, ${cantidadTotal} ${cantidadTotal === 1 ? "producto" : "productos"}`
+                  : "Ver carrito"
+              }
+            >
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                   d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.2a1.5 1.5 0 0 0 1.5-1.2L20 8H6"
@@ -119,6 +132,12 @@ export function Navbar() {
                 <circle cx="9.5" cy="20" r="1.4" fill="currentColor" />
                 <circle cx="17" cy="20" r="1.4" fill="currentColor" />
               </svg>
+
+              {cantidadTotal > 0 && (
+                <span className="navbar__contador" aria-hidden="true">
+                  {cantidadTotal > 99 ? "99+" : cantidadTotal}
+                </span>
+              )}
             </Link>
 
             {/* Sesión */}
