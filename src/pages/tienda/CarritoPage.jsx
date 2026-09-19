@@ -1,10 +1,18 @@
-import React from 'react';
 import { useCarrito } from '../../context/CarritoContext';
 import { Card, Boton, EstadoVacio, Input } from '../../components/ui';
+import { formatearSoles } from '../../utils/formato';
+import './CarritoPage.css';
 
 /**
  * Vista de la página del Carrito (/carrito).
  * Muestra el desglose de productos, modificación de cantidad y cálculo total.
+ *
+ * El layout usa `.contenedor contenedor--angosto`, la misma utilidad centrada
+ * que emplean el catálogo y el checkout, para que el contenido no se estire de
+ * lado a lado en pantallas grandes. Los estilos propios están en
+ * ./CarritoPage.css (antes eran atributos `style` sueltos en el JSX).
+ *
+ * La lógica del carrito vive en CarritoProvider; aquí solo se consume.
  */
 export const CarritoPage = () => {
   const { items, quitar, cambiarCantidad, vaciar, total } = useCarrito();
@@ -12,50 +20,62 @@ export const CarritoPage = () => {
   // Estado vacío cuando no hay ítems en el carrito
   if (items.length === 0) {
     return (
-      <div style={{ padding: 'var(--esp-4)' }}>
-        <EstadoVacio 
-          mensaje="Tu carrito está vacío" 
-          descripcion="Explora la tienda y añade productos a tu carrito de compras." 
+      <div className="contenedor contenedor--angosto seccion carrito__vacio">
+        <EstadoVacio
+          icono="🛒"
+          titulo="Tu carrito está vacío"
+          descripcion="Explora la tienda y añade productos a tu carrito de compras."
         />
       </div>
     );
   }
 
+  const unidades = items.reduce((suma, item) => suma + item.cantidad, 0);
+
   return (
-    <div style={{ padding: 'var(--esp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--esp-4)' }}>
-      <h1 style={{ color: 'var(--color-texto)', fontSize: 'var(--esp-5)' }}>Carrito de Compras</h1>
-      
+    <div className="contenedor contenedor--angosto seccion carrito-pagina">
+      <header className="carrito__cabecera">
+        <h1 className="carrito__titulo">Carrito de compras</h1>
+        <p className="carrito__resumen-linea">
+          {items.length} {items.length === 1 ? 'producto' : 'productos'} ·{' '}
+          {unidades} {unidades === 1 ? 'unidad' : 'unidades'}
+        </p>
+      </header>
+
       {/* Listado de ítems agregados */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--esp-3)' }}>
+      <div className="carrito__lista">
         {items.map((item) => (
           <Card key={item.id}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--esp-2)' }}>
-              <h3 style={{ margin: 0, color: 'var(--color-texto)' }}>{item.nombre}</h3>
+            <div className="carrito__item-cabecera">
+              <h3 className="carrito__nombre">{item.nombre}</h3>
               {/* Botón para remover ítem */}
-              <Boton variant="danger" size="small" onClick={() => quitar(item.id)}>
+              <Boton variante="peligro" tamano="sm" onClick={() => quitar(item.id)}>
                 Eliminar
               </Boton>
             </div>
-            
-            <p style={{ margin: 'var(--esp-1) 0', color: 'var(--color-texto-secundario)' }}>
-              Precio unitario: S/ {Number(item.precio).toFixed(2)}
+
+            <p className="carrito__precio-unitario">
+              Precio unitario: {formatearSoles(item.precio)}
             </p>
 
             {/* Selector de cantidad y subtotal */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--esp-2)', marginTop: 'var(--esp-2)' }}>
-              <label htmlFor={`cant-${item.id}`} style={{ color: 'var(--color-texto)' }}>
+            <div className="carrito__controles">
+              <label
+                htmlFor={`cant-${item.id}`}
+                className="carrito__etiqueta-cantidad"
+              >
                 Cantidad:
               </label>
               <Input
                 id={`cant-${item.id}`}
+                className="carrito__cantidad"
                 type="number"
                 min="1"
                 value={item.cantidad}
                 onChange={(e) => cambiarCantidad(item.id, parseInt(e.target.value, 10) || 1)}
-                style={{ width: '70px' }}
               />
-              <span style={{ fontWeight: 'bold', marginLeft: 'auto', color: 'var(--color-texto)' }}>
-                Subtotal: S/ {(item.precio * item.cantidad).toFixed(2)}
+              <span className="carrito__subtotal">
+                Subtotal: {formatearSoles(item.precio * item.cantidad)}
               </span>
             </div>
           </Card>
@@ -63,20 +83,18 @@ export const CarritoPage = () => {
       </div>
 
       {/* Resumen del pedido y acciones globales */}
-      <Card style={{ backgroundColor: 'var(--color-fondo-alt)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--esp-3)' }}>
-          <span style={{ fontSize: 'var(--esp-4)', fontWeight: 'bold', color: 'var(--color-texto)' }}>Total:</span>
-          <span style={{ fontSize: 'var(--esp-4)', fontWeight: 'bold', color: 'var(--color-primario)' }}>
-            S/ {total.toFixed(2)}
-          </span>
+      <Card className="carrito__resumen">
+        <div className="carrito__total-fila">
+          <span className="carrito__total-etiqueta">Total:</span>
+          <span className="carrito__total-monto">{formatearSoles(total)}</span>
         </div>
-        
-        <div style={{ display: 'flex', gap: 'var(--esp-2)', flexDirection: 'column' }}>
-          <Boton variant="outline" onClick={vaciar}>
-            Vaciar Carrito
+
+        <div className="carrito__acciones">
+          <Boton variante="primario">
+            Proceder al pago
           </Boton>
-          <Boton variant="primary">
-            Proceder al Pago
+          <Boton variante="contorno" onClick={vaciar}>
+            Vaciar carrito
           </Boton>
         </div>
       </Card>
