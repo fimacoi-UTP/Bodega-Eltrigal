@@ -23,10 +23,24 @@ export const CarritoPage = () => {
   if (items.length === 0) {
     return (
       <div className="contenedor contenedor--angosto seccion carrito__vacio">
+        <figure className="carrito__ilustracion">
+          <img
+            src="/imagenes/carrito.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+
         <EstadoVacio
-          icono="🛒"
           titulo="Tu carrito está vacío"
-          descripcion="Explora la tienda y añade productos a tu carrito de compras."
+          descripcion="Explora la tienda y añade los productos que necesitas. Te los llevamos a casa o los recoges por la bodega."
+          accion={
+            <Boton como={Link} to={RUTAS.INICIO} variante="primario" tamano="lg">
+              Ver el catálogo
+            </Boton>
+          }
         />
       </div>
     );
@@ -37,11 +51,17 @@ export const CarritoPage = () => {
   return (
     <div className="contenedor contenedor--angosto seccion carrito-pagina">
       <header className="carrito__cabecera">
-        <h1 className="carrito__titulo">Carrito de compras</h1>
-        <p className="carrito__resumen-linea">
-          {items.length} {items.length === 1 ? 'producto' : 'productos'} ·{' '}
-          {unidades} {unidades === 1 ? 'unidad' : 'unidades'}
-        </p>
+        <span className="carrito__cabecera-foto" aria-hidden="true">
+          <img src="/imagenes/carrito.jpg" alt="" loading="lazy" decoding="async" />
+        </span>
+
+        <div className="carrito__cabecera-textos">
+          <h1 className="carrito__titulo">Carrito de compras</h1>
+          <p className="carrito__resumen-linea">
+            {items.length} {items.length === 1 ? 'producto' : 'productos'} ·{' '}
+            {unidades} {unidades === 1 ? 'unidad' : 'unidades'}
+          </p>
+        </div>
       </header>
 
       {/* Listado de ítems agregados */}

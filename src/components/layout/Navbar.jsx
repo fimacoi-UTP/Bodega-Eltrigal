@@ -17,7 +17,7 @@ import { useCarrito } from "../../context/CarritoContext";
 import { Badge } from "../ui";
 import Logo from "./Logo";
 import { RUTAS, aRuta } from "../../routes/rutas";
-import { ETIQUETAS_ROL } from "../../constantes";
+import { BODEGA, ETIQUETAS_ROL } from "../../constantes";
 import { clases, obtenerIniciales } from "../../utils/formato";
 import "./Navbar.css";
 
@@ -68,7 +68,8 @@ export function Navbar() {
       <div className="cinta">
         <div className="contenedor cinta__contenido">
           <span>🚚 Delivery en Piura · Pedidos hasta las 9:00 p.m.</span>
-          <span className="cinta__extra">📞 969 000 000</span>
+          {/* El teléfono sale de BODEGA para no tener el dato en dos sitios. */}
+          <span className="cinta__extra">📞 {BODEGA.telefono}</span>
         </div>
       </div>
 
