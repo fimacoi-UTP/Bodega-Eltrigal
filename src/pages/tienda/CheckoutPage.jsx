@@ -24,10 +24,11 @@
  *    con el canal `'web'`.
  * ==========================================================================*/
 
-import { useState, useMemo, useCallback } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
+import { useCarrito } from "../../context/CarritoContext";
 import { pedidoRepository } from "../../repositories";
 import { RUTAS } from "../../routes/rutas";
 import {
@@ -69,7 +70,8 @@ function FormularioCheckoutPrincipal({
   usuario,
   estaAutenticado,
   items,
-  setItems,
+  subtotalCarrito,
+  vaciarCarrito,
   onPedidoCreado,
   descontarStock,
   onCargarProductosEjemplo,
@@ -99,14 +101,11 @@ function FormularioCheckoutPrincipal({
   const [erroresEntrega, setErroresEntrega] = useState({});
   const [erroresPago, setErroresPago] = useState({});
 
-  // Cálculos de montos
-  const subtotal = useMemo(() => {
-    return items.reduce((acc, it) => {
-      const precio = Number(it.precio ?? it.precioUnitario ?? 0);
-      const cant = Number(it.cantidad ?? 1);
-      return acc + precio * cant;
-    }, 0);
-  }, [items]);
+  /* Cálculos de montos.
+     El subtotal de los productos ya lo calcula el carrito (useCarrito().total),
+     así que el checkout no lleva una segunda cuenta que se pueda desincronizar.
+     Aquí solo se le suma el costo de envío. */
+  const subtotal = subtotalCarrito;
 
   const costoEnvio = tipoEntrega === TIPOS_ENTREGA.DELIVERY ? COSTO_DELIVERY_PIURA : 0;
   const total = subtotal + costoEnvio;
@@ -244,7 +243,9 @@ function FormularioCheckoutPrincipal({
 
       const pedidoCreado = await pedidoRepository.crear(datosNuevoPedido);
 
-      setItems([]);
+      // Paso 3: vaciar el carrito real. El contador del navbar y la página
+      // /carrito se actualizan solos (Context + re-render).
+      vaciarCarrito();
       onPedidoCreado(pedidoCreado);
     } catch (err) {
       console.error("[Checkout] Error en confirmación:", err);
@@ -346,35 +347,24 @@ function FormularioCheckoutPrincipal({
 }
 
 export function CheckoutPage() {
-  const location = useLocation();
   const { productosActivos, cargando: cargandoInventario, descontarStock } = useInventario();
   const { usuario, estaAutenticado, cargando: cargandoAuth } = useAuth();
 
-  const [items, setItems] = useState(() => {
-    if (location.state?.items && Array.isArray(location.state.items)) {
-      return location.state.items;
-    }
-    return [];
-  });
+  /* 🛒 FUENTE ÚNICA DEL PEDIDO
+     Antes el checkout guardaba sus propios `items` en un useState local que
+     solo se llenaba desde `location.state`, algo que el carrito nunca enviaba:
+     por eso siempre mostraba «Tu pedido está vacío» aunque el navbar contara
+     productos. Ahora lee el MISMO carrito que el navbar y /carrito. */
+  const { items, agregar, vaciar, total: totalCarrito } = useCarrito();
 
   const [pedidoConfirmado, setPedidoConfirmado] = useState(null);
 
+  /* Los productos de demostración también entran al carrito REAL, para que no
+     vuelva a existir una lista paralela dentro del checkout. */
   const cargarProductosEjemplo = useCallback(() => {
     const candidatos = productosActivos.filter((p) => Number(p.stock) > 0).slice(0, 2);
-    if (candidatos.length > 0) {
-      setItems(
-        candidatos.map((p) => ({
-          productoId: p.id,
-          nombre: p.nombre,
-          precio: p.precio,
-          cantidad: 1,
-          subtotal: p.precio,
-          imagen: p.imagen,
-          color: p.color,
-        })),
-      );
-    }
-  }, [productosActivos]);
+    candidatos.forEach((producto) => agregar(producto, 1));
+  }, [productosActivos, agregar]);
 
   // Carga inicial
   if (cargandoInventario || cargandoAuth) {
@@ -446,7 +436,8 @@ export function CheckoutPage() {
         usuario={usuario}
         estaAutenticado={estaAutenticado}
         items={items}
-        setItems={setItems}
+        subtotalCarrito={totalCarrito}
+        vaciarCarrito={vaciar}
         onPedidoCreado={setPedidoConfirmado}
         descontarStock={descontarStock}
         onCargarProductosEjemplo={cargarProductosEjemplo}

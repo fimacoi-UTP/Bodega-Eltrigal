@@ -27,7 +27,7 @@ import {
   EstadoVacio,
   Input,
 } from "../../components/ui";
-import { TarjetaProducto, useAgregarAlCarrito } from "./catalogo";
+import { CarruselHero, TarjetaProducto, useAgregarAlCarrito } from "./catalogo";
 import "./HomePage.css";
 
 export function HomePage() {
@@ -90,8 +90,14 @@ export function HomePage() {
 
   return (
     <div className="contenedor">
+      {/* 0. CARRUSEL DESTACADO */}
+      <CarruselHero />
+
       {/* 1. SECCIÓN DE BIENVENIDA (HERO) */}
-      <section className="catalogo-hero" aria-label="Bienvenida a Bodega El Trigal">
+      <section
+        className="catalogo-hero catalogo-aparece"
+        aria-label="Bienvenida a Bodega El Trigal"
+      >
         <div className="catalogo-hero__contenido">
           <Badge variante="marca" tamano="sm" className="catalogo-hero__insignia">
             🌾 Tu bodega de barrio en Piura
@@ -134,7 +140,10 @@ export function HomePage() {
       )}
 
       {/* 2. FILTROS Y BUSCADOR */}
-      <section className="catalogo-filtros" aria-label="Filtros del catálogo">
+      <section
+        className="catalogo-filtros catalogo-aparece catalogo-aparece--2"
+        aria-label="Filtros del catálogo"
+      >
         <div className="catalogo-filtros__barra-superior">
           {/* Buscador en tiempo real */}
           <div className="catalogo-filtros__buscador">
@@ -205,7 +214,11 @@ export function HomePage() {
       </section>
 
       {/* 3. CONTENIDO: CARGANDO / VACÍO / GRILLA */}
-      <section className="seccion" style={{ paddingTop: 0 }} aria-label="Lista de productos">
+      <section
+        id="catalogo-productos"
+        className="seccion catalogo-productos catalogo-aparece catalogo-aparece--3"
+        aria-label="Lista de productos"
+      >
         {cargando ? (
           <Cargando texto="Cargando catálogo de productos…" />
         ) : productosVisibles.length === 0 ? (
@@ -226,7 +239,7 @@ export function HomePage() {
             }
           />
         ) : (
-          <div className="rejilla">
+          <div className="rejilla catalogo-rejilla">
             {productosVisibles.map((producto) => (
               <TarjetaProducto
                 key={producto.id}
