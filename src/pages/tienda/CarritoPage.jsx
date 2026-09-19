@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useCarrito } from '../../context/CarritoContext';
 import { Card, Boton, EstadoVacio, Input } from '../../components/ui';
 import { formatearSoles } from '../../utils/formato';
+import { RUTAS } from '../../routes/rutas';
 import './CarritoPage.css';
 
 /**
@@ -90,7 +92,7 @@ export const CarritoPage = () => {
         </div>
 
         <div className="carrito__acciones">
-          <Boton variante="primario">
+          <Boton como={Link} to={RUTAS.CHECKOUT} variante="primario">
             Proceder al pago
           </Boton>
           <Boton variante="contorno" onClick={vaciar}>
