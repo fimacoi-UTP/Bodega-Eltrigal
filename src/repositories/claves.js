@@ -27,7 +27,7 @@ export const CLAVES = {
  * que la versión guardada es vieja y vuelve a sembrar, así a nadie del grupo
  * le queda data desactualizada en su navegador.
  */
-export const VERSION_DATOS = 1;
+export const VERSION_DATOS = 2;
 
 /** Lista de todas las claves, para poder limpiar todo de un golpe. */
 export const TODAS_LAS_CLAVES = Object.values(CLAVES);

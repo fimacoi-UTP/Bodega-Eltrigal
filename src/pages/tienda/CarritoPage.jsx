@@ -1,49 +1,127 @@
+import { Link } from 'react-router-dom';
+import { useCarrito } from '../../context/CarritoContext';
+import { Card, Boton, EstadoVacio, Input } from '../../components/ui';
+import { formatearSoles } from '../../utils/formato';
+import { RUTAS } from '../../routes/rutas';
+import './CarritoPage.css';
+
 /**
- * ============================================================================
- * 🚧 CASCARÓN · Carrito de compras
- * ============================================================================
- * ⚠️ IMPORTANTE para quien tome este módulo: el carrito necesita su propio
- * contexto, porque su estado tiene que sobrevivir mientras el usuario navega
- * entre el catálogo, el detalle y el checkout.
+ * Vista de la página del Carrito (/carrito).
+ * Muestra el desglose de productos, modificación de cantidad y cálculo total.
  *
- * Creen `src/context/CarritoContext.jsx` copiando la estructura de
- * InventarioContext.jsx, y monten el provider en src/App.jsx DENTRO de
- * <InventarioProvider> (el carrito consulta precios y stock).
+ * El layout usa `.contenedor contenedor--angosto`, la misma utilidad centrada
+ * que emplean el catálogo y el checkout, para que el contenido no se estire de
+ * lado a lado en pantallas grandes. Los estilos propios están en
+ * ./CarritoPage.css (antes eran atributos `style` sueltos en el JSX).
  *
- * 🔴 REGLA: el carrito NO descuenta stock. Agregar algo al carrito no es
- * vender. El stock se descuenta recién al confirmar la compra en el checkout,
- * con `inventario.descontarStock(items)`.
- * ==========================================================================*/
+ * La lógica del carrito vive en CarritoProvider; aquí solo se consume.
+ */
+export const CarritoPage = () => {
+  const { items, quitar, cambiarCantidad, vaciar, total } = useCarrito();
 
-import CascaronModulo from "../../components/comunes/CascaronModulo";
+  // Estado vacío cuando no hay ítems en el carrito
+  if (items.length === 0) {
+    return (
+      <div className="contenedor contenedor--angosto seccion carrito__vacio">
+        <figure className="carrito__ilustracion">
+          <img
+            src="/imagenes/carrito.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
 
-export function CarritoPage() {
+        <EstadoVacio
+          titulo="Tu carrito está vacío"
+          descripcion="Explora la tienda y añade los productos que necesitas. Te los llevamos a casa o los recoges por la bodega."
+          accion={
+            <Boton como={Link} to={RUTAS.INICIO} variante="primario" tamano="lg">
+              Ver el catálogo
+            </Boton>
+          }
+        />
+      </div>
+    );
+  }
+
+  const unidades = items.reduce((suma, item) => suma + item.cantidad, 0);
+
   return (
-    <div className="contenedor">
-      <CascaronModulo
-        nombre="Carrito de compras"
-        descripcion="Lista de lo que el cliente va a comprar, con el control de cantidades y el resumen del total antes de pasar a pagar."
-        archivo="src/pages/tienda/CarritoPage.jsx"
-        tareas={[
-          "Crear src/context/CarritoContext.jsx con: items, agregar, quitar, cambiarCantidad, vaciar, cantidadTotal y subtotal.",
-          "Montar <CarritoProvider> en src/App.jsx, dentro de <InventarioProvider>.",
-          "Crear el hook src/hooks/useCarrito.js siguiendo el molde de useInventario.js.",
-          "Listar los items con su imagen, nombre, precio unitario y subtotal.",
-          "Controles de + / − y botón para eliminar, validando contra el stock disponible.",
-          "Resumen con subtotal y el botón 'Continuar compra' que lleva a /checkout.",
-          "Estado vacío con <EstadoVacio /> y enlace de vuelta al catálogo.",
-          "Activar el contador del carrito en el Navbar (ya está el TODO marcado ahí).",
-        ]}
-        herramientas={[
-          "useInventario() → obtenerProducto(id) para validar stock y precio",
-          "formatearSoles(monto) de utils/formato",
-          "<Card>, <Boton>, <EstadoVacio>, <Badge>",
-          "RUTAS.CHECKOUT de routes/rutas",
-        ]}
-        patron="El carrito usa Context + useState, o sea el patrón Observer que React ya resuelve: cuando cambian los items, el Navbar, la página del carrito y el checkout se re-renderizan solos. No implementen un Observer manual."
-      />
+    <div className="contenedor contenedor--angosto seccion carrito-pagina">
+      <header className="carrito__cabecera">
+        <span className="carrito__cabecera-foto" aria-hidden="true">
+          <img src="/imagenes/carrito.jpg" alt="" loading="lazy" decoding="async" />
+        </span>
+
+        <div className="carrito__cabecera-textos">
+          <h1 className="carrito__titulo">Carrito de compras</h1>
+          <p className="carrito__resumen-linea">
+            {items.length} {items.length === 1 ? 'producto' : 'productos'} ·{' '}
+            {unidades} {unidades === 1 ? 'unidad' : 'unidades'}
+          </p>
+        </div>
+      </header>
+
+      {/* Listado de ítems agregados */}
+      <div className="carrito__lista">
+        {items.map((item) => (
+          <Card key={item.id}>
+            <div className="carrito__item-cabecera">
+              <h3 className="carrito__nombre">{item.nombre}</h3>
+              {/* Botón para remover ítem */}
+              <Boton variante="peligro" tamano="sm" onClick={() => quitar(item.id)}>
+                Eliminar
+              </Boton>
+            </div>
+
+            <p className="carrito__precio-unitario">
+              Precio unitario: {formatearSoles(item.precio)}
+            </p>
+
+            {/* Selector de cantidad y subtotal */}
+            <div className="carrito__controles">
+              <label
+                htmlFor={`cant-${item.id}`}
+                className="carrito__etiqueta-cantidad"
+              >
+                Cantidad:
+              </label>
+              <Input
+                id={`cant-${item.id}`}
+                className="carrito__cantidad"
+                type="number"
+                min="1"
+                value={item.cantidad}
+                onChange={(e) => cambiarCantidad(item.id, parseInt(e.target.value, 10) || 1)}
+              />
+              <span className="carrito__subtotal">
+                Subtotal: {formatearSoles(item.precio * item.cantidad)}
+              </span>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Resumen del pedido y acciones globales */}
+      <Card className="carrito__resumen">
+        <div className="carrito__total-fila">
+          <span className="carrito__total-etiqueta">Total:</span>
+          <span className="carrito__total-monto">{formatearSoles(total)}</span>
+        </div>
+
+        <div className="carrito__acciones">
+          <Boton como={Link} to={RUTAS.CHECKOUT} variante="primario">
+            Proceder al pago
+          </Boton>
+          <Boton variante="contorno" onClick={vaciar}>
+            Vaciar carrito
+          </Boton>
+        </div>
+      </Card>
     </div>
   );
-}
+};
 
 export default CarritoPage;

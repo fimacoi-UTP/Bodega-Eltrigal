@@ -45,10 +45,10 @@ export function inicializarDatos({ forzar = false } = {}) {
   if (forzar || versionDesactualizada) {
     almacenamiento.escribir(CLAVES.PRODUCTOS, productosSemilla);
     almacenamiento.escribir(CLAVES.USUARIOS, usuariosSemilla);
-    // Las colecciones transaccionales arrancan vacías: las llenan los módulos.
-    almacenamiento.escribir(CLAVES.VENTAS, []);
-    almacenamiento.escribir(CLAVES.PEDIDOS, []);
-    almacenamiento.escribir(CLAVES.PROMOCIONES, []);
+    // Las colecciones transaccionales se preservan si ya existen, a menos que sea forzado.
+    if (forzar || !almacenamiento.existe(CLAVES.VENTAS)) almacenamiento.escribir(CLAVES.VENTAS, []);
+    if (forzar || !almacenamiento.existe(CLAVES.PEDIDOS)) almacenamiento.escribir(CLAVES.PEDIDOS, []);
+    if (forzar || !almacenamiento.existe(CLAVES.PROMOCIONES)) almacenamiento.escribir(CLAVES.PROMOCIONES, []);
     almacenamiento.escribir(CLAVES.VERSION_DATOS, VERSION_DATOS);
 
     if (import.meta.env.DEV) {

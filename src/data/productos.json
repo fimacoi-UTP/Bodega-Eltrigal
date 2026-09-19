@@ -9,7 +9,7 @@
     "stock": 40,
     "stockMinimo": 10,
     "unidad": "bolsa",
-    "imagen": "",
+    "imagen": "/productos/arroz-costeño.jpg",
     "color": "#E9A08A",
     "activo": true
   },
@@ -23,7 +23,7 @@
     "stock": 60,
     "stockMinimo": 15,
     "unidad": "bolsa",
-    "imagen": "",
+    "imagen": "/productos/azucar-rubia.jpg",
     "color": "#F0B429",
     "activo": true
   },
@@ -37,7 +37,7 @@
     "stock": 35,
     "stockMinimo": 12,
     "unidad": "botella",
-    "imagen": "",
+    "imagen": "/productos/aceite-primor.jpg",
     "color": "#F5C94F",
     "activo": true
   },
@@ -51,7 +51,7 @@
     "stock": 80,
     "stockMinimo": 20,
     "unidad": "paquete",
-    "imagen": "",
+    "imagen": "/productos/fideos-donvictorio.jpg",
     "color": "#F9DE8E",
     "activo": true
   },
@@ -65,7 +65,7 @@
     "stock": 45,
     "stockMinimo": 12,
     "unidad": "lata",
-    "imagen": "",
+    "imagen": "/productos/atun-florida.jpg",
     "color": "#45B579",
     "activo": true
   },
@@ -79,7 +79,7 @@
     "stock": 50,
     "stockMinimo": 15,
     "unidad": "bolsa",
-    "imagen": "",
+    "imagen": "/productos/sal-mesa.jpg",
     "color": "#D5CCC0",
     "activo": true
   },
@@ -93,7 +93,7 @@
     "stock": 30,
     "stockMinimo": 10,
     "unidad": "bolsa",
-    "imagen": "",
+    "imagen": "/productos/lenteja-serrana.jpg",
     "color": "#8F3719",
     "activo": true
   },
@@ -107,7 +107,7 @@
     "stock": 25,
     "stockMinimo": 10,
     "unidad": "bolsa",
-    "imagen": "",
+    "imagen": "/productos/harina.jpg",
     "color": "#F4F0EA",
     "activo": true
   },
@@ -121,7 +121,7 @@
     "stock": 90,
     "stockMinimo": 24,
     "unidad": "lata",
-    "imagen": "",
+    "imagen": "/productos/leche-gloria.jpg",
     "color": "#2563EB",
     "activo": true
   },
@@ -135,7 +135,7 @@
     "stock": 24,
     "stockMinimo": 8,
     "unidad": "botella",
-    "imagen": "",
+    "imagen": "/productos/yogurt-gloria.jpg",
     "color": "#E9A08A",
     "activo": true
   },
@@ -149,7 +149,7 @@
     "stock": 12,
     "stockMinimo": 5,
     "unidad": "porción",
-    "imagen": "",
+    "imagen": "/productos/queso-fresco.jpg",
     "color": "#FAF8F5",
     "activo": true
   },
@@ -163,7 +163,7 @@
     "stock": 18,
     "stockMinimo": 6,
     "unidad": "barra",
-    "imagen": "",
+    "imagen": "/productos/mantequilla-laive.jpg",
     "color": "#F5C94F",
     "activo": true
   },
@@ -177,7 +177,7 @@
     "stock": 60,
     "stockMinimo": 18,
     "unidad": "botella",
-    "imagen": "",
+    "imagen": "/productos/inca-kola.jpg",
     "color": "#F0B429",
     "activo": true
   },
@@ -191,7 +191,7 @@
     "stock": 48,
     "stockMinimo": 15,
     "unidad": "botella",
-    "imagen": "",
+    "imagen": "/productos/agua-cielo.jpg",
     "color": "#A8E5C2",
     "activo": true
   },
@@ -205,7 +205,7 @@
     "stock": 36,
     "stockMinimo": 12,
     "unidad": "botella",
-    "imagen": "",
+    "imagen": "/productos/cerveza-pilsen.jpg",
     "color": "#C27803",
     "activo": true
   },
@@ -219,7 +219,7 @@
     "stock": 22,
     "stockMinimo": 8,
     "unidad": "frasco",
-    "imagen": "",
+    "imagen": "/productos/nescafe.jpg",
     "color": "#5F2B1A",
     "activo": true
   },
@@ -233,7 +233,7 @@
     "stock": 28,
     "stockMinimo": 10,
     "unidad": "bolsa",
-    "imagen": "",
+    "imagen": "/productos/detergente-bolivar.jpg",
     "color": "#45B579",
     "activo": true
   },
@@ -247,7 +247,7 @@
     "stock": 32,
     "stockMinimo": 10,
     "unidad": "botella",
-    "imagen": "",
+    "imagen": "/productos/lejia-clorox.jpg",
     "color": "#DBEAFE",
     "activo": true
   },
@@ -261,7 +261,7 @@
     "stock": 40,
     "stockMinimo": 12,
     "unidad": "paquete",
-    "imagen": "",
+    "imagen": "/productos/papel-elite.jpg",
     "color": "#F3C5B7",
     "activo": true
   },
@@ -275,7 +275,7 @@
     "stock": 8,
     "stockMinimo": 3,
     "unidad": "balón",
-    "imagen": "",
+    "imagen": "/productos/balon-z-gas.jpg",
     "color": "#B0441F",
     "activo": true
   }
