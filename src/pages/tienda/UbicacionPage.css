@@ -1,0 +1,265 @@
+/* ============================================================================
+ * UbicacionPage.css · Dónde queda la bodega y cómo llegar
+ * ----------------------------------------------------------------------------
+ * MOBILE-FIRST: lo que se ve sin media query es cómo se ve a 375px.
+ * Mismo lenguaje visual que el catálogo y Nosotros.
+ * Todos los valores salen de los tokens de src/styles/tokens.css.
+ * ==========================================================================*/
+
+.ubicacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+  padding-bottom: var(--esp-12);
+}
+
+@media (min-width: 768px) {
+  .ubicacion {
+    gap: var(--esp-8);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 1. HERO
+ * ------------------------------------------------------------------------ */
+.ubicacion-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin-top: var(--esp-4);
+  padding: var(--esp-6) var(--esp-4);
+  background: linear-gradient(135deg, var(--ladrillo-50) 0%, var(--trigo-50) 100%);
+  border: 1px solid var(--color-primario-borde);
+  border-radius: var(--radio-xl);
+  overflow: hidden;
+}
+
+.ubicacion-hero__ornamento {
+  position: absolute;
+  right: calc(var(--esp-4) * -1);
+  bottom: calc(var(--esp-6) * -1);
+  font-size: 7rem;
+  line-height: 1;
+  opacity: 0.08;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .ubicacion-hero {
+    margin-top: var(--esp-6);
+    padding: var(--esp-10) var(--esp-8);
+  }
+
+  .ubicacion-hero__ornamento {
+    font-size: 11rem;
+  }
+}
+
+.ubicacion-hero__contenido {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  max-width: 680px;
+}
+
+.ubicacion-hero__insignia {
+  align-self: flex-start;
+}
+
+.ubicacion-hero__titulo {
+  font-size: clamp(1.5rem, 1.2rem + 1.6vw, var(--texto-3xl));
+  font-weight: var(--peso-extra);
+  line-height: var(--interlineado-ajustado);
+  color: var(--color-texto);
+}
+
+.ubicacion-hero__destaque {
+  color: var(--color-primario);
+}
+
+.ubicacion-hero__descripcion {
+  font-size: var(--texto-base);
+  color: var(--color-texto-suave);
+  line-height: var(--interlineado-base);
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. TARJETAS DE DATOS · 1 columna en celular, 3 desde tablet
+ * ------------------------------------------------------------------------ */
+.ubicacion__datos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 720px) {
+  .ubicacion__datos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.ubicacion__dato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  height: 100%;
+}
+
+.ubicacion__dato-icono {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font-size: var(--texto-xl);
+  border-radius: var(--radio-lg);
+  background-color: var(--color-primario-suave);
+  border: 1px solid var(--color-primario-borde);
+}
+
+.ubicacion__dato-titulo {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-texto-tenue);
+}
+
+.ubicacion__dato-principal {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-semi);
+  line-height: 1.35;
+  color: var(--color-texto);
+  text-wrap: pretty;
+}
+
+.ubicacion__dato-secundario {
+  font-size: var(--texto-sm);
+  line-height: var(--interlineado-base);
+  color: var(--color-texto-suave);
+  text-wrap: pretty;
+}
+
+/* Enlaces de contacto dentro de las tarjetas */
+.ubicacion__dato-enlace {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-semi);
+  color: var(--color-primario);
+  width: fit-content;
+}
+
+.ubicacion__dato-enlace:hover {
+  color: var(--color-primario-hover);
+  text-decoration: underline;
+}
+
+/* Empuja el contenido final al fondo para que las 3 tarjetas cuadren */
+.ubicacion__dato-pie {
+  margin-top: auto;
+  padding-top: var(--esp-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. MAPA
+ * El iframe llena su contenedor; la altura crece con la pantalla.
+ * ------------------------------------------------------------------------ */
+.ubicacion__mapa-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.ubicacion__mapa-cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.ubicacion__mapa-titulo {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-negrita);
+  letter-spacing: -0.015em;
+  color: var(--color-texto);
+}
+
+.ubicacion__mapa-bajada {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+}
+
+.ubicacion__mapa-marco {
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-xl);
+  box-shadow: var(--sombra-md);
+  background-color: var(--color-superficie-suave);
+  /* line-height 0 evita la franja blanca bajo el iframe */
+  line-height: 0;
+}
+
+@media (min-width: 768px) {
+  .ubicacion__mapa-marco {
+    height: 420px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .ubicacion__mapa-marco {
+    height: 460px;
+  }
+}
+
+.ubicacion__mapa-marco iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* --- Botonera bajo el mapa --- */
+.ubicacion__acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+@media (min-width: 560px) {
+  .ubicacion__acciones {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .ubicacion__acciones > * {
+    flex: 1 1 200px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 4. NOTA DE DELIVERY
+ * ------------------------------------------------------------------------ */
+.ubicacion__nota {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.ubicacion__nota-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-base);
+  font-weight: var(--peso-semi);
+  color: var(--color-texto);
+}
+
+.ubicacion__nota-texto {
+  font-size: var(--texto-sm);
+  line-height: var(--interlineado-base);
+  color: var(--color-texto-suave);
+  text-wrap: pretty;
+}

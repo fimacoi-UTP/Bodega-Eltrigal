@@ -1,0 +1,338 @@
+/* ============================================================================
+ * CarruselHero.css · Carrusel destacado de la portada
+ * ----------------------------------------------------------------------------
+ * MOBILE-FIRST: sin media query es cómo se ve a 375px.
+ *
+ * Rendimiento: solo se animan `opacity` y `transform`, que el navegador
+ * compone en la GPU. No se anima ni `height`, ni `top`, ni `background`,
+ * que obligarían a recalcular el layout en cada fotograma.
+ * ==========================================================================*/
+
+.carrusel {
+  margin-top: var(--esp-4);
+  margin-bottom: var(--esp-8);
+}
+
+@media (min-width: 768px) {
+  .carrusel {
+    margin-top: var(--esp-6);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * MARCO
+ * Los slides se apilan en la MISMA celda del grid, así el marco conserva su
+ * altura y el cambio es un cross-fade sin saltos.
+ * ------------------------------------------------------------------------ */
+.carrusel__marco {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+  border-radius: var(--radio-xl);
+  border: 1px solid var(--color-primario-borde);
+  box-shadow: var(--sombra-lg);
+  /* Fondo cálido mientras cargan las fotos: nunca se ve un rectángulo blanco. */
+  background: linear-gradient(135deg, var(--ladrillo-100) 0%, var(--trigo-100) 100%);
+  isolation: isolate;
+}
+
+@media (min-width: 640px) {
+  .carrusel__marco {
+    height: 420px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .carrusel__marco {
+    height: 520px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * SLIDES
+ * ------------------------------------------------------------------------ */
+.carrusel__slide {
+  grid-area: 1 / 1; /* todas las diapositivas ocupan la misma celda */
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 700ms ease,
+    visibility 700ms ease;
+}
+
+.carrusel__slide--activo {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+}
+
+.carrusel__imagen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Zoom lentísimo tipo Ken Burns mientras el slide está activo. */
+  transform: scale(1.06);
+  transition: transform 6s ease-out;
+}
+
+.carrusel__slide--activo .carrusel__imagen {
+  transform: scale(1);
+}
+
+/* Velo: oscuro abajo (donde va el texto) y transparente arriba. */
+.carrusel__velo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(26, 23, 20, 0.88) 0%,
+    rgba(26, 23, 20, 0.6) 38%,
+    rgba(26, 23, 20, 0.15) 70%,
+    rgba(26, 23, 20, 0.05) 100%
+  );
+}
+
+/* ---------------------------------------------------------------------------
+ * CONTENIDO DEL SLIDE
+ * ------------------------------------------------------------------------ */
+.carrusel__contenido {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  width: 100%;
+  max-width: 640px;
+  /* Deja aire abajo para no chocar con los puntitos. */
+  padding: var(--esp-6) var(--esp-4) var(--esp-10);
+}
+
+@media (min-width: 640px) {
+  .carrusel__contenido {
+    padding: var(--esp-8) var(--esp-8) var(--esp-12);
+  }
+}
+
+@media (min-width: 1024px) {
+  .carrusel__contenido {
+    padding: var(--esp-10) var(--esp-12) var(--esp-12);
+  }
+}
+
+.carrusel__titulo {
+  font-size: clamp(1.5rem, 1.1rem + 2.2vw, var(--texto-4xl));
+  font-weight: var(--peso-extra);
+  line-height: var(--interlineado-ajustado);
+  letter-spacing: -0.02em;
+  color: var(--neutro-0);
+  text-wrap: balance;
+  text-shadow: 0 2px 12px rgba(26, 23, 20, 0.45);
+}
+
+.carrusel__subtitulo {
+  font-size: var(--texto-sm);
+  line-height: var(--interlineado-base);
+  color: var(--neutro-200);
+  max-width: 46ch;
+  text-wrap: pretty;
+  text-shadow: 0 1px 8px rgba(26, 23, 20, 0.5);
+}
+
+@media (min-width: 640px) {
+  .carrusel__subtitulo {
+    font-size: var(--texto-lg);
+  }
+}
+
+.carrusel__accion {
+  margin-top: var(--esp-1);
+}
+
+/* El texto entra con un desplazamiento suave cuando el slide se activa. */
+.carrusel__slide--activo .carrusel__titulo,
+.carrusel__slide--activo .carrusel__subtitulo,
+.carrusel__slide--activo .carrusel__accion {
+  animation: carrusel-entrar 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.carrusel__slide--activo .carrusel__subtitulo {
+  animation-delay: 90ms;
+}
+
+.carrusel__slide--activo .carrusel__accion {
+  animation-delay: 180ms;
+}
+
+@keyframes carrusel-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * FLECHAS
+ * En celular son más chicas y pegadas al borde; desde tablet crecen.
+ * ------------------------------------------------------------------------ */
+.carrusel__flecha {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  transform: translateY(-50%);
+  font-size: var(--texto-2xl);
+  line-height: 1;
+  color: var(--neutro-0);
+  background-color: rgba(26, 23, 20, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--radio-pastilla);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition:
+    background-color var(--transicion-rapida),
+    border-color var(--transicion-rapida),
+    transform var(--transicion-rapida);
+}
+
+.carrusel__flecha:hover {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.carrusel__flecha--anterior {
+  left: var(--esp-2);
+}
+
+.carrusel__flecha--siguiente {
+  right: var(--esp-2);
+}
+
+@media (min-width: 640px) {
+  .carrusel__flecha {
+    width: 46px;
+    height: 46px;
+  }
+
+  .carrusel__flecha--anterior {
+    left: var(--esp-4);
+  }
+
+  .carrusel__flecha--siguiente {
+    right: var(--esp-4);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * INDICADORES (puntitos)
+ * El activo se alarga como una pastilla y se rellena con el tiempo del slide.
+ * ------------------------------------------------------------------------ */
+.carrusel__puntos {
+  position: absolute;
+  left: 50%;
+  bottom: var(--esp-4);
+  z-index: 2;
+  display: flex;
+  gap: var(--esp-2);
+  transform: translateX(-50%);
+  padding: var(--esp-2) var(--esp-3);
+  background-color: rgba(26, 23, 20, 0.35);
+  border-radius: var(--radio-pastilla);
+  backdrop-filter: blur(4px);
+}
+
+@media (min-width: 640px) {
+  .carrusel__puntos {
+    left: var(--esp-8);
+    bottom: var(--esp-6);
+    transform: none;
+  }
+}
+
+.carrusel__punto {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.45);
+  border: none;
+  border-radius: var(--radio-pastilla);
+  cursor: pointer;
+  transition:
+    width var(--transicion),
+    background-color var(--transicion-rapida);
+}
+
+.carrusel__punto:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.carrusel__punto--activo {
+  width: 32px;
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.carrusel__punto-relleno {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background-color: var(--color-acento);
+  border-radius: inherit;
+}
+
+/* La barra se llena en los 5 s que dura el slide. */
+.carrusel__punto--activo .carrusel__punto-relleno {
+  animation: carrusel-progreso 5000ms linear both;
+}
+
+@keyframes carrusel-progreso {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Con el carrusel pausado (mouse encima) la barra también se detiene. */
+.carrusel:hover .carrusel__punto--activo .carrusel__punto-relleno,
+.carrusel:focus-within .carrusel__punto--activo .carrusel__punto-relleno {
+  animation-play-state: paused;
+}
+
+/* ---------------------------------------------------------------------------
+ * ACCESIBILIDAD · menos movimiento
+ * Quien pidió reducir animaciones ve los cambios de golpe, sin desplazamientos
+ * ni zoom. El carrusel sigue funcionando.
+ * ------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .carrusel__slide,
+  .carrusel__imagen {
+    transition-duration: 1ms;
+  }
+
+  .carrusel__imagen {
+    transform: none;
+  }
+
+  .carrusel__slide--activo .carrusel__titulo,
+  .carrusel__slide--activo .carrusel__subtitulo,
+  .carrusel__slide--activo .carrusel__accion,
+  .carrusel__punto--activo .carrusel__punto-relleno {
+    animation: none;
+  }
+
+  .carrusel__punto--activo .carrusel__punto-relleno {
+    transform: scaleX(1);
+  }
+}

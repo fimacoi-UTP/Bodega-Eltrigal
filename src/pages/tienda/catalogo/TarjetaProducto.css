@@ -166,3 +166,60 @@
   background-color: var(--color-exito) !important;
   border-color: var(--color-exito) !important;
 }
+
+/* ============================================================================
+ * MEJORA DE HOVER · elevación más marcada y foco visible
+ * ----------------------------------------------------------------------------
+ * La tarjeta ya subía 2px; ahora sube más y proyecta una sombra mayor, que es
+ * lo que da la sensación de "levantarse" de un e-commerce cuidado. Se anima
+ * solo transform y box-shadow, nada que recalcule el layout.
+ * ==========================================================================*/
+
+.catalogo-tarjeta:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--sombra-lg);
+  border-color: var(--color-primario-borde);
+}
+
+/* Al soltar el mouse vuelve un poco más lento: se siente menos brusco. */
+.catalogo-tarjeta {
+  transition:
+    transform var(--transicion-lenta),
+    box-shadow var(--transicion-lenta),
+    border-color var(--transicion);
+}
+
+/* Mismo realce al llegar con el teclado, no solo con el mouse. */
+.catalogo-tarjeta:focus-within {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-md);
+  border-color: var(--color-primario-borde);
+}
+
+/* El zoom de la foto acompaña un poco más. */
+.catalogo-tarjeta:hover .catalogo-tarjeta__imagen {
+  transform: scale(1.07);
+}
+
+/* El botón de agregar se tiñe del color de marca al acercarse a la tarjeta. */
+.catalogo-tarjeta__pie .ui-boton {
+  transition:
+    background-color var(--transicion-rapida),
+    box-shadow var(--transicion-rapida),
+    transform var(--transicion-rapida);
+}
+
+.catalogo-tarjeta:hover .catalogo-tarjeta__pie .ui-boton {
+  box-shadow: var(--sombra-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalogo-tarjeta:hover,
+  .catalogo-tarjeta:focus-within {
+    transform: none;
+  }
+
+  .catalogo-tarjeta:hover .catalogo-tarjeta__imagen {
+    transform: none;
+  }
+}

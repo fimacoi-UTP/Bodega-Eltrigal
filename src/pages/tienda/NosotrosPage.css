@@ -1,0 +1,439 @@
+/* ============================================================================
+ * NosotrosPage.css · La historia de la bodega
+ * ----------------------------------------------------------------------------
+ * MOBILE-FIRST: lo que se ve sin media query es cómo se ve a 375px.
+ * Reutiliza el mismo lenguaje visual del catálogo (HomePage.css): hero con
+ * degradado cálido, insignia de marca y tarjetas sobre superficie.
+ * Todos los valores salen de los tokens de src/styles/tokens.css.
+ * ==========================================================================*/
+
+.nosotros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-8);
+  padding-bottom: var(--esp-12);
+}
+
+@media (min-width: 768px) {
+  .nosotros {
+    gap: var(--esp-12);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 1. HERO
+ * ------------------------------------------------------------------------ */
+.nosotros-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  margin-top: var(--esp-4);
+  padding: var(--esp-6) var(--esp-4);
+  background: linear-gradient(135deg, var(--ladrillo-50) 0%, var(--trigo-50) 100%);
+  border: 1px solid var(--color-primario-borde);
+  border-radius: var(--radio-xl);
+  overflow: hidden;
+}
+
+/* Espiga decorativa de fondo, puramente ornamental. */
+.nosotros-hero__ornamento {
+  position: absolute;
+  right: calc(var(--esp-4) * -1);
+  bottom: calc(var(--esp-6) * -1);
+  font-size: 8rem;
+  line-height: 1;
+  opacity: 0.08;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .nosotros-hero {
+    margin-top: var(--esp-6);
+    padding: var(--esp-10) var(--esp-8);
+  }
+
+  .nosotros-hero__ornamento {
+    font-size: 13rem;
+  }
+}
+
+.nosotros-hero__contenido {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  max-width: 720px;
+}
+
+.nosotros-hero__insignia {
+  align-self: flex-start;
+}
+
+.nosotros-hero__titulo {
+  font-size: clamp(1.5rem, 1.2rem + 1.6vw, var(--texto-3xl));
+  font-weight: var(--peso-extra);
+  line-height: var(--interlineado-ajustado);
+  color: var(--color-texto);
+}
+
+.nosotros-hero__destaque {
+  color: var(--color-primario);
+}
+
+.nosotros-hero__lema {
+  font-size: var(--texto-base);
+  color: var(--color-texto-suave);
+  line-height: var(--interlineado-base);
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. ESTADÍSTICAS · 2 columnas en celular, 4 desde tablet
+ * ------------------------------------------------------------------------ */
+.nosotros__estadisticas {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3);
+}
+
+@media (min-width: 768px) {
+  .nosotros__estadisticas {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--esp-4);
+  }
+}
+
+.nosotros__estadistica {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--esp-1);
+}
+
+.nosotros__estadistica-valor {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-extra);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--color-primario);
+  font-variant-numeric: tabular-nums;
+}
+
+.nosotros__estadistica-etiqueta {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-tenue);
+  text-wrap: balance;
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. CABECERA DE SECCIÓN
+ * ------------------------------------------------------------------------ */
+.nosotros__seccion-cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-5);
+  text-align: center;
+}
+
+.nosotros__seccion-titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-negrita);
+  letter-spacing: -0.02em;
+  color: var(--color-texto);
+}
+
+.nosotros__seccion-bajada {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+  max-width: 60ch;
+  margin-inline: auto;
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------------------
+ * 4. HISTORIA · relato + línea de tiempo
+ * ------------------------------------------------------------------------ */
+.nosotros__historia {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-6);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .nosotros__historia {
+    grid-template-columns: 1.15fr 1fr;
+    gap: var(--esp-10);
+  }
+}
+
+.nosotros__relato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.nosotros__parrafo {
+  font-size: var(--texto-base);
+  line-height: var(--interlineado-amplio);
+  color: var(--color-texto-suave);
+  text-wrap: pretty;
+}
+
+/* Capitular: la primera letra grande, como en una crónica de barrio. */
+.nosotros__parrafo--apertura::first-letter {
+  float: left;
+  font-size: 3.2rem;
+  line-height: 0.85;
+  font-weight: var(--peso-extra);
+  color: var(--color-primario);
+  padding-right: var(--esp-2);
+  padding-top: var(--esp-1);
+}
+
+.nosotros__parrafo strong {
+  color: var(--color-texto);
+  font-weight: var(--peso-semi);
+}
+
+/* --- Línea de tiempo --- */
+.nosotros__linea {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nosotros__hito {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  padding-left: var(--esp-6);
+  padding-bottom: var(--esp-5);
+  border-left: 2px solid var(--color-primario-borde);
+}
+
+.nosotros__hito:last-child {
+  padding-bottom: 0;
+  border-left-color: transparent;
+}
+
+/* Punto del hito, montado sobre la línea vertical. */
+.nosotros__hito-punto {
+  position: absolute;
+  left: -7px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--color-primario);
+  border: 2px solid var(--color-superficie);
+  box-shadow: 0 0 0 2px var(--color-primario-borde);
+}
+
+.nosotros__hito-anio {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-negrita);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-acento-fuerte);
+}
+
+.nosotros__hito-titulo {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-semi);
+  color: var(--color-texto);
+}
+
+.nosotros__hito-texto {
+  font-size: var(--texto-sm);
+  line-height: var(--interlineado-base);
+  color: var(--color-texto-suave);
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------------------
+ * 5. VALORES · 1 columna, 2 en tablet, 4 en escritorio
+ * ------------------------------------------------------------------------ */
+.nosotros__valores {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 560px) {
+  .nosotros__valores {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1000px) {
+  .nosotros__valores {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.nosotros__valor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  height: 100%;
+}
+
+.nosotros__valor-icono {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  font-size: var(--texto-2xl);
+  border-radius: var(--radio-lg);
+  background-color: var(--color-primario-suave);
+  border: 1px solid var(--color-primario-borde);
+}
+
+.nosotros__valor-titulo {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-semi);
+  color: var(--color-texto);
+}
+
+.nosotros__valor-texto {
+  font-size: var(--texto-sm);
+  line-height: var(--interlineado-base);
+  color: var(--color-texto-suave);
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------------------
+ * 6. CIERRE
+ * ------------------------------------------------------------------------ */
+.nosotros__cierre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--esp-4);
+  padding: var(--esp-8) var(--esp-4);
+  background: linear-gradient(135deg, var(--trigo-50) 0%, var(--ladrillo-50) 100%);
+  border: 1px solid var(--color-primario-borde);
+  border-radius: var(--radio-xl);
+}
+
+@media (min-width: 768px) {
+  .nosotros__cierre {
+    padding: var(--esp-10);
+  }
+}
+
+.nosotros__cierre-titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-extra);
+  letter-spacing: -0.02em;
+  color: var(--color-texto);
+  text-wrap: balance;
+}
+
+.nosotros__cierre-texto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  max-width: 52ch;
+  text-wrap: pretty;
+}
+
+.nosotros__cierre-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  width: 100%;
+  max-width: 320px;
+}
+
+@media (min-width: 560px) {
+  .nosotros__cierre-acciones {
+    flex-direction: row;
+    justify-content: center;
+    max-width: none;
+    width: auto;
+  }
+}
+
+/* ============================================================================
+ * HERO CON LA FACHADA REAL
+ * ----------------------------------------------------------------------------
+ * MOBILE-FIRST: en celular la foto va DEBAJO del texto, a todo el ancho.
+ * Desde 900px pasa a dos columnas, con el texto a la izquierda.
+ *
+ * `object-fit: cover` sobre una relación de aspecto fija: la foto llena su caja
+ * recortando lo que sobra, nunca se estira ni se deforma.
+ * ==========================================================================*/
+
+.nosotros-hero--con-foto {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-6);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .nosotros-hero--con-foto {
+    grid-template-columns: 1.05fr 1fr;
+    gap: var(--esp-10);
+  }
+
+  /* Con foto, el ornamento estorbaría detrás de la imagen. */
+  .nosotros-hero--con-foto .nosotros-hero__ornamento {
+    display: none;
+  }
+}
+
+.nosotros-hero__foto {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.nosotros-hero__foto img {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radio-xl);
+  border: 1px solid var(--color-primario-borde);
+  box-shadow: var(--sombra-lg);
+  background-color: var(--color-superficie-suave);
+  transition: transform var(--transicion-lenta);
+}
+
+.nosotros-hero__foto:hover img {
+  transform: scale(1.015);
+}
+
+@media (min-width: 900px) {
+  .nosotros-hero__foto img {
+    aspect-ratio: 5 / 4;
+  }
+}
+
+.nosotros-hero__pie {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-tenue);
+  text-align: center;
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nosotros-hero__foto:hover img {
+    transform: none;
+  }
+}

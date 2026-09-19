@@ -1,57 +1,64 @@
 /**
  * ============================================================================
- * useAgregarAlCarrito · Coordinación con el módulo de Carrito
+ * useAgregarAlCarrito · Puente entre el catálogo y el carrito
  * ----------------------------------------------------------------------------
- * 🤝 COORDINACIÓN CON EL INTEGRANTE DEL CARRITO:
+ * 🤝 CONECTADO CON EL MÓDULO DE CARRITO
  *
- * La firma acordada para el Carrito es:
+ * Este gancho envuelve a `agregar()` del CarritoProvider real
+ * (src/context/CarritoProvider.jsx) y le suma el estado visual que necesita el
+ * catálogo: qué tarjeta está "cargando" y qué producto se agregó al final,
+ * para el aviso de confirmación.
+ *
+ * Firma del carrito (definida en CarritoProvider):
  *   agregar(producto, cantidad = 1)
+ * Guarda el objeto completo del producto más su `cantidad`, y lo identifica
+ * por `producto.id`. Por eso aquí le pasamos el producto tal cual viene del
+ * inventario, sin transformarlo.
  *
- * Cuando el compañero de la rama `carrito` cree su `src/context/CarritoContext.jsx`
- * y `src/hooks/useCarrito.js`, este gancho se conectará directamente con él.
+ * ⚠️ HISTORIA DE UN BUG (no repetir):
+ * Antes, mientras el módulo de carrito aún no existía, esta función solo
+ * emitía un CustomEvent 'carrito:agregar' en window y buscaba un
+ * `window.__elTrigalCarrito`. Nadie escuchaba ese evento ni definía ese
+ * objeto, así que el producto NUNCA llegaba al carrito: el usuario veía el
+ * mensaje "¡Agregado!" (que era estado local de este archivo) pero el ícono
+ * del navbar seguía en cero y /carrito salía vacía.
  *
- * Mientras tanto, esta función deja la llamada preparada:
- *   1. Emite el evento personalizado 'carrito:agregar' en el objeto window.
- *   2. Provee estado de confirmación visual momentánea ("¡Agregado!") para
- *      que el usuario sienta la respuesta inmediata al hacer clic.
+ * La regla que evita esto: el estado compartido vive en el Context, no en
+ * `window` ni en implementaciones paralelas.
  * ==========================================================================*/
 
 import { useCallback, useState } from "react";
+import { useCarrito } from "../../../context/CarritoContext";
 
 export function useAgregarAlCarrito() {
+  // ⬇️ La conexión de verdad: el mismo carrito que leen el Navbar y /carrito.
+  const { agregar } = useCarrito();
+
   const [ultimoAgregado, setUltimoAgregado] = useState(null);
   const [agregandoId, setAgregandoId] = useState(null);
 
-  const agregarAlCarrito = useCallback(async (producto, cantidad = 1) => {
-    if (!producto || producto.stock <= 0) return;
+  const agregarAlCarrito = useCallback(
+    async (producto, cantidad = 1) => {
+      if (!producto || producto.stock <= 0) return;
 
-    setAgregandoId(producto.id);
+      setAgregandoId(producto.id);
 
-    // Disparar evento para listeners del carrito u otros módulos
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("carrito:agregar", {
-          detail: { producto, cantidad },
-        }),
-      );
+      // Esto es lo que realmente mete el producto al carrito.
+      agregar(producto, cantidad);
 
-      // Si el contexto global expone un método temporal en window
-      if (typeof window.__elTrigalCarrito?.agregar === "function") {
-        window.__elTrigalCarrito.agregar(producto, cantidad);
-      }
-    }
+      setUltimoAgregado({
+        producto,
+        cantidad,
+        fecha: Date.now(),
+      });
 
-    setUltimoAgregado({
-      producto,
-      cantidad,
-      fecha: Date.now(),
-    });
-
-    // Pequeño retardo para animación y reset de estado
-    setTimeout(() => {
-      setAgregandoId(null);
-    }, 600);
-  }, []);
+      // Pequeño retardo para la animación de la tarjeta.
+      setTimeout(() => {
+        setAgregandoId(null);
+      }, 600);
+    },
+    [agregar],
+  );
 
   const limpiarAviso = useCallback(() => {
     setUltimoAgregado(null);

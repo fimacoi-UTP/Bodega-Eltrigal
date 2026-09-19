@@ -127,19 +127,29 @@ export const ETIQUETAS_METODO_PAGO = {
 
 /**
  * Información de contacto que aparece en el footer, "Nosotros" y "Ubicación".
- * TODO: reemplazar con los datos reales de la bodega antes de la entrega final.
+ * Cambiar aquí actualiza esos tres sitios de una sola vez.
+ *
+ * Los datos de contacto son los reales de la bodega.
  */
 export const BODEGA = {
   nombre: "Bodega El Trigal",
   lema: "Tu bodega de confianza en Piura",
-  direccion: "Av. Grau 1234, Urb. Santa Isabel",
-  ciudad: "Piura, Perú",
-  telefono: "+51 969 000 000",
-  whatsapp: "51969000000",
+
+  // Fundación del negocio. La página Nosotros calcula los años de
+  // trayectoria a partir de esta fecha, para que nunca quede desactualizada.
+  fundacion: "1994-01-10",
+
+  // Dirección real de la bodega.
+  direccion: "Av. John F. Kennedy 343-297",
+  ciudad: "Piura 20007, Perú",
+
+  telefono: "+51 920 642 639",
+  whatsapp: "51920642639",
   correo: "hola@eltrigal.pe",
   horario: "Lun a Sáb 7:00 a.m. – 10:00 p.m. · Dom 8:00 a.m. – 2:00 p.m.",
-  // Coordenadas aproximadas de Piura (para el módulo de ubicación / mapa).
-  coordenadas: { lat: -5.1945, lng: -80.6328 },
+
+  // Coordenadas reales (se usan para el enlace "Cómo llegar" de /ubicacion).
+  coordenadas: { lat: -5.192277, lng: -80.65098 },
 };
 
 /** Moneda con la que trabaja todo el sistema. */
