@@ -27,11 +27,11 @@ import {
 import "./VentasPage.css";
 
 export function VentasPage() {
-  const { productosActivos, buscar, descontarStock, reponerStock, obtenerProducto } = useInventario();
+  const { buscar, descontarStock, reponerStock, obtenerProducto } = useInventario();
   const { usuario } = useAuth();
 
   const [busqueda, setBusqueda] = useState("");
-  const [resultados, setResultados] = useState([]);
+  const resultados = busqueda.trim() ? buscar(busqueda) : [];
   const [carrito, setCarrito] = useState([]);
   const [metodoPago, setMetodoPago] = useState(METODOS_PAGO.EFECTIVO);
   const [montoRecibido, setMontoRecibido] = useState("");
@@ -41,15 +41,6 @@ export function VentasPage() {
   const [ventasDelDia, setVentasDelDia] = useState([]);
   const [cargandoVentas, setCargandoVentas] = useState(true);
   const [ventaAAnular, setVentaAAnular] = useState(null);
-
-  // Buscar productos
-  useEffect(() => {
-    if (busqueda.trim()) {
-      setResultados(buscar(busqueda));
-    } else {
-      setResultados([]);
-    }
-  }, [busqueda, buscar]);
 
   // Cargar ventas del día
   useEffect(() => {
@@ -93,7 +84,6 @@ export function VentasPage() {
       ]);
     }
     setBusqueda("");
-    setResultados([]);
   };
 
   const cambiarCantidad = (productoId, nuevaCantidad) => {
@@ -304,7 +294,7 @@ export function VentasPage() {
                   <div className="ventas-page__pago">
                     <Select
                       etiqueta="Método de pago"
-                      valor={metodoPago}
+                      value={metodoPago}
                       onChange={(e) => setMetodoPago(e.target.value)}
                     >
                       {Object.entries(ETIQUETAS_METODO_PAGO).map(([valor, etiqueta]) => (
