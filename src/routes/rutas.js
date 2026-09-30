@@ -24,6 +24,7 @@ export const RUTAS = {
 
   /* ------------------------- DASHBOARD (protegido por rol) -------------- */
   DASHBOARD: "/dashboard",
+  DASHBOARD_PEDIDOS: "/dashboard/pedidos",
   DASHBOARD_INVENTARIO: "/dashboard/inventario",
   DASHBOARD_PRODUCTOS: "/dashboard/productos",
   DASHBOARD_PROMOCIONES: "/dashboard/promociones",

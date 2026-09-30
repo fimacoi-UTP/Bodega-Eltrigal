@@ -38,6 +38,12 @@ const SECCIONES = [
     roles: ROLES_DASHBOARD,
   },
   {
+    a: RUTAS.DASHBOARD_PEDIDOS,
+    texto: "Pedidos web",
+    icono: "🛍️",
+    roles: ROLES_DASHBOARD,
+  },
+  {
     a: RUTAS.DASHBOARD_INVENTARIO,
     texto: "Inventario",
     icono: "📦",
