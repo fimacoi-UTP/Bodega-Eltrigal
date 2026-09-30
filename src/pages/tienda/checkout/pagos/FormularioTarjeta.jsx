@@ -1,4 +1,4 @@
-import { Input } from "../../../../components/ui";
+import { Input, Select } from "../../../../components/ui";
 
 function formatearNumeroTarjeta(valor) {
   const soloDigitos = valor.replace(/\D/g, "").slice(0, 16);
@@ -32,6 +32,16 @@ export function FormularioTarjeta({ datos, onChange, errores }) {
       </div>
 
       <div className="checkout-formulario-rejilla">
+        <Select
+          etiqueta="Tipo de tarjeta"
+          id="tarjeta-tipo"
+          value={datos.tipoTarjeta || "DEBITO"}
+          onChange={(e) => onChange("tipoTarjeta", e.target.value)}
+        >
+          <option value="DEBITO">Tarjeta de Débito</option>
+          <option value="CREDITO">Tarjeta de Crédito</option>
+        </Select>
+
         <Input
           etiqueta="Número de tarjeta"
           id="tarjeta-numero"

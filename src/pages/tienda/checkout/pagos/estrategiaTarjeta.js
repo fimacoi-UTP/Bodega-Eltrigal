@@ -69,12 +69,14 @@ export const estrategiaTarjeta = {
     const numLimpio = String(datos.numeroTarjeta ?? "").replace(/\s/g, "");
     const ultimos4 = numLimpio.slice(-4) || "0000";
     const authCode = Math.floor(100000 + Math.random() * 900000);
+    const tipo = datos.tipoTarjeta === "CREDITO" ? "Crédito" : "Débito";
     const referencia = `TAR-${authCode}`;
 
     return {
       exito: true,
       referencia,
-      detalle: `Tarjeta terminada en •••• ${ultimos4} (Aut: ${authCode})`,
+      detalle: `Tarjeta ${tipo} terminada en •••• ${ultimos4} (Aut: ${authCode})`,
+      tipoTarjeta: tipo,
       monto,
       fecha: new Date().toISOString(),
       metodo: METODOS_PAGO.TARJETA,
