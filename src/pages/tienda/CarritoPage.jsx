@@ -78,6 +78,14 @@ export const CarritoPage = () => {
 
             <p className="carrito__precio-unitario">
               Precio unitario: {formatearSoles(item.precio)}
+              {item.tieneDescuento && (
+                <>
+                  {" "}
+                  <del style={{ color: "var(--color-texto-apagado)", marginLeft: "var(--esp-2)" }}>
+                    {formatearSoles(item.precioOriginal)}
+                  </del>
+                </>
+              )}
             </p>
 
             {/* Selector de cantidad y subtotal */}

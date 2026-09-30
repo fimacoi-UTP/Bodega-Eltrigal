@@ -99,8 +99,13 @@ export function TarjetaProducto({ producto, alAgregar, agregando = false }) {
           )}
         </Link>
 
-        {/* Insignias flotantes: Stock & Categoría */}
+        {/* Insignias flotantes: Stock & Promoción */}
         <div className="catalogo-tarjeta__insignias">
+          {producto.tieneDescuento && (
+            <Badge variante="info" tamano="sm">
+              Oferta
+            </Badge>
+          )}
           {sinStock ? (
             <Badge variante="peligro" punto tamano="sm">
               Agotado
@@ -130,9 +135,16 @@ export function TarjetaProducto({ producto, alAgregar, agregando = false }) {
         </h3>
 
         <div className="catalogo-tarjeta__precio-fila">
-          <span className="catalogo-tarjeta__precio">
-            {formatearSoles(producto.precio)}
-          </span>
+          <div className="catalogo-tarjeta__precios-contenedor">
+            <span className="catalogo-tarjeta__precio">
+              {formatearSoles(producto.precio)}
+            </span>
+            {producto.tieneDescuento && (
+              <del className="catalogo-tarjeta__precio-original">
+                {formatearSoles(producto.precioOriginal)}
+              </del>
+            )}
+          </div>
           {producto.unidad && (
             <span className="catalogo-tarjeta__unidad">
               por {producto.unidad}

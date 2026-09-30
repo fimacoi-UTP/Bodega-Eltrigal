@@ -64,7 +64,11 @@ export function VentasPage() {
         setCarrito(
           carrito.map((item) =>
             item.productoId === producto.id
-              ? { ...item, cantidad: item.cantidad + 1 }
+              ? {
+                  ...item,
+                  cantidad: item.cantidad + 1,
+                  subtotal: item.precioUnitario * (item.cantidad + 1),
+                }
               : item
           )
         );
@@ -79,6 +83,9 @@ export function VentasPage() {
           nombre: producto.nombre,
           cantidad: 1,
           precioUnitario: producto.precio,
+          precioOriginal: producto.precioOriginal ?? producto.precio,
+          tieneDescuento: Boolean(producto.tieneDescuento),
+          promocionesAplicadas: producto.promocionesAplicadas || [],
           subtotal: producto.precio,
         },
       ]);
@@ -229,8 +236,20 @@ export function VentasPage() {
                       onClick={() => agregarAlCarrito(producto)}
                     >
                       <div className="ventas-page__resultado-info">
-                        <span className="ventas-page__resultado-nombre">{producto.nombre}</span>
-                        <span className="ventas-page__resultado-precio">{formatearSoles(producto.precio)}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "var(--esp-2)" }}>
+                          <span className="ventas-page__resultado-nombre">{producto.nombre}</span>
+                          {producto.tieneDescuento && (
+                            <Badge variante="info" tamano="sm">Promo</Badge>
+                          )}
+                        </div>
+                        <div style={{ display: "flex", gap: "var(--esp-2)", alignItems: "center" }}>
+                          <span className="ventas-page__resultado-precio">{formatearSoles(producto.precio)}</span>
+                          {producto.tieneDescuento && (
+                            <del style={{ color: "var(--color-texto-apagado)", fontSize: "var(--texto-xs)" }}>
+                              {formatearSoles(producto.precioOriginal)}
+                            </del>
+                          )}
+                        </div>
                       </div>
                       <Badge variante={producto.stock > 0 ? "exito" : "peligro"}>
                         Stock: {producto.stock}
@@ -255,8 +274,20 @@ export function VentasPage() {
                     {carrito.map((item) => (
                       <div key={item.productoId} className="ventas-page__item">
                         <div className="ventas-page__item-info">
-                          <span className="ventas-page__item-nombre">{item.nombre}</span>
-                          <span className="ventas-page__item-precio">{formatearSoles(item.precioUnitario)}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "var(--esp-2)" }}>
+                            <span className="ventas-page__item-nombre">{item.nombre}</span>
+                            {item.tieneDescuento && (
+                              <Badge variante="info" tamano="sm">Promo</Badge>
+                            )}
+                          </div>
+                          <div style={{ display: "flex", gap: "var(--esp-2)", alignItems: "center" }}>
+                            <span className="ventas-page__item-precio">{formatearSoles(item.precioUnitario)}</span>
+                            {item.tieneDescuento && (
+                              <del style={{ color: "var(--color-texto-apagado)", fontSize: "var(--texto-xs)" }}>
+                                {formatearSoles(item.precioOriginal)}
+                              </del>
+                            )}
+                          </div>
                         </div>
                         <div className="ventas-page__item-controles">
                           <Boton

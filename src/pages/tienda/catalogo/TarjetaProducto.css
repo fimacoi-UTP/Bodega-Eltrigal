@@ -137,9 +137,16 @@
 .catalogo-tarjeta__precio-fila {
   display: flex;
   align-items: baseline;
+  justify-content: space-between;
   gap: var(--esp-2);
   margin-top: auto;
   padding-top: var(--esp-3);
+}
+
+.catalogo-tarjeta__precios-contenedor {
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-2);
 }
 
 .catalogo-tarjeta__precio {
@@ -147,6 +154,12 @@
   font-weight: var(--peso-extra);
   color: var(--color-primario);
   line-height: 1;
+}
+
+.catalogo-tarjeta__precio-original {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+  text-decoration: line-through;
 }
 
 .catalogo-tarjeta__unidad {
