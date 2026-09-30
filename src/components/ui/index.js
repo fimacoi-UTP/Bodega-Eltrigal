@@ -20,3 +20,5 @@ export { Alerta } from "./Alerta";
 export { Cargando } from "./Cargando";
 export { EstadoVacio } from "./EstadoVacio";
 export { Modal } from "./Modal";
+export { MenuKebab } from "./MenuKebab";
+export { Drawer } from "./Drawer";
