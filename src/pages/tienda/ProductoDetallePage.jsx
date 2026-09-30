@@ -203,13 +203,25 @@ export function ProductoDetallePage() {
 
           {/* Precio y unidad */}
           <div className="detalle-producto__precio-bloque">
-            <span className="detalle-producto__precio">
-              {formatearSoles(producto.precio)}
-            </span>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "var(--esp-3)", flexWrap: "wrap" }}>
+              <span className="detalle-producto__precio">
+                {formatearSoles(producto.precio)}
+              </span>
+              {producto.tieneDescuento && (
+                <del style={{ color: "var(--color-texto-apagado)", fontSize: "var(--texto-base)" }}>
+                  {formatearSoles(producto.precioOriginal)}
+                </del>
+              )}
+            </div>
             {producto.unidad && (
               <span className="detalle-producto__unidad">
                 por {producto.unidad}
               </span>
+            )}
+            {producto.tieneDescuento && (
+              <Badge variante="info" tamano="sm">
+                Oferta disponible
+              </Badge>
             )}
           </div>
 

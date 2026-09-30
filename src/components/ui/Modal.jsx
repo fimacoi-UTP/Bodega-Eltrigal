@@ -31,13 +31,18 @@ export function Modal({
   className,
 }) {
   const ventanaRef = useRef(null);
+  const alCerrarRef = useRef(alCerrar);
+
+  useEffect(() => {
+    alCerrarRef.current = alCerrar;
+  }, [alCerrar]);
 
   // Cerrar con Escape + bloquear el scroll del fondo mientras está abierto.
   useEffect(() => {
     if (!abierto) return;
 
     const alPresionarTecla = (evento) => {
-      if (evento.key === "Escape") alCerrar?.();
+      if (evento.key === "Escape") alCerrarRef.current?.();
     };
 
     const desbordeOriginal = document.body.style.overflow;
@@ -52,7 +57,7 @@ export function Modal({
       document.body.style.overflow = desbordeOriginal;
       document.removeEventListener("keydown", alPresionarTecla);
     };
-  }, [abierto, alCerrar]);
+  }, [abierto]);
 
   if (!abierto) return null;
 
@@ -61,7 +66,7 @@ export function Modal({
       className="ui-modal__fondo"
       // Cierra solo si el clic fue en el fondo, no dentro de la ventana.
       onClick={(evento) => {
-        if (evento.target === evento.currentTarget) alCerrar?.();
+        if (evento.target === evento.currentTarget) alCerrarRef.current?.();
       }}
     >
       <div

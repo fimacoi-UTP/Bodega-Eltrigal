@@ -9,7 +9,7 @@
  * qué otras promociones existen.
  * ==========================================================================*/
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { promocionRepository } from "../../repositories";
 import { TIPOS_PROMOCION, ETIQUETAS_TIPO_PROMOCION } from "../../constantes";
@@ -30,10 +30,36 @@ import {
 import { calcularPrecioFinal } from "./promociones/decoradores";
 import "./PromocionesPage.css";
 
+function obtenerFinDia(fecha) {
+  if (!fecha) return Infinity;
+  const fechaStr = typeof fecha === "string" ? fecha.split("T")[0] : fecha;
+  const partes = String(fechaStr).split("-").map(Number);
+  if (partes.length === 3 && !partes.some(isNaN)) {
+    const [anio, mes, dia] = partes;
+    return new Date(anio, mes - 1, dia, 23, 59, 59, 999).getTime();
+  }
+  const d = new Date(fecha);
+  d.setHours(23, 59, 59, 999);
+  return d.getTime();
+}
+
+function obtenerInicioDia(fecha) {
+  if (!fecha) return -Infinity;
+  const fechaStr = typeof fecha === "string" ? fecha.split("T")[0] : fecha;
+  const partes = String(fechaStr).split("-").map(Number);
+  if (partes.length === 3 && !partes.some(isNaN)) {
+    const [anio, mes, dia] = partes;
+    return new Date(anio, mes - 1, dia, 0, 0, 0, 0).getTime();
+  }
+  const d = new Date(fecha);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
 function obtenerEstadoPromocion(promo) {
   const ahora = Date.now();
-  const inicio = promo.desde ? new Date(promo.desde).getTime() : -Infinity;
-  const fin = promo.hasta ? new Date(promo.hasta).getTime() : Infinity;
+  const inicio = obtenerInicioDia(promo.desde);
+  const fin = obtenerFinDia(promo.hasta);
 
   if (!promo.activa) return { texto: "Inactiva", variante: "neutro" };
   if (ahora < inicio) return { texto: "Programada", variante: "info" };
@@ -41,89 +67,35 @@ function obtenerEstadoPromocion(promo) {
   return { texto: "Vigente", variante: "exito" };
 }
 
-export function PromocionesPage() {
-  const { productos, categorias } = useInventario();
-
-  const [promociones, setPromociones] = useState([]);
-  const [cargando, setCargando] = useState(true);
+function ModalPromocion({
+  abierto,
+  promocion = null,
+  productos = [],
+  categorias = [],
+  alCerrar,
+  alGuardar,
+}) {
+  const editando = promocion !== null;
   const [error, setError] = useState(null);
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [editando, setEditando] = useState(null);
-  const [productoPreview, setProductoPreview] = useState(null);
+  const [guardando, setGuardando] = useState(false);
 
-  // Formulario
-  const [formulario, setFormulario] = useState({
-    nombre: "",
-    tipo: TIPOS_PROMOCION.PORCENTAJE,
-    valor: "",
-    aplicaA: "TODO",
-    objetivo: "",
-    desde: "",
-    hasta: "",
-    activa: true,
-  });
+  const [formulario, setFormulario] = useState(() => ({
+    nombre: promocion?.nombre ?? "",
+    tipo: promocion?.tipo ?? TIPOS_PROMOCION.PORCENTAJE,
+    valor: promocion?.valor != null ? String(promocion.valor) : "",
+    aplicaA: promocion?.aplicaA ?? "TODO",
+    objetivo: promocion?.objetivo ?? "",
+    desde: promocion?.desde?.split("T")[0] ?? "",
+    hasta: promocion?.hasta?.split("T")[0] ?? "",
+    activa: promocion?.activa !== false,
+  }));
 
-  const cargarPromociones = async () => {
-    try {
-      const todas = await promocionRepository.obtenerTodos();
-      setPromociones(todas);
-    } catch {
-      setError("Error al cargar promociones");
-    } finally {
-      setCargando(false);
-    }
-  };
+  if (!abierto) return null;
 
-  useEffect(() => {
-    async function inicializar() {
-      try {
-        const todas = await promocionRepository.obtenerTodos();
-        setPromociones(todas);
-      } catch {
-        setError("Error al cargar promociones");
-      } finally {
-        setCargando(false);
-      }
-    }
-    inicializar();
-  }, []);
-
-  const abrirModal = (promo = null) => {
-    if (promo) {
-      setEditando(promo);
-      setFormulario({
-        nombre: promo.nombre,
-        tipo: promo.tipo,
-        valor: promo.valor,
-        aplicaA: promo.aplicaA,
-        objetivo: promo.objetivo || "",
-        desde: promo.desde?.split("T")[0] || "",
-        hasta: promo.hasta?.split("T")[0] || "",
-        activa: promo.activa,
-      });
-    } else {
-      setEditando(null);
-      setFormulario({
-        nombre: "",
-        tipo: TIPOS_PROMOCION.PORCENTAJE,
-        valor: "",
-        aplicaA: "TODO",
-        objetivo: "",
-        desde: "",
-        hasta: "",
-        activa: true,
-      });
-    }
-    setModalAbierto(true);
-  };
-
-  const cerrarModal = () => {
-    setModalAbierto(false);
-    setEditando(null);
+  const handleSubmit = async (e) => {
+    e?.preventDefault();
     setError(null);
-  };
 
-  const guardar = async () => {
     // Validaciones
     if (!formulario.nombre.trim()) {
       setError("El nombre es obligatorio");
@@ -142,6 +114,7 @@ export function PromocionesPage() {
       return;
     }
 
+    setGuardando(true);
     try {
       const datos = {
         ...formulario,
@@ -149,7 +122,176 @@ export function PromocionesPage() {
         desde: formulario.desde ? new Date(formulario.desde).toISOString() : null,
         hasta: formulario.hasta ? new Date(formulario.hasta).toISOString() : null,
       };
+      await alGuardar(datos);
+      alCerrar();
+    } catch (err) {
+      setError(err.message || "Error al guardar la promoción");
+    } finally {
+      setGuardando(false);
+    }
+  };
 
+  return (
+    <Modal
+      abierto={abierto}
+      alCerrar={alCerrar}
+      titulo={editando ? "Editar promoción" : "Nueva promoción"}
+    >
+      {error && (
+        <Alerta variante="peligro" onClose={() => setError(null)} style={{ marginBottom: "var(--esp-4)" }}>
+          {error}
+        </Alerta>
+      )}
+
+      <form onSubmit={handleSubmit} className="promociones-page__form">
+        <Input
+          etiqueta="Nombre"
+          value={formulario.nombre}
+          onChange={(e) => setFormulario((prev) => ({ ...prev, nombre: e.target.value }))}
+          placeholder="Ej: Descuento de verano"
+        />
+
+        <Select
+          etiqueta="Tipo de descuento"
+          value={formulario.tipo}
+          onChange={(e) => setFormulario((prev) => ({ ...prev, tipo: e.target.value }))}
+        >
+          {Object.entries(ETIQUETAS_TIPO_PROMOCION).map(([valor, etiqueta]) => (
+            <option key={valor} value={valor}>
+              {etiqueta}
+            </option>
+          ))}
+        </Select>
+
+        <Input
+          etiqueta={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "Porcentaje" : "Monto"}
+          type="number"
+          value={formulario.valor}
+          onChange={(e) => setFormulario((prev) => ({ ...prev, valor: e.target.value }))}
+          prefijo={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "%" : "S/"}
+        />
+
+        <Select
+          etiqueta="Aplica a"
+          value={formulario.aplicaA}
+          onChange={(e) =>
+            setFormulario((prev) => ({ ...prev, aplicaA: e.target.value, objetivo: "" }))
+          }
+        >
+          <option value="TODO">Todos los productos</option>
+          <option value="PRODUCTO">Producto específico</option>
+          <option value="CATEGORIA">Categoría</option>
+        </Select>
+
+        {formulario.aplicaA === "PRODUCTO" && (
+          <Select
+            etiqueta="Producto"
+            value={formulario.objetivo}
+            onChange={(e) => setFormulario((prev) => ({ ...prev, objetivo: e.target.value }))}
+          >
+            <option value="">Selecciona un producto</option>
+            {productos.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nombre}
+              </option>
+            ))}
+          </Select>
+        )}
+
+        {formulario.aplicaA === "CATEGORIA" && (
+          <Select
+            etiqueta="Categoría"
+            value={formulario.objetivo}
+            onChange={(e) => setFormulario((prev) => ({ ...prev, objetivo: e.target.value }))}
+          >
+            <option value="">Selecciona una categoría</option>
+            {categorias.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
+        )}
+
+        <Input
+          etiqueta="Fecha desde (opcional)"
+          type="date"
+          value={formulario.desde}
+          onChange={(e) => setFormulario((prev) => ({ ...prev, desde: e.target.value }))}
+        />
+
+        <Input
+          etiqueta="Fecha hasta (opcional)"
+          type="date"
+          value={formulario.hasta}
+          onChange={(e) => setFormulario((prev) => ({ ...prev, hasta: e.target.value }))}
+        />
+
+        <div className="promociones-page__form-botones">
+          <Boton variante="contorno" onClick={alCerrar} type="button">
+            Cancelar
+          </Boton>
+          <Boton variante="primario" type="submit" cargando={guardando}>
+            {editando ? "Actualizar" : "Crear"}
+          </Boton>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+export function PromocionesPage() {
+  const { productos, categorias, refrescar } = useInventario();
+
+  const [promociones, setPromociones] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [productoPreview, setProductoPreview] = useState(null);
+
+  const cargarPromociones = useCallback(async () => {
+    try {
+      const todas = await promocionRepository.obtenerTodos();
+      setPromociones(todas);
+    } catch {
+      setError("Error al cargar promociones");
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelado = false;
+    async function inicializar() {
+      try {
+        const todas = await promocionRepository.obtenerTodos();
+        if (cancelado) return;
+        setPromociones(todas);
+      } catch {
+        if (!cancelado) setError("Error al cargar promociones");
+      } finally {
+        if (!cancelado) setCargando(false);
+      }
+    }
+    inicializar();
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
+  const abrirModal = useCallback((promo = null) => {
+    setEditando(promo);
+    setModalAbierto(true);
+  }, []);
+
+  const cerrarModal = useCallback(() => {
+    setModalAbierto(false);
+    setEditando(null);
+  }, []);
+
+  const guardar = async (datos) => {
+    try {
       if (editando) {
         await promocionRepository.actualizar(editando.id, datos);
       } else {
@@ -157,9 +299,12 @@ export function PromocionesPage() {
       }
 
       await cargarPromociones();
-      cerrarModal();
-    } catch {
-      setError("Error al guardar la promoción");
+      if (typeof refrescar === "function") {
+        await refrescar();
+      }
+    } catch (err) {
+      setError("Error al guardar la promoción: " + (err.message || ""));
+      throw err;
     }
   };
 
@@ -168,6 +313,9 @@ export function PromocionesPage() {
     try {
       await promocionRepository.eliminar(id);
       await cargarPromociones();
+      if (typeof refrescar === "function") {
+        await refrescar();
+      }
     } catch {
       setError("Error al eliminar la promoción");
     }
@@ -175,21 +323,15 @@ export function PromocionesPage() {
 
   const probarPromocion = async (promo) => {
     try {
-      const promosVigentes = await promocionRepository.obtenerVigentes();
-      const promosDelProducto = promosVigentes.filter(p => 
-        p.aplicaA === "TODO" || 
-        (p.aplicaA === "PRODUCTO" && p.objetivo === promo.objetivo) ||
-        (p.aplicaA === "CATEGORIA" && p.objetivo === promo.objetivo)
-      );
-
-      if (promosDelProducto.length === 0) {
-        setError("No hay promociones vigentes para este producto");
+      const producto = productos.find((p) => p.id === promo.objetivo) || productos[0];
+      if (!producto) {
+        setError("No hay productos disponibles para probar");
         return;
       }
 
-      const producto = productos.find(p => p.id === promo.objetivo) || productos[0];
-      if (!producto) {
-        setError("No hay productos disponibles para probar");
+      const promosDelProducto = await promocionRepository.obtenerParaProducto(producto);
+      if (promosDelProducto.length === 0) {
+        setError("No hay promociones vigentes para este producto");
         return;
       }
 
@@ -302,99 +444,15 @@ export function PromocionesPage() {
       )}
 
       {/* Modal de creación/edición */}
-      <Modal abierto={modalAbierto} alCerrar={cerrarModal} titulo={editando ? "Editar promoción" : "Nueva promoción"}>
-        <div className="promociones-page__form">
-          <Input
-            etiqueta="Nombre"
-            value={formulario.nombre}
-            onChange={(e) => setFormulario({ ...formulario, nombre: e.target.value })}
-            placeholder="Ej: Descuento de verano"
-          />
-
-          <Select
-            etiqueta="Tipo de descuento"
-            value={formulario.tipo}
-            onChange={(e) => setFormulario({ ...formulario, tipo: e.target.value })}
-          >
-            {Object.entries(ETIQUETAS_TIPO_PROMOCION).map(([valor, etiqueta]) => (
-              <option key={valor} value={valor}>
-                {etiqueta}
-              </option>
-            ))}
-          </Select>
-
-          <Input
-            etiqueta={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "Porcentaje" : "Monto"}
-            type="number"
-            value={formulario.valor}
-            onChange={(e) => setFormulario({ ...formulario, valor: e.target.value })}
-            prefijo={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "%" : "S/"}
-          />
-
-          <Select
-            etiqueta="Aplica a"
-            value={formulario.aplicaA}
-            onChange={(e) => setFormulario({ ...formulario, aplicaA: e.target.value, objetivo: "" })}
-          >
-            <option value="TODO">Todos los productos</option>
-            <option value="PRODUCTO">Producto específico</option>
-            <option value="CATEGORIA">Categoría</option>
-          </Select>
-
-          {formulario.aplicaA === "PRODUCTO" && (
-            <Select
-              etiqueta="Producto"
-              value={formulario.objetivo}
-              onChange={(e) => setFormulario({ ...formulario, objetivo: e.target.value })}
-            >
-              <option value="">Selecciona un producto</option>
-              {productos.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nombre}
-                </option>
-              ))}
-            </Select>
-          )}
-
-          {formulario.aplicaA === "CATEGORIA" && (
-            <Select
-              etiqueta="Categoría"
-              value={formulario.objetivo}
-              onChange={(e) => setFormulario({ ...formulario, objetivo: e.target.value })}
-            >
-              <option value="">Selecciona una categoría</option>
-              {categorias.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </Select>
-          )}
-
-          <Input
-            etiqueta="Fecha desde (opcional)"
-            type="date"
-            value={formulario.desde}
-            onChange={(e) => setFormulario({ ...formulario, desde: e.target.value })}
-          />
-
-          <Input
-            etiqueta="Fecha hasta (opcional)"
-            type="date"
-            value={formulario.hasta}
-            onChange={(e) => setFormulario({ ...formulario, hasta: e.target.value })}
-          />
-
-          <div className="promociones-page__form-botones">
-            <Boton variante="contorno" onClick={cerrarModal}>
-              Cancelar
-            </Boton>
-            <Boton variante="primario" onClick={guardar}>
-              {editando ? "Actualizar" : "Crear"}
-            </Boton>
-          </div>
-        </div>
-      </Modal>
+      <ModalPromocion
+        key={editando?.id ?? (modalAbierto ? "nuevo" : "cerrado")}
+        abierto={modalAbierto}
+        promocion={editando}
+        productos={productos}
+        categorias={categorias}
+        alCerrar={cerrarModal}
+        alGuardar={guardar}
+      />
 
       {/* Modal de vista previa del cálculo */}
       {productoPreview && (
