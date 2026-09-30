@@ -4,88 +4,107 @@
  * ============================================================================
  * 
  * Este archivo implementa el patrón Decorator para el cálculo de precios
- * con múltiples promociones. Cada promoción envuelve el cálculo anterior
- * y le agrega su efecto, sin saber qué otras promociones existen.
+ * con múltiples promociones. Cada promoción envuelve la entidad del producto
+ * y le agrega su efecto sobre el precio final, sin saber qué otras promociones
+ * existen ni perder los atributos originales del producto (id, nombre, stock, etc.).
  * 
- * El problema que resuelve: sobre un mismo producto pueden caer varias
- * promociones a la vez (10% por categoría + S/ 2 de descuento por producto).
- * Con Decorator, cada promoción envuelve el precio anterior sin que ninguna
- * sepa de la existencia de las otras.
- * 
- * 🪝 GANCHO: Este es el punto de extensión documentado en
- * src/repositories/promocionRepository.js (líneas 62-106)
  * ==========================================================================*/
 
-import { TIPOS_PROMOCION } from "../../../constantes";
+import { TIPOS_PROMOCION } from "../../../constantes.js";
 
 /**
- * El "componente base": el precio pelado del producto.
- * @param {Object} producto - El producto con su precio base
- * @returns {{ monto: number, detalle: string[] }} - Cálculo inicial
+ * El "componente base": inicializa la entidad Producto decorada.
+ * @param {Object} producto - El producto base de catálogo
+ * @returns {Object} - Entidad completa del producto enriquecida con datos de precio y descuentos
  */
-const precioBase = (producto) => ({
-  monto: producto.precio,
-  detalle: [],
-});
+const precioBase = (producto) => {
+  const precioNum = Number(producto?.precio || 0);
+  return {
+    ...producto,
+    precioOriginal: precioNum,
+    precioFinal: precioNum,
+    precio: precioNum,
+    monto: precioNum, // Compatibilidad hacia atrás
+    promocionesAplicadas: [],
+    detalle: [], // Compatibilidad hacia atrás
+    tieneDescuento: false,
+  };
+};
 
 /**
  * Decorador: descuento por porcentaje.
- * Envuelve el cálculo anterior y aplica un descuento porcentual.
- * 
- * @param {{ monto: number, detalle: string[] }} calculo - Cálculo anterior
- * @param {Object} promocion - Promoción con tipo PORCENTAJE
- * @returns {{ monto: number, detalle: string[] }} - Nuevo cálculo
+ * Envuelve el producto anterior y aplica un descuento porcentual sobre el precio actual.
  */
-const conPorcentaje = (calculo, promocion) => ({
-  monto: calculo.monto * (1 - promocion.valor / 100),
-  detalle: [...calculo.detalle, `${promocion.nombre} (-${promocion.valor}%)`],
-});
+const conPorcentaje = (prod, promocion) => {
+  const descuento = prod.precioFinal * (Number(promocion.valor) / 100);
+  const nuevoPrecio = Math.max(0, prod.precioFinal - descuento);
+  const texto = `${promocion.nombre} (-${promocion.valor}%)`;
+  return {
+    ...prod,
+    precioFinal: nuevoPrecio,
+    precio: nuevoPrecio,
+    monto: nuevoPrecio,
+    promocionesAplicadas: [...prod.promocionesAplicadas, texto],
+    detalle: [...prod.detalle, texto],
+    tieneDescuento: true,
+  };
+};
 
 /**
  * Decorador: descuento por monto fijo.
- * Envuelve el cálculo anterior y resta un monto fijo.
- * 
- * @param {{ monto: number, detalle: string[] }} calculo - Cálculo anterior
- * @param {Object} promocion - Promoción con tipo MONTO_FIJO
- * @returns {{ monto: number, detalle: string[] }} - Nuevo cálculo
+ * Envuelve el producto anterior y resta un monto fijo en Soles.
  */
-const conMontoFijo = (calculo, promocion) => ({
-  monto: Math.max(0, calculo.monto - promocion.valor),
-  detalle: [...calculo.detalle, `${promocion.nombre} (-S/ ${promocion.valor.toFixed(2)})`],
-});
+const conMontoFijo = (prod, promocion) => {
+  const valorDescuento = Number(promocion.valor || 0);
+  const nuevoPrecio = Math.max(0, prod.precioFinal - valorDescuento);
+  const texto = `${promocion.nombre} (-S/ ${valorDescuento.toFixed(2)})`;
+  return {
+    ...prod,
+    precioFinal: nuevoPrecio,
+    precio: nuevoPrecio,
+    monto: nuevoPrecio,
+    promocionesAplicadas: [...prod.promocionesAplicadas, texto],
+    detalle: [...prod.detalle, texto],
+    tieneDescuento: true,
+  };
+};
 
 /**
- * Decorador: 2x1 (el segundo producto es gratis).
- * Este decorador es especial porque depende de la cantidad, pero para
- * simplificar el cálculo de precio unitario, aplicamos un 50% de descuento.
- * 
- * @param {{ monto: number, detalle: string[] }} calculo - Cálculo anterior
- * @param {Object} promocion - Promoción con tipo DOS_X_UNO
- * @returns {{ monto: number, detalle: string[] }} - Nuevo cálculo
+ * Decorador: 2x1 (el segundo producto es gratis / 50% precio unitario equivalente).
  */
-const conDosXUno = (calculo, promocion) => ({
-  monto: calculo.monto * 0.5,
-  detalle: [...calculo.detalle, `${promocion.nombre} (2x1 - 50% descuento)`],
-});
+const conDosXUno = (prod, promocion) => {
+  const nuevoPrecio = prod.precioFinal * 0.5;
+  const texto = `${promocion.nombre} (2x1 - 50% descuento)`;
+  return {
+    ...prod,
+    precioFinal: nuevoPrecio,
+    precio: nuevoPrecio,
+    monto: nuevoPrecio,
+    promocionesAplicadas: [...prod.promocionesAplicadas, texto],
+    detalle: [...prod.detalle, texto],
+    tieneDescuento: true,
+  };
+};
 
 /**
- * Decorador: combo (precio especial por varios productos).
- * Para simplificar, este decorador aplica un descuento fijo del 20%
- * sobre el cálculo anterior. En una implementación real, necesitaría
- * información sobre qué productos componen el combo.
- * 
- * @param {{ monto: number, detalle: string[] }} calculo - Cálculo anterior
- * @param {Object} promocion - Promoción con tipo COMBO
- * @returns {{ monto: number, detalle: string[] }} - Nuevo cálculo
+ * Decorador: combo (precio especial por varios productos - 20% descuento).
  */
-const conCombo = (calculo, promocion) => ({
-  monto: calculo.monto * 0.8,
-  detalle: [...calculo.detalle, `${promocion.nombre} (Combo - 20% descuento)`],
-});
+const conCombo = (prod, promocion) => {
+  const nuevoPrecio = prod.precioFinal * 0.8;
+  const texto = `${promocion.nombre} (Combo - 20% descuento)`;
+  return {
+    ...prod,
+    precioFinal: nuevoPrecio,
+    precio: nuevoPrecio,
+    monto: nuevoPrecio,
+    promocionesAplicadas: [...prod.promocionesAplicadas, texto],
+    detalle: [...prod.detalle, texto],
+    tieneDescuento: true,
+  };
+};
 
 /**
  * Mapa de decoradores por tipo de promoción.
- * Agregar un tipo nuevo = agregar una función a este mapa.
  * Principio abierto/cerrado: abierto para extensión, cerrado para modificación.
  */
 const DECORADORES = {
@@ -100,32 +119,26 @@ const DECORADORES = {
  * vigentes usando el patrón Decorator.
  * 
  * Las promociones se apilan una sobre otra usando reduce(), donde cada
- * promoción envuelve el resultado de la anterior.
+ * promoción envuelve y enriquece el resultado anterior preservando todas las
+ * propiedades originales del producto.
  * 
  * @param {Object} producto - El producto a calcular
  * @param {Object[]} promociones - Lista de promociones vigentes para el producto
- * @returns {{ monto: number, detalle: string[] }} - Precio final y detalle de descuentos
- * 
- * @example
- * const producto = { nombre: "Arroz", precio: 10 };
- * const promociones = [
- *   { nombre: "Descuento categoría", tipo: "PORCENTAJE", valor: 10 },
- *   { nombre: "Descuento producto", tipo: "MONTO_FIJO", valor: 1 },
- * ];
- * const resultado = calcularPrecioFinal(producto, promociones);
- * // resultado.monto = 8 (10 - 10% = 9, 9 - 1 = 8)
- * // resultado.detalle = ["Descuento categoría (-10%)", "Descuento producto (-S/ 1.00)"]
+ * @returns {Object} - Entidad producto enriquecida con { precioOriginal, precioFinal, precio, promocionesAplicadas, tieneDescuento }
  */
-export function calcularPrecioFinal(producto, promociones) {
+export function calcularPrecioFinal(producto, promociones = []) {
+  if (!producto) return null;
+
   // Filtrar solo las promociones que tienen un decorador implementado
-  const promocionesValidas = promociones.filter(
-    (promo) => DECORADORES[promo.tipo]
+  const promocionesValidas = (promociones || []).filter(
+    (promo) => promo && DECORADORES[promo.tipo]
   );
 
   // Apilar todas las promociones usando reduce()
-  // Cada promoción envuelve el cálculo anterior
   return promocionesValidas.reduce(
-    (calculo, promo) => DECORADORES[promo.tipo](calculo, promo),
+    (productoDecorado, promo) => DECORADORES[promo.tipo](productoDecorado, promo),
     precioBase(producto)
   );
 }
+
+export default calcularPrecioFinal;

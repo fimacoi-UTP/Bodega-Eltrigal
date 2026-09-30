@@ -25,12 +25,44 @@ const base = crearRepositorioBase({
   nombre: "promociones",
 });
 
+/**
+ * Parsea el final del día en hora local para evitar expiraciones prematuras por UTC.
+ */
+function obtenerFinDia(fecha) {
+  if (!fecha) return Infinity;
+  const fechaStr = typeof fecha === "string" ? fecha.split("T")[0] : fecha;
+  const partes = String(fechaStr).split("-").map(Number);
+  if (partes.length === 3 && !partes.some(isNaN)) {
+    const [anio, mes, dia] = partes;
+    return new Date(anio, mes - 1, dia, 23, 59, 59, 999).getTime();
+  }
+  const d = new Date(fecha);
+  d.setHours(23, 59, 59, 999);
+  return d.getTime();
+}
+
+/**
+ * Parsea el inicio del día en hora local.
+ */
+function obtenerInicioDia(fecha) {
+  if (!fecha) return -Infinity;
+  const fechaStr = typeof fecha === "string" ? fecha.split("T")[0] : fecha;
+  const partes = String(fechaStr).split("-").map(Number);
+  if (partes.length === 3 && !partes.some(isNaN)) {
+    const [anio, mes, dia] = partes;
+    return new Date(anio, mes - 1, dia, 0, 0, 0, 0).getTime();
+  }
+  const d = new Date(fecha);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
 export const promocionRepository = {
   ...base,
 
   /**
    * Promociones activas y dentro de su rango de fechas EN ESTE MOMENTO.
-   * Es la que debe usar la tienda web: que una promo esté marcada como activa
+   * Es la que debe usar la tienda web y el POS: que una promo esté marcada como activa
    * no significa que ya haya empezado o que no haya vencido.
    */
   async obtenerVigentes() {
@@ -39,8 +71,8 @@ export const promocionRepository = {
     return base.obtenerDonde((promocion) => {
       if (promocion.activa === false) return false;
 
-      const inicio = promocion.desde ? new Date(promocion.desde).getTime() : -Infinity;
-      const fin = promocion.hasta ? new Date(promocion.hasta).getTime() : Infinity;
+      const inicio = obtenerInicioDia(promocion.desde);
+      const fin = obtenerFinDia(promocion.hasta);
 
       return ahora >= inicio && ahora <= fin;
     });
@@ -48,6 +80,7 @@ export const promocionRepository = {
 
   /** Promociones vigentes que afectan a un producto concreto. */
   async obtenerParaProducto(producto) {
+    if (!producto) return [];
     const vigentes = await this.obtenerVigentes();
 
     return vigentes.filter((promocion) => {

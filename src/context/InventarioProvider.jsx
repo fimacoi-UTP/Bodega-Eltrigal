@@ -24,24 +24,28 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { InventarioContext } from "./InventarioContext";
-import { productoRepository } from "../repositories";
+import { productoRepository, promocionRepository } from "../repositories";
 import { normalizarTexto } from "../utils/formato";
+import { calcularPrecioFinal } from "../pages/dashboard/promociones/decoradores";
 
 export function InventarioProvider({ children }) {
   /** Copia en memoria del catálogo. Es lo que React observa y renderiza. */
   const [productos, setProductos] = useState([]);
+  const [promociones, setPromociones] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
   /**
-   * Vuelve a leer el catálogo desde el repositorio.
-   * La llamamos después de cada operación de escritura, para que lo que se ve
-   * en pantalla coincida con lo que quedó guardado.
+   * Vuelve a leer el catálogo y promociones desde los repositorios.
    */
   const refrescar = useCallback(async () => {
     try {
-      const lista = await productoRepository.obtenerTodos();
+      const [lista, promos] = await Promise.all([
+        productoRepository.obtenerTodos(),
+        promocionRepository.obtenerVigentes(),
+      ]);
       setProductos(lista);
+      setPromociones(promos);
       setError(null);
     } catch (fallo) {
       console.error("[El Trigal] Error al recargar el inventario:", fallo);
@@ -68,9 +72,13 @@ export function InventarioProvider({ children }) {
 
     async function cargarCatalogo() {
       try {
-        const lista = await productoRepository.obtenerTodos();
+        const [lista, promos] = await Promise.all([
+          productoRepository.obtenerTodos(),
+          promocionRepository.obtenerVigentes(),
+        ]);
         if (cancelado) return;
         setProductos(lista);
+        setPromociones(promos);
         setError(null);
       } catch (fallo) {
         console.error("[El Trigal] Error al cargar el inventario:", fallo);
@@ -185,10 +193,40 @@ export function InventarioProvider({ children }) {
   );
 
   /* ========================================================================
-   * CONSULTAS DERIVADAS
-   * Se calculan a partir de `productos` que ya está en memoria: son síncronas
+   * CONSULTAS DERIVADAS Y DESCUENTOS (Patrón Decorator)
+   * Se calculan a partir de `productos` y `promociones` en memoria: son síncronas
    * y no tocan el almacenamiento. Perfectas para usar dentro del render.
    * ===================================================================== */
+
+  /**
+   * Aplica las promociones vigentes a un producto usando el patrón Decorator.
+   */
+  const aplicarDescuentoAProducto = useCallback(
+    (producto, listaPromociones = promociones) => {
+      if (!producto) return null;
+      const promosParaProducto = (listaPromociones || []).filter((promo) => {
+        if (promo.activa === false) return false;
+        if (promo.aplicaA === "TODO") return true;
+        if (promo.aplicaA === "PRODUCTO") return promo.objetivo === producto.id;
+        if (promo.aplicaA === "CATEGORIA") return promo.objetivo === producto.categoria;
+        return false;
+      });
+      return calcularPrecioFinal(producto, promosParaProducto);
+    },
+    [promociones],
+  );
+
+  /**
+   * Obtiene la entidad de un producto enriquecida con sus descuentos calculados.
+   */
+  const obtenerProductoConDescuento = useCallback(
+    (productoId) => {
+      const base = productos.find((p) => p.id === productoId);
+      if (!base) return null;
+      return aplicarDescuentoAProducto(base, promociones);
+    },
+    [productos, promociones, aplicarDescuentoAProducto],
+  );
 
   /** Categorías existentes, sin repetir y ordenadas. Las usa el Navbar. */
   const categorias = useMemo(() => {
@@ -196,16 +234,22 @@ export function InventarioProvider({ children }) {
     return [...unicas].sort((a, b) => a.localeCompare(b, "es"));
   }, [productos]);
 
-  /** Solo los productos visibles en la tienda web. */
+  /** Solo los productos visibles en la tienda web, enriquecidos con promociones. */
   const productosActivos = useMemo(
-    () => productos.filter((p) => p.activo !== false),
-    [productos],
+    () =>
+      productos
+        .filter((p) => p.activo !== false)
+        .map((p) => aplicarDescuentoAProducto(p, promociones)),
+    [productos, promociones, aplicarDescuentoAProducto],
   );
 
-  /** Busca un producto ya cargado, sin ir al repositorio. */
+  /** Busca un producto ya cargado y decorado con promociones. */
   const obtenerProducto = useCallback(
-    (id) => productos.find((p) => p.id === id) ?? null,
-    [productos],
+    (id) => {
+      const base = productos.find((p) => p.id === id);
+      return base ? aplicarDescuentoAProducto(base, promociones) : null;
+    },
+    [productos, promociones, aplicarDescuentoAProducto],
   );
 
   /** Filtra por categoría. Pasen null o "Todos" para no filtrar. */
@@ -238,6 +282,7 @@ export function InventarioProvider({ children }) {
     () => ({
       // Estado
       productos,
+      promociones,
       productosActivos,
       categorias,
       cargando,
@@ -252,13 +297,16 @@ export function InventarioProvider({ children }) {
       reponerStock,
       refrescar,
 
-      // Consultas
+      // Consultas y descuentos
       obtenerProducto,
+      obtenerProductoConDescuento,
+      aplicarDescuentoAProducto,
       filtrarPorCategoria,
       buscar,
     }),
     [
       productos,
+      promociones,
       productosActivos,
       categorias,
       cargando,
@@ -271,6 +319,8 @@ export function InventarioProvider({ children }) {
       reponerStock,
       refrescar,
       obtenerProducto,
+      obtenerProductoConDescuento,
+      aplicarDescuentoAProducto,
       filtrarPorCategoria,
       buscar,
     ],
