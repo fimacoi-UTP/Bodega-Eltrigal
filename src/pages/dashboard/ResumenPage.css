@@ -16,9 +16,12 @@
   margin-bottom: var(--esp-4);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .resumen-page__indicadores {
-    grid-template-columns: repeat(4, 1fr);
+    /* 5 tarjetas no reparten parejo en 2 o 4 columnas fijas: con auto-fit,
+       cada tarjeta pide un ancho minimo y el navegador decide cuantas caben
+       por fila, sin dejar ninguna huerfana sola en su propia fila. */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 }
 
@@ -30,6 +33,13 @@
   font-size: 2rem;
   font-weight: 700;
   color: var(--color-primario);
+  margin-bottom: var(--esp-1);
+}
+
+.resumen-page__indicador-monto {
+  color: var(--color-texto);
+  font-size: 1rem;
+  font-weight: 600;
   margin-bottom: var(--esp-1);
 }
 

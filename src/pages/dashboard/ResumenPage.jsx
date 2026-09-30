@@ -11,6 +11,7 @@
 import { useState, useEffect } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { ventaRepository, pedidoRepository, productoRepository } from "../../repositories";
+import { ESTADOS_PEDIDO, ETIQUETAS_ESTADO_PEDIDO } from "../../constantes";
 import { formatearSoles, formatearFecha } from "../../utils/formato";
 import {
   Card,
@@ -22,6 +23,14 @@ import {
 } from "../../components/ui";
 import "./ResumenPage.css";
 
+const VARIANTES_ESTADO_PEDIDO = {
+  [ESTADOS_PEDIDO.PENDIENTE]: "advertencia",
+  [ESTADOS_PEDIDO.CONFIRMADO]: "info",
+  [ESTADOS_PEDIDO.EN_CAMINO]: "marca",
+  [ESTADOS_PEDIDO.ENTREGADO]: "exito",
+  [ESTADOS_PEDIDO.CANCELADO]: "peligro",
+};
+
 export function ResumenPage() {
   const { productos } = useInventario();
 
@@ -30,23 +39,46 @@ export function ResumenPage() {
   const [pedidosPendientes, setPedidosPendientes] = useState([]);
   const [productosBajoStock, setProductosBajoStock] = useState([]);
   const [productosMasVendidos, setProductosMasVendidos] = useState([]);
+  // Pedidos web del día, sin contar los cancelados. Es un estado aparte de
+  // `pedidosActivos` porque "activos" excluye ENTREGADO (y no queremos que un
+  // pedido ya entregado HOY deje de contar como una venta web de hoy).
+  const [pedidosWebHoy, setPedidosWebHoy] = useState([]);
 
   useEffect(() => {
     async function cargarDatos() {
       try {
-        const [ventas, pedidos, bajoStock] = await Promise.all([
+        const [ventas, pedidosActivos, bajoStock, todosLosPedidos] = await Promise.all([
           ventaRepository.obtenerDeHoy(),
           pedidoRepository.obtenerActivos(),
           productoRepository.obtenerBajoStock(),
+          // pedidoRepository no tiene un obtenerDeHoy() propio (solo ventaRepository
+          // lo tiene). Traemos todos los pedidos y filtramos el día aquí mismo, con
+          // el mismo criterio de rango horario que usa ventaRepository.obtenerDeHoy().
+          pedidoRepository.obtenerTodos(),
         ]);
 
         setVentasHoy(ventas);
-        setPedidosPendientes(pedidos.filter(p => p.estado === "PENDIENTE"));
+        setPedidosPendientes(pedidosActivos.filter(p => p.estado === "PENDIENTE"));
         setProductosBajoStock(bajoStock);
+
+        // Ventas web de HOY: fecha de hoy y que no esté cancelado. A propósito NO
+        // reutilizamos `pedidosActivos` (obtenerActivos() excluye ENTREGADO además
+        // de CANCELADO), porque un pedido ya entregado hoy sigue siendo una venta
+        // de hoy para efectos de este indicador.
+        const inicioDelDia = new Date();
+        inicioDelDia.setHours(0, 0, 0, 0);
+        const finDelDia = new Date();
+        finDelDia.setHours(23, 59, 59, 999);
+
+        const pedidosDeHoy = todosLosPedidos.filter((p) => {
+          const momento = new Date(p.fecha).getTime();
+          return momento >= inicioDelDia.getTime() && momento <= finDelDia.getTime();
+        });
+        setPedidosWebHoy(pedidosDeHoy.filter((p) => p.estado !== ESTADOS_PEDIDO.CANCELADO));
 
         // Calcular productos más vendidos (ventas + pedidos)
         const ventasItems = ventas.flatMap(v => v.items);
-        const pedidosItems = pedidos.flatMap(p => p.items || []);
+        const pedidosItems = pedidosActivos.flatMap(p => p.items || []);
         const todosLosItems = [...ventasItems, ...pedidosItems];
 
         const ventasPorProducto = todosLosItems.reduce((acc, item) => {
@@ -75,11 +107,17 @@ export function ResumenPage() {
     cargarDatos();
   }, [productos]);
 
-  const totalVentasHoy = ventasHoy
-    .filter(v => !v.anulada)
-    .reduce((sum, v) => sum + v.total, 0);
+  // --- Canal TIENDA (mostrador) ---
+  const ventasTiendaValidas = ventasHoy.filter((v) => !v.anulada);
+  const cantidadVentasTienda = ventasTiendaValidas.length;
+  const totalVentasTienda = ventasTiendaValidas.reduce((sum, v) => sum + v.total, 0);
 
-  const cantidadVentasHoy = ventasHoy.filter(v => !v.anulada).length;
+  // --- Canal WEB (pedidos del catálogo online) ---
+  const cantidadVentasWeb = pedidosWebHoy.length;
+  const totalVentasWeb = pedidosWebHoy.reduce((sum, p) => sum + (p.total || 0), 0);
+
+  // --- Combinado: lo que de verdad entró a la bodega hoy, sin importar el canal ---
+  const totalVendidoHoy = totalVentasTienda + totalVentasWeb;
 
   if (cargando) {
     return <Cargando texto="Cargando estadísticas..." />;
@@ -91,16 +129,27 @@ export function ResumenPage() {
 
       {/* Indicadores clave */}
       <div className="resumen-page__indicadores">
+        {/* Desglose por canal: la bodega necesita saber cuánto vino del mostrador
+            y cuánto de la tienda web, no solo el total mezclado. */}
         <Card className="resumen-page__indicador">
           <CardCuerpo>
-            <div className="resumen-page__indicador-valor">{cantidadVentasHoy}</div>
-            <div className="resumen-page__indicador-etiqueta">Ventas hoy</div>
+            <div className="resumen-page__indicador-valor">{cantidadVentasTienda}</div>
+            <div className="resumen-page__indicador-monto">{formatearSoles(totalVentasTienda)}</div>
+            <div className="resumen-page__indicador-etiqueta">Ventas en tienda</div>
           </CardCuerpo>
         </Card>
 
         <Card className="resumen-page__indicador">
           <CardCuerpo>
-            <div className="resumen-page__indicador-valor">{formatearSoles(totalVentasHoy)}</div>
+            <div className="resumen-page__indicador-valor">{cantidadVentasWeb}</div>
+            <div className="resumen-page__indicador-monto">{formatearSoles(totalVentasWeb)}</div>
+            <div className="resumen-page__indicador-etiqueta">Ventas web</div>
+          </CardCuerpo>
+        </Card>
+
+        <Card className="resumen-page__indicador">
+          <CardCuerpo>
+            <div className="resumen-page__indicador-valor">{formatearSoles(totalVendidoHoy)}</div>
             <div className="resumen-page__indicador-etiqueta">Total vendido</div>
           </CardCuerpo>
         </Card>
@@ -188,7 +237,9 @@ export function ResumenPage() {
                       <span className="resumen-page__item-nombre">Pedido #{pedido.id.slice(-6)}</span>
                       <span className="resumen-page__item-sub">{formatearFecha(pedido.fecha, { conHora: true })}</span>
                     </div>
-                    <Badge variante="advertencia">Pendiente</Badge>
+                    <Badge variante={VARIANTES_ESTADO_PEDIDO[pedido.estado] || "neutro"}>
+                      {ETIQUETAS_ESTADO_PEDIDO[pedido.estado] || pedido.estado}
+                    </Badge>
                   </div>
                 ))}
               </div>
