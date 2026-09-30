@@ -34,6 +34,149 @@ import {
 } from "../../components/ui";
 import "./VentasPage.css";
 
+/**
+ * ============================================================================
+ * Componente reutilizable del Ticket de Venta de mostrador
+ * ----------------------------------------------------------------------------
+ * Usado tanto para confirmar una venta nueva como para consultar el detalle
+ * completo de cualquier venta registrada en el historial del día.
+ * ==========================================================================*/
+function TicketVenta({ venta }) {
+  if (!venta) return null;
+
+  return (
+    <div className="ventas-page__ticket">
+      {venta.anulada && (
+        <div className="ventas-page__ticket-alerta-anulada">
+          <Badge variante="peligro" tamano="md">⚠️ VENTA ANULADA</Badge>
+          {venta.motivoAnulacion && (
+            <p className="ventas-page__ticket-motivo-anulacion">
+              Motivo: {venta.motivoAnulacion}
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="ventas-page__ticket-cabecera">
+        <h3 className="ventas-page__ticket-titulo">BODEGA EL TRIGAL</h3>
+        <p className="ventas-page__ticket-sub">Ticket de Venta Mostrador</p>
+        <p className="ventas-page__ticket-meta">Ticket #{venta.id}</p>
+        <p className="ventas-page__ticket-meta">
+          Fecha: {formatearFecha(venta.fecha, { conHora: true })}
+        </p>
+        <p className="ventas-page__ticket-meta">Cajero: {venta.cajeroNombre}</p>
+      </div>
+
+      <hr className="ventas-page__ticket-divisor" />
+
+      {/* Lista de productos vendidos con promociones detalladas */}
+      <div className="ventas-page__ticket-items">
+        {venta.items?.map((item, index) => {
+          const precioUnit = Number(item.precioUnitario ?? item.precio ?? 0);
+          const precioOrig = Number(item.precioOriginal ?? precioUnit);
+          const tieneDesc = Boolean(item.tieneDescuento || precioOrig > precioUnit);
+          const subtotal = Number(item.subtotal ?? precioUnit * item.cantidad);
+
+          return (
+            <div key={item.productoId || index} className="ventas-page__ticket-item">
+              <div className="ventas-page__ticket-item-detalles">
+                <div className="ventas-page__ticket-item-linea">
+                  <span className="ventas-page__ticket-item-cantidad">{item.cantidad}x</span>
+                  <span className="ventas-page__ticket-item-nombre">{item.nombre}</span>
+                  {tieneDesc && (
+                    <Badge variante="info" tamano="sm">Promo</Badge>
+                  )}
+                </div>
+                <div className="ventas-page__ticket-item-unitario">
+                  <span>{formatearSoles(precioUnit)} c/u</span>
+                  {tieneDesc && (
+                    <del className="ventas-page__ticket-item-tachado">
+                      {formatearSoles(precioOrig)}
+                    </del>
+                  )}
+                </div>
+              </div>
+              <span className="ventas-page__ticket-item-precio">
+                {formatearSoles(subtotal)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <hr className="ventas-page__ticket-divisor" />
+
+      <div className="ventas-page__ticket-total">
+        <span>TOTAL</span>
+        <strong>{formatearSoles(venta.total)}</strong>
+      </div>
+
+      {/* Información detallada del medio de pago */}
+      <div className="ventas-page__ticket-pago-info">
+        <div className="ventas-page__ticket-pago-fila">
+          <span>Medio de pago:</span>
+          <strong>{ETIQUETAS_METODO_PAGO[venta.metodoPago] || venta.metodoPago}</strong>
+        </div>
+
+        {venta.datosPago?.tipoTarjeta && (
+          <div className="ventas-page__ticket-pago-fila">
+            <span>Tipo de tarjeta:</span>
+            <span>{venta.datosPago.tipoTarjeta}</span>
+          </div>
+        )}
+
+        {venta.datosPago?.bancoPlin && (
+          <div className="ventas-page__ticket-pago-fila">
+            <span>Banco Plin:</span>
+            <span>{venta.datosPago.bancoPlin}</span>
+          </div>
+        )}
+
+        {(venta.datosPago?.telefonoYape || venta.datosPago?.telefonoPlin) && (
+          <div className="ventas-page__ticket-pago-fila">
+            <span>Celular de origen:</span>
+            <span>{venta.datosPago?.telefonoYape || venta.datosPago?.telefonoPlin}</span>
+          </div>
+        )}
+
+        {(venta.datosPago?.codigoAprobacion || venta.datosPago?.codigoOperacion) && (
+          <div className="ventas-page__ticket-pago-fila">
+            <span>Código de operación:</span>
+            <span>{venta.datosPago?.codigoAprobacion || venta.datosPago?.codigoOperacion}</span>
+          </div>
+        )}
+
+        {venta.referenciaPago && (
+          <div className="ventas-page__ticket-pago-fila">
+            <span>Referencia:</span>
+            <span>{venta.referenciaPago}</span>
+          </div>
+        )}
+
+        {venta.detallePago && (
+          <div className="ventas-page__ticket-pago-fila">
+            <span>Detalle:</span>
+            <span>{venta.detallePago}</span>
+          </div>
+        )}
+
+        {venta.metodoPago === METODOS_PAGO.EFECTIVO && (
+          <>
+            <div className="ventas-page__ticket-pago-fila">
+              <span>Monto recibido:</span>
+              <span>{formatearSoles(venta.montoRecibido ?? venta.total)}</span>
+            </div>
+            <div className="ventas-page__ticket-pago-fila ventas-page__ticket-pago-fila--vuelto">
+              <span>Vuelto entregado:</span>
+              <strong>{formatearSoles(venta.vuelto ?? 0)}</strong>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function VentasPage() {
   const { buscar, descontarStock, reponerStock, obtenerProducto } = useInventario();
   const { usuario } = useAuth();
@@ -49,7 +192,11 @@ export function VentasPage() {
 
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Modales de visualización de ticket
   const [ventaExitosa, setVentaExitosa] = useState(null);
+  const [ventaDetalle, setVentaDetalle] = useState(null);
+
   const [ventasDelDia, setVentasDelDia] = useState([]);
   const [cargandoVentas, setCargandoVentas] = useState(true);
   const [ventaAAnular, setVentaAAnular] = useState(null);
@@ -201,6 +348,7 @@ export function VentasPage() {
           precioUnitario: item.precioUnitario,
           precioOriginal: item.precioOriginal,
           tieneDescuento: item.tieneDescuento,
+          promocionesAplicadas: item.promocionesAplicadas || [],
           subtotal: item.subtotal,
         })),
         total,
@@ -258,7 +406,7 @@ export function VentasPage() {
     }
   };
 
-  const cerrarModal = () => {
+  const cerrarModalVentaExitosa = () => {
     setVentaExitosa(null);
   };
 
@@ -456,6 +604,16 @@ export function VentasPage() {
                     <div
                       key={venta.id}
                       className={`ventas-page__venta ${venta.anulada ? "ventas-page__venta--anulada" : ""}`}
+                      onClick={() => setVentaDetalle(venta)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setVentaDetalle(venta);
+                        }
+                      }}
+                      title="Clic para ver detalle de la venta"
                     >
                       <div className="ventas-page__venta-header">
                         <span className="ventas-page__venta-hora">
@@ -464,20 +622,43 @@ export function VentasPage() {
                         {venta.anulada ? (
                           <Badge variante="peligro">Anulada</Badge>
                         ) : (
-                          <Badge variante="exito">{ETIQUETAS_METODO_PAGO[venta.metodoPago] || venta.metodoPago}</Badge>
+                          <Badge variante="exito">
+                            {ETIQUETAS_METODO_PAGO[venta.metodoPago] || venta.metodoPago}
+                          </Badge>
                         )}
                       </div>
+
                       <div className="ventas-page__venta-total">{formatearSoles(venta.total)}</div>
-                      <div className="ventas-page__venta-cajero">{venta.cajeroNombre}</div>
-                      {!venta.anulada && (
+
+                      <div className="ventas-page__venta-meta">
+                        <span className="ventas-page__venta-items-count">
+                          {venta.items?.length || 0} {venta.items?.length === 1 ? "producto" : "productos"}
+                        </span>
+                        <span>·</span>
+                        <span className="ventas-page__venta-cajero">{venta.cajeroNombre}</span>
+                      </div>
+
+                      <div
+                        className="ventas-page__venta-acciones"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Boton
-                          variante="contorno"
+                          variante="fantasma"
                           tamano="sm"
-                          onClick={() => setVentaAAnular(venta)}
+                          onClick={() => setVentaDetalle(venta)}
                         >
-                          Anular venta
+                          Ver detalle
                         </Boton>
-                      )}
+                        {!venta.anulada && (
+                          <Boton
+                            variante="contorno"
+                            tamano="sm"
+                            onClick={() => setVentaAAnular(venta)}
+                          >
+                            Anular
+                          </Boton>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -487,77 +668,49 @@ export function VentasPage() {
         </div>
       </div>
 
-      {/* Modal de venta exitosa / Ticket de mostrador */}
-      <Modal abierto={ventaExitosa !== null} alCerrar={cerrarModal} titulo="¡Venta registrada con éxito!">
-        <div className="ventas-page__ticket">
-          <div className="ventas-page__ticket-cabecera">
-            <h3 className="ventas-page__ticket-titulo">BODEGA EL TRIGAL</h3>
-            <p className="ventas-page__ticket-sub">Ticket de Venta Mostrador</p>
-            <p className="ventas-page__ticket-meta">Ticket #{ventaExitosa?.id}</p>
-            <p className="ventas-page__ticket-meta">
-              Fecha: {ventaExitosa && formatearFecha(ventaExitosa.fecha, { conHora: true })}
-            </p>
-            <p className="ventas-page__ticket-meta">Cajero: {ventaExitosa?.cajeroNombre}</p>
-          </div>
-
-          <hr className="ventas-page__ticket-divisor" />
-
-          <div className="ventas-page__ticket-items">
-            {ventaExitosa?.items.map((item) => (
-              <div key={item.productoId} className="ventas-page__ticket-item">
-                <span className="ventas-page__ticket-item-nombre">
-                  {item.cantidad}x {item.nombre}
-                </span>
-                <span className="ventas-page__ticket-item-precio">{formatearSoles(item.subtotal)}</span>
-              </div>
-            ))}
-          </div>
-
-          <hr className="ventas-page__ticket-divisor" />
-
-          <div className="ventas-page__ticket-total">
-            <span>TOTAL</span>
-            <strong>{formatearSoles(ventaExitosa?.total)}</strong>
-          </div>
-
-          <div className="ventas-page__ticket-pago-info">
-            <div className="ventas-page__ticket-pago-fila">
-              <span>Medio de pago:</span>
-              <strong>{ETIQUETAS_METODO_PAGO[ventaExitosa?.metodoPago] || ventaExitosa?.metodoPago}</strong>
-            </div>
-            {ventaExitosa?.referenciaPago && (
-              <div className="ventas-page__ticket-pago-fila">
-                <span>Referencia:</span>
-                <span>{ventaExitosa.referenciaPago}</span>
-              </div>
-            )}
-            {ventaExitosa?.detallePago && (
-              <div className="ventas-page__ticket-pago-fila">
-                <span>Detalle:</span>
-                <span>{ventaExitosa.detallePago}</span>
-              </div>
-            )}
-            {ventaExitosa?.metodoPago === METODOS_PAGO.EFECTIVO && (
-              <>
-                <div className="ventas-page__ticket-pago-fila">
-                  <span>Monto recibido:</span>
-                  <span>{formatearSoles(ventaExitosa.montoRecibido)}</span>
-                </div>
-                <div className="ventas-page__ticket-pago-fila ventas-page__ticket-pago-fila--vuelto">
-                  <span>Vuelto entregado:</span>
-                  <strong>{formatearSoles(ventaExitosa.vuelto)}</strong>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        <Boton variante="primario" bloque onClick={cerrarModal}>
+      {/* Modal 1: Venta recién registrada con éxito */}
+      <Modal
+        abierto={ventaExitosa !== null}
+        alCerrar={cerrarModalVentaExitosa}
+        titulo="¡Venta registrada con éxito!"
+      >
+        <TicketVenta venta={ventaExitosa} />
+        <Boton variante="primario" bloque onClick={cerrarModalVentaExitosa}>
           + Nueva venta
         </Boton>
       </Modal>
 
-      {/* Modal de confirmación de anulación */}
+      {/* Modal 2: Consulta de detalle de venta histórica */}
+      <Modal
+        abierto={ventaDetalle !== null}
+        alCerrar={() => setVentaDetalle(null)}
+        titulo={`Detalle de venta #${ventaDetalle?.id?.slice(-6) || ""}`}
+        tamano="md"
+        pie={
+          <div style={{ display: "flex", gap: "var(--esp-2)", width: "100%", justifyContent: "flex-end" }}>
+            {!ventaDetalle?.anulada && (
+              <Boton
+                variante="peligro"
+                tamano="sm"
+                onClick={() => {
+                  const v = ventaDetalle;
+                  setVentaDetalle(null);
+                  setVentaAAnular(v);
+                }}
+              >
+                Anular venta
+              </Boton>
+            )}
+            <Boton variante="contorno" tamano="sm" onClick={() => setVentaDetalle(null)}>
+              Cerrar
+            </Boton>
+          </div>
+        }
+      >
+        <TicketVenta venta={ventaDetalle} />
+      </Modal>
+
+      {/* Modal 3: Confirmación de anulación de venta */}
       <Modal
         abierto={ventaAAnular !== null}
         alCerrar={() => setVentaAAnular(null)}

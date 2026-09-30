@@ -393,7 +393,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--esp-3);
-  max-height: 520px;
+  max-height: 540px;
   overflow-y: auto;
   padding-right: var(--esp-1);
 }
@@ -419,7 +419,7 @@
 }
 
 .ventas-page__venta--anulada {
-  opacity: 0.7;
+  opacity: 0.75;
   background-color: var(--rojo-50);
   border-color: var(--rojo-200, #fecaca);
 }
@@ -442,13 +442,34 @@
   font-variant-numeric: tabular-nums;
 }
 
-.ventas-page__venta-cajero {
-  color: var(--color-texto-tenue);
+.ventas-page__venta-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
   font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+
+.ventas-page__venta-items-count {
+  font-weight: var(--peso-medio);
+}
+
+.ventas-page__venta-cajero {
+  color: var(--color-texto-suave);
+}
+
+.ventas-page__venta-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+  margin-top: var(--esp-1);
+  padding-top: var(--esp-2);
+  border-top: 1px solid var(--color-borde);
 }
 
 /* ---------------------------------------------------------------------------
- * TICKET / RECIBO MODAL DE MOSTRADOR
+ * TICKET / RECIBO REUTILIZABLE DE MOSTRADOR
  * ------------------------------------------------------------------------ */
 .ventas-page__ticket {
   padding: var(--esp-4);
@@ -457,6 +478,26 @@
   border-radius: var(--radio-md);
   margin-bottom: var(--esp-4);
   font-family: var(--fuente-mono);
+}
+
+.ventas-page__ticket-alerta-anulada {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-1);
+  margin-bottom: var(--esp-3);
+  padding: var(--esp-2);
+  background-color: var(--rojo-50);
+  border: 1px solid var(--rojo-200, #fecaca);
+  border-radius: var(--radio-md);
+  text-align: center;
+}
+
+.ventas-page__ticket-motivo-anulacion {
+  margin: 0;
+  font-size: var(--texto-xs);
+  color: var(--color-peligro);
+  font-family: var(--fuente-base);
 }
 
 .ventas-page__ticket-cabecera {
@@ -504,11 +545,42 @@
   align-items: flex-start;
   font-size: var(--texto-xs);
   color: var(--color-texto);
+  gap: var(--esp-3);
+}
+
+.ventas-page__ticket-item-detalles {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ventas-page__ticket-item-linea {
+  display: flex;
+  align-items: center;
   gap: var(--esp-2);
 }
 
+.ventas-page__ticket-item-cantidad {
+  font-weight: var(--peso-negrita);
+  color: var(--color-primario);
+}
+
 .ventas-page__ticket-item-nombre {
-  flex: 1;
+  font-weight: var(--peso-semi);
+}
+
+.ventas-page__ticket-item-unitario {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-tenue);
+}
+
+.ventas-page__ticket-item-tachado {
+  color: var(--color-texto-tenue);
 }
 
 .ventas-page__ticket-item-precio {
