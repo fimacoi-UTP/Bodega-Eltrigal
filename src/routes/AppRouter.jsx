@@ -51,6 +51,7 @@ import UbicacionPage from "../pages/tienda/UbicacionPage";
 // Páginas del dashboard
 import ResumenPage from "../pages/dashboard/ResumenPage";
 import InventarioPage from "../pages/dashboard/InventarioPage";
+import PedidosPage from "../pages/dashboard/PedidosPage";
 import ProductosPage from "../pages/dashboard/ProductosPage";
 import PromocionesPage from "../pages/dashboard/PromocionesPage";
 import VentasPage from "../pages/dashboard/VentasPage";
@@ -115,6 +116,7 @@ export function AppRouter() {
         >
           {/* ADMIN y CAJERO */}
           <Route index element={<ResumenPage />} />
+          <Route path="pedidos" element={<PedidosPage />} />
           <Route path="inventario" element={<InventarioPage />} />
           <Route path="ventas" element={<VentasPage />} />
 
