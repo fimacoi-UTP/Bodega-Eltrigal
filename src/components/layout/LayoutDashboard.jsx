@@ -21,6 +21,7 @@ import "./LayoutDashboard.css";
 /** Título de la barra superior según la URL. */
 const TITULOS = {
   [RUTAS.DASHBOARD]: "Resumen general",
+  [RUTAS.DASHBOARD_CATALOGO]: "Catálogo y existencias",
   [RUTAS.DASHBOARD_INVENTARIO]: "Inventario",
   [RUTAS.DASHBOARD_PRODUCTOS]: "Gestión de productos",
   [RUTAS.DASHBOARD_PROMOCIONES]: "Promociones",

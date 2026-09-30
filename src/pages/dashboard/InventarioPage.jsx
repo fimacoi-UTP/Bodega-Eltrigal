@@ -161,7 +161,7 @@ export function InventarioPage() {
             titulo="Todavía no hay productos"
             descripcion="El inventario se llena solo cuando existen productos registrados. Crea el primero desde la gestión de productos."
             accion={
-              <Boton como={Link} to={RUTAS.DASHBOARD_PRODUCTOS}>
+              <Boton como={Link} to={RUTAS.DASHBOARD_CATALOGO}>
                 Ir a productos
               </Boton>
             }

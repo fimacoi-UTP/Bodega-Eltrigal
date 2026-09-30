@@ -34,6 +34,11 @@ export function Drawer({
 }) {
   const drawerRef = useRef(null);
   const cerrarFn = onClose || alCerrar;
+  const cerrarRef = useRef(cerrarFn);
+
+  useEffect(() => {
+    cerrarRef.current = cerrarFn;
+  }, [cerrarFn]);
 
   // Cierre con Escape y bloqueo de scroll
   useEffect(() => {
@@ -41,7 +46,7 @@ export function Drawer({
 
     const manejarTecla = (e) => {
       if (e.key === "Escape") {
-        cerrarFn?.();
+        cerrarRef.current?.();
       }
     };
 
@@ -55,7 +60,7 @@ export function Drawer({
       document.body.style.overflow = desbordeOriginal;
       document.removeEventListener("keydown", manejarTecla);
     };
-  }, [abierto, cerrarFn]);
+  }, [abierto]);
 
   if (!abierto) return null;
 

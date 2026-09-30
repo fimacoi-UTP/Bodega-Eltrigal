@@ -46,11 +46,10 @@
   letter-spacing: -1px;
 }
 
-/* Menú flotante desplegable */
+/* Menú flotante montado en Portal (document.body) */
 .ui-kebab__menu {
-  position: absolute;
-  top: calc(100% + var(--esp-1));
-  z-index: var(--z-navegacion);
+  position: fixed;
+  z-index: var(--z-cajon, 200);
   min-width: 190px;
   max-width: 280px;
   padding: var(--esp-1);
@@ -64,18 +63,25 @@
   animation: kebab-aparecer 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.ui-kebab__menu--derecha {
-  right: 0;
-}
-
-.ui-kebab__menu--izquierda {
-  left: 0;
+.ui-kebab__menu--arriba {
+  animation: kebab-aparecer-arriba 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes kebab-aparecer {
   from {
     opacity: 0;
     transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes kebab-aparecer-arriba {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(4px);
   }
   to {
     opacity: 1;
