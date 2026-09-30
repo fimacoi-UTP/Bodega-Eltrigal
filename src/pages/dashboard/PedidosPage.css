@@ -1,0 +1,321 @@
+.pedidos-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+  animation: aparecer 0.25s ease-out;
+}
+
+.pedidos-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+@media (min-width: 640px) {
+  .pedidos-page__header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.pedidos-page__titulo {
+  font-size: var(--tamano-h2);
+  font-weight: 700;
+  color: var(--color-texto-fuerte);
+  margin: 0;
+}
+
+.pedidos-page__subtitulo {
+  color: var(--color-texto-suave);
+  font-size: var(--tamano-sm);
+  margin: var(--esp-1) 0 0 0;
+}
+
+/* Indicadores / Métricas superiores */
+.pedidos-page__metricas {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3);
+}
+
+@media (min-width: 768px) {
+  .pedidos-page__metricas {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.pedidos-page__metrica-card {
+  text-align: center;
+  padding: var(--esp-3);
+  cursor: pointer;
+  transition: transform var(--transicion-rapida), box-shadow var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.pedidos-page__metrica-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+}
+
+.pedidos-page__metrica-card--activa {
+  border-color: var(--color-marca);
+  background-color: var(--color-marca-fondo);
+}
+
+.pedidos-page__metrica-valor {
+  font-size: var(--tamano-xl);
+  font-weight: 800;
+  color: var(--color-texto-fuerte);
+  line-height: 1.2;
+}
+
+.pedidos-page__metrica-etiqueta {
+  font-size: var(--tamano-xs);
+  color: var(--color-texto-suave);
+  margin-top: var(--esp-1);
+}
+
+/* Filtros */
+.pedidos-page__filtros {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-3);
+}
+
+@media (min-width: 640px) {
+  .pedidos-page__filtros {
+    grid-template-columns: 2fr 1fr 1fr;
+    align-items: flex-end;
+  }
+}
+
+/* Lista de pedidos */
+.pedidos-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 900px) {
+  .pedidos-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .pedidos-page__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.pedidos-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  border-radius: var(--radio-lg);
+  transition: box-shadow var(--transicion-rapida), transform var(--transicion-rapida);
+}
+
+.pedidos-card:hover {
+  box-shadow: var(--sombra-md);
+}
+
+.pedidos-card__cabecera-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--esp-2);
+}
+
+.pedidos-card__id {
+  font-weight: 700;
+  font-size: var(--tamano-base);
+  color: var(--color-texto-fuerte);
+}
+
+.pedidos-card__fecha {
+  font-size: var(--tamano-xs);
+  color: var(--color-texto-suave);
+  margin-top: 2px;
+}
+
+.pedidos-card__cliente-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  padding: var(--esp-3) 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.pedidos-card__cliente-nombre {
+  font-weight: 600;
+  color: var(--color-texto-fuerte);
+}
+
+.pedidos-card__cliente-contacto {
+  font-size: var(--tamano-xs);
+  color: var(--color-texto-suave);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pedidos-card__detalles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding-top: var(--esp-3);
+  font-size: var(--tamano-sm);
+}
+
+.pedidos-card__fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pedidos-card__fila-etiqueta {
+  color: var(--color-texto-suave);
+}
+
+.pedidos-card__total {
+  font-size: var(--tamano-lg);
+  font-weight: 800;
+  color: var(--color-marca);
+}
+
+.pedidos-card__acciones {
+  margin-top: var(--esp-4);
+  display: flex;
+  gap: var(--esp-2);
+}
+
+/* Modal de gestión */
+.pedidos-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+}
+
+.pedidos-modal__seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.pedidos-modal__seccion-titulo {
+  font-size: var(--tamano-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-texto-suave);
+  margin: 0;
+}
+
+.pedidos-modal__grid-info {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-3);
+  background-color: var(--color-fondo-suave);
+  padding: var(--esp-3);
+  border-radius: var(--radio-md);
+  font-size: var(--tamano-sm);
+}
+
+@media (min-width: 600px) {
+  .pedidos-modal__grid-info {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pedidos-modal__items-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--tamano-sm);
+}
+
+.pedidos-modal__items-tabla th,
+.pedidos-modal__items-tabla td {
+  padding: var(--esp-2) var(--esp-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.pedidos-modal__items-tabla th {
+  background-color: var(--color-fondo-suave);
+  color: var(--color-texto-suave);
+  font-weight: 600;
+}
+
+.pedidos-modal__items-tabla th:last-child,
+.pedidos-modal__items-tabla td:last-child {
+  text-align: right;
+}
+
+.pedidos-modal__items-totales {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding-top: var(--esp-2);
+  font-size: var(--tamano-sm);
+}
+
+.pedidos-modal__total-final {
+  font-size: var(--tamano-base);
+  font-weight: 800;
+  color: var(--color-marca);
+}
+
+/* Caja de estado del patrón State en el modal */
+.pedidos-modal__state-caja {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  padding: var(--esp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.pedidos-modal__state-actual {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+}
+
+.pedidos-modal__state-desc {
+  font-size: var(--tamano-sm);
+  color: var(--color-texto-suave);
+  margin: 0;
+}
+
+.pedidos-modal__state-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  margin-top: var(--esp-2);
+}
+
+.pedidos-modal__historial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding: var(--esp-2) 0;
+}
+
+.pedidos-modal__historial-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--tamano-xs);
+  padding: var(--esp-2) var(--esp-3);
+  background-color: var(--color-fondo-suave);
+  border-radius: var(--radio-sm);
+}
+
+.pedidos-modal__historial-fecha {
+  color: var(--color-texto-suave);
+}
