@@ -1,23 +1,31 @@
 /**
  * ============================================================================
- * VENTAS EN TIENDA · Punto de venta del mostrador
+ * VENTAS EN TIENDA · Punto de venta del mostrador (POS)
  * ============================================================================
  * Ruta: /dashboard/ventas · Acceso: ADMIN y CAJERO
+ *
+ * 🎯 PATRÓN STRATEGY:
+ * Reutiliza las estrategias de pago de src/pages/tienda/checkout/pagos
+ * (Efectivo, Tarjeta, Yape, Plin) para validar y procesar cada medio de cobro
+ * en una venta presencial de mostrador sin duplicar lógica.
  * ==========================================================================*/
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
 import { ventaRepository } from "../../repositories";
 import { METODOS_PAGO, ETIQUETAS_METODO_PAGO } from "../../constantes";
 import { formatearSoles, formatearFecha } from "../../utils/formato";
 import {
+  obtenerEstrategiaPago,
+  listarEstrategiasPago,
+} from "../tienda/checkout/pagos";
+import {
   Boton,
   Card,
   CardCabecera,
   CardCuerpo,
   Input,
-  Select,
   Badge,
   Alerta,
   Modal,
@@ -33,14 +41,22 @@ export function VentasPage() {
   const [busqueda, setBusqueda] = useState("");
   const resultados = busqueda.trim() ? buscar(busqueda) : [];
   const [carrito, setCarrito] = useState([]);
+  
+  // 🎯 PATRÓN STRATEGY: Estado del medio de pago activo y sus datos
   const [metodoPago, setMetodoPago] = useState(METODOS_PAGO.EFECTIVO);
-  const [montoRecibido, setMontoRecibido] = useState("");
+  const [datosPago, setDatosPago] = useState({});
+  const [erroresPago, setErroresPago] = useState({});
+
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState(null);
   const [ventaExitosa, setVentaExitosa] = useState(null);
   const [ventasDelDia, setVentasDelDia] = useState([]);
   const [cargandoVentas, setCargandoVentas] = useState(true);
   const [ventaAAnular, setVentaAAnular] = useState(null);
+
+  // Lista de estrategias registradas en el patrón Strategy
+  const estrategias = useMemo(() => listarEstrategiasPago(), []);
+  const estrategiaActual = useMemo(() => obtenerEstrategiaPago(metodoPago), [metodoPago]);
 
   // Cargar ventas del día
   useEffect(() => {
@@ -55,6 +71,18 @@ export function VentasPage() {
       }
     }
     cargarVentas();
+  }, []);
+
+  const handleSeleccionarMetodoPago = useCallback((nuevoMetodo) => {
+    setMetodoPago(nuevoMetodo);
+    setDatosPago(nuevoMetodo === METODOS_PAGO.TARJETA ? { tipoTarjeta: "DEBITO" } : {});
+    setErroresPago({});
+    setError(null);
+  }, []);
+
+  const handleCambioDatoPago = useCallback((campo, valor) => {
+    setDatosPago((prev) => ({ ...prev, [campo]: valor }));
+    setErroresPago((prev) => ({ ...prev, [campo]: undefined }));
   }, []);
 
   const agregarAlCarrito = (producto) => {
@@ -73,7 +101,7 @@ export function VentasPage() {
           )
         );
       } else {
-        setError("No hay suficiente stock disponible");
+        setError("No hay suficiente stock disponible para este producto.");
       }
     } else {
       setCarrito([
@@ -123,16 +151,19 @@ export function VentasPage() {
   };
 
   const total = carrito.reduce((sum, item) => sum + item.subtotal, 0);
-  const vuelto = metodoPago === METODOS_PAGO.EFECTIVO ? Number(montoRecibido) - total : 0;
 
+  // 🎯 Confirmación de venta con validación y procesamiento de estrategia
   const confirmarVenta = async () => {
     if (carrito.length === 0) {
-      setError("El carrito está vacío");
+      setError("El carrito de venta está vacío. Agrega productos para cobrar.");
       return;
     }
 
-    if (metodoPago === METODOS_PAGO.EFECTIVO && (!montoRecibido || Number(montoRecibido) < total)) {
-      setError("El monto recibido debe ser mayor o igual al total");
+    // 1. Validar el medio de pago usando la estrategia activa
+    const validacion = estrategiaActual.validar(datosPago, total);
+    if (!validacion.valido) {
+      setErroresPago(validacion.errores);
+      setError("Completa o corrige los datos del medio de pago antes de continuar.");
       return;
     }
 
@@ -140,36 +171,64 @@ export function VentasPage() {
     setError(null);
 
     try {
-      // 🥇 PRIMERO: descontar stock (regla de oro)
+      // 2. REGLA DE ORO: Descontar stock PRIMERO
       const itemsParaStock = carrito.map((item) => ({
         productoId: item.productoId,
         cantidad: item.cantidad,
       }));
       await descontarStock(itemsParaStock);
 
-      // DESPUÉS: registrar la venta
-      const venta = await ventaRepository.crear({
+      // 3. Procesar el pago con la estrategia (Strategy Pattern)
+      const resultadoPago = await estrategiaActual.procesarPago(total, datosPago);
+
+      // 4. Calcular montos de cobro y vuelto
+      const montoRecibido = metodoPago === METODOS_PAGO.EFECTIVO
+        ? (datosPago.montoExacto ? total : Number(datosPago.pagaCon) || total)
+        : total;
+      const vuelto = metodoPago === METODOS_PAGO.EFECTIVO
+        ? (resultadoPago.vuelto ?? 0)
+        : 0;
+
+      // 5. Registrar la venta en ventaRepository
+      const nuevaVenta = {
         fecha: new Date().toISOString(),
-        cajeroId: usuario.id,
-        cajeroNombre: usuario.nombre,
-        items: carrito,
+        cajeroId: usuario?.id || "cajero",
+        cajeroNombre: usuario?.nombre || "Cajero",
+        items: carrito.map((item) => ({
+          productoId: item.productoId,
+          nombre: item.nombre,
+          cantidad: item.cantidad,
+          precioUnitario: item.precioUnitario,
+          precioOriginal: item.precioOriginal,
+          tieneDescuento: item.tieneDescuento,
+          subtotal: item.subtotal,
+        })),
         total,
         metodoPago,
-        montoRecibido: metodoPago === METODOS_PAGO.EFECTIVO ? Number(montoRecibido) : total,
-        vuelto: metodoPago === METODOS_PAGO.EFECTIVO ? vuelto : 0,
+        datosPago: {
+          ...datosPago,
+          ...resultadoPago,
+        },
+        montoRecibido,
+        vuelto,
+        referenciaPago: resultadoPago.referencia,
+        detallePago: resultadoPago.detalle,
         anulada: false,
-      });
+      };
 
-      setVentaExitosa(venta);
+      const ventaRegistrada = await ventaRepository.crear(nuevaVenta);
+
+      // 6. Actualizar estados locales y mostrar ticket
+      setVentaExitosa(ventaRegistrada);
       setCarrito([]);
-      setMontoRecibido("");
-      setMetodoPago(METODOS_PAGO.EFECTIVO);
+      setDatosPago(metodoPago === METODOS_PAGO.TARJETA ? { tipoTarjeta: "DEBITO" } : {});
+      setErroresPago({});
 
       // Recargar ventas del día
       const ventasActualizadas = await ventaRepository.obtenerDeHoy();
       setVentasDelDia(ventasActualizadas);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Error al registrar la venta");
     } finally {
       setProcesando(false);
     }
@@ -203,12 +262,14 @@ export function VentasPage() {
     setVentaExitosa(null);
   };
 
+  const FormularioEstrategia = estrategiaActual.Formulario;
+
   return (
     <div className="ventas-page">
       <header className="ventas-page__cabecera">
         <h1 className="ventas-page__titulo">Ventas en tienda</h1>
         <p className="ventas-page__subtitulo">
-          Punto de venta y caja para registrar ventas físicas en mostrador y emitir tickets.
+          Punto de venta del mostrador: cobro en efectivo, tarjeta (débito/crédito), Yape o Plin.
         </p>
       </header>
 
@@ -227,7 +288,7 @@ export function VentasPage() {
             </CardCabecera>
             <CardCuerpo>
               <Input
-                placeholder="Escribe el nombre o código del producto..."
+                placeholder="Escribe el nombre o categoría del producto..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 autoFocus
@@ -324,38 +385,43 @@ export function VentasPage() {
                   </div>
 
                   <div className="ventas-page__total">
-                    <strong>Total: {formatearSoles(total)}</strong>
+                    <span>Total a cobrar</span>
+                    <strong>{formatearSoles(total)}</strong>
                   </div>
 
+                  {/* 🎯 PATRÓN STRATEGY: Selector y formulario del medio de pago */}
                   <div className="ventas-page__pago">
-                    <Select
-                      etiqueta="Método de pago"
-                      value={metodoPago}
-                      onChange={(e) => setMetodoPago(e.target.value)}
-                    >
-                      {Object.entries(ETIQUETAS_METODO_PAGO).map(([valor, etiqueta]) => (
-                        <option key={valor} value={valor}>
-                          {etiqueta}
-                        </option>
-                      ))}
-                    </Select>
+                    <label className="ventas-page__pago-etiqueta">Medio de pago</label>
+                    <div className="ventas-page__pagos-selector" role="radiogroup" aria-label="Medios de pago disponibles">
+                      {estrategias.map((est) => {
+                        const activa = est.id === metodoPago;
+                        return (
+                          <button
+                            key={est.id}
+                            type="button"
+                            role="radio"
+                            aria-checked={activa}
+                            className={`ventas-page__pago-boton ${activa ? "ventas-page__pago-boton--activo" : ""}`}
+                            onClick={() => handleSeleccionarMetodoPago(est.id)}
+                          >
+                            <span className="ventas-page__pago-icono">{est.icono}</span>
+                            <span className="ventas-page__pago-nombre">{est.nombre}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
 
-                    {metodoPago === METODOS_PAGO.EFECTIVO && (
-                      <Input
-                        etiqueta="Monto recibido"
-                        type="number"
-                        value={montoRecibido}
-                        onChange={(e) => setMontoRecibido(e.target.value)}
-                        prefijo="S/"
-                      />
-                    )}
-
-                    {metodoPago === METODOS_PAGO.EFECTIVO && montoRecibido && (
-                      <div className="ventas-page__vuelto">
-                        <span>Vuelto: </span>
-                        <strong>{formatearSoles(vuelto)}</strong>
-                      </div>
-                    )}
+                    {/* Formulario de la estrategia concreta */}
+                    <div className="ventas-page__pago-formulario">
+                      {FormularioEstrategia && (
+                        <FormularioEstrategia
+                          datos={datosPago}
+                          onChange={handleCambioDatoPago}
+                          errores={erroresPago}
+                          monto={total}
+                        />
+                      )}
+                    </div>
                   </div>
 
                   <Boton
@@ -365,7 +431,7 @@ export function VentasPage() {
                     cargando={procesando}
                     disabled={carrito.length === 0}
                   >
-                    Confirmar venta
+                    Confirmar y registrar venta ({formatearSoles(total)})
                   </Boton>
                 </>
               )}
@@ -373,7 +439,7 @@ export function VentasPage() {
           </Card>
         </div>
 
-        {/* Historial de ventas */}
+        {/* Historial de ventas del día */}
         <div className="ventas-page__historial">
           <Card>
             <CardCabecera>
@@ -398,7 +464,7 @@ export function VentasPage() {
                         {venta.anulada ? (
                           <Badge variante="peligro">Anulada</Badge>
                         ) : (
-                          <Badge variante="exito">{ETIQUETAS_METODO_PAGO[venta.metodoPago]}</Badge>
+                          <Badge variante="exito">{ETIQUETAS_METODO_PAGO[venta.metodoPago] || venta.metodoPago}</Badge>
                         )}
                       </div>
                       <div className="ventas-page__venta-total">{formatearSoles(venta.total)}</div>
@@ -409,7 +475,7 @@ export function VentasPage() {
                           tamano="sm"
                           onClick={() => setVentaAAnular(venta)}
                         >
-                          Anular
+                          Anular venta
                         </Boton>
                       )}
                     </div>
@@ -421,29 +487,73 @@ export function VentasPage() {
         </div>
       </div>
 
-      {/* Modal de venta exitosa */}
-      <Modal abierto={ventaExitosa !== null} alCerrar={cerrarModal} titulo="¡Venta registrada!">
+      {/* Modal de venta exitosa / Ticket de mostrador */}
+      <Modal abierto={ventaExitosa !== null} alCerrar={cerrarModal} titulo="¡Venta registrada con éxito!">
         <div className="ventas-page__ticket">
-          <h3>Ticket de venta #{ventaExitosa?.id}</h3>
-          <p>Fecha: {ventaExitosa && formatearFecha(ventaExitosa.fecha, { conHora: true })}</p>
-          <p>Cajero: {ventaExitosa?.cajeroNombre}</p>
-          <hr />
-          {ventaExitosa?.items.map((item) => (
-            <div key={item.productoId} className="ventas-page__ticket-item">
-              <span>{item.cantidad}x {item.nombre}</span>
-              <span>{formatearSoles(item.subtotal)}</span>
-            </div>
-          ))}
-          <hr />
-          <div className="ventas-page__ticket-total">
-            <strong>Total: {formatearSoles(ventaExitosa?.total)}</strong>
+          <div className="ventas-page__ticket-cabecera">
+            <h3 className="ventas-page__ticket-titulo">BODEGA EL TRIGAL</h3>
+            <p className="ventas-page__ticket-sub">Ticket de Venta Mostrador</p>
+            <p className="ventas-page__ticket-meta">Ticket #{ventaExitosa?.id}</p>
+            <p className="ventas-page__ticket-meta">
+              Fecha: {ventaExitosa && formatearFecha(ventaExitosa.fecha, { conHora: true })}
+            </p>
+            <p className="ventas-page__ticket-meta">Cajero: {ventaExitosa?.cajeroNombre}</p>
           </div>
-          {ventaExitosa?.metodoPago === METODOS_PAGO.EFECTIVO && (
-            <p>Pagado: {formatearSoles(ventaExitosa.montoRecibido)} | Vuelto: {formatearSoles(ventaExitosa.vuelto)}</p>
-          )}
+
+          <hr className="ventas-page__ticket-divisor" />
+
+          <div className="ventas-page__ticket-items">
+            {ventaExitosa?.items.map((item) => (
+              <div key={item.productoId} className="ventas-page__ticket-item">
+                <span className="ventas-page__ticket-item-nombre">
+                  {item.cantidad}x {item.nombre}
+                </span>
+                <span className="ventas-page__ticket-item-precio">{formatearSoles(item.subtotal)}</span>
+              </div>
+            ))}
+          </div>
+
+          <hr className="ventas-page__ticket-divisor" />
+
+          <div className="ventas-page__ticket-total">
+            <span>TOTAL</span>
+            <strong>{formatearSoles(ventaExitosa?.total)}</strong>
+          </div>
+
+          <div className="ventas-page__ticket-pago-info">
+            <div className="ventas-page__ticket-pago-fila">
+              <span>Medio de pago:</span>
+              <strong>{ETIQUETAS_METODO_PAGO[ventaExitosa?.metodoPago] || ventaExitosa?.metodoPago}</strong>
+            </div>
+            {ventaExitosa?.referenciaPago && (
+              <div className="ventas-page__ticket-pago-fila">
+                <span>Referencia:</span>
+                <span>{ventaExitosa.referenciaPago}</span>
+              </div>
+            )}
+            {ventaExitosa?.detallePago && (
+              <div className="ventas-page__ticket-pago-fila">
+                <span>Detalle:</span>
+                <span>{ventaExitosa.detallePago}</span>
+              </div>
+            )}
+            {ventaExitosa?.metodoPago === METODOS_PAGO.EFECTIVO && (
+              <>
+                <div className="ventas-page__ticket-pago-fila">
+                  <span>Monto recibido:</span>
+                  <span>{formatearSoles(ventaExitosa.montoRecibido)}</span>
+                </div>
+                <div className="ventas-page__ticket-pago-fila ventas-page__ticket-pago-fila--vuelto">
+                  <span>Vuelto entregado:</span>
+                  <strong>{formatearSoles(ventaExitosa.vuelto)}</strong>
+                </div>
+              </>
+            )}
+          </div>
         </div>
+
         <Boton variante="primario" bloque onClick={cerrarModal}>
-          Nueva venta
+          + Nueva venta
         </Boton>
       </Modal>
 
@@ -454,7 +564,7 @@ export function VentasPage() {
         titulo="¿Anular venta?"
       >
         <p>¿Estás seguro de anular la venta #{ventaAAnular?.id}?</p>
-        <p>El stock será devuelto automáticamente.</p>
+        <p>El stock será devuelto automáticamente al inventario.</p>
         <div className="ventas-page__modal-botones">
           <Boton variante="contorno" onClick={() => setVentaAAnular(null)}>
             Cancelar
