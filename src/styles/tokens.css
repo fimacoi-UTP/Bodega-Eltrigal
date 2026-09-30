@@ -129,6 +129,12 @@
   --color-foco: var(--ladrillo-400);
   --anillo-foco: 0 0 0 3px var(--ladrillo-100);
 
+  /* Alias semánticos y de compatibilidad */
+  --color-marca: var(--color-primario);
+  --color-marca-fondo: var(--color-primario-suave);
+  --color-texto-fuerte: var(--color-texto);
+  --color-fondo-suave: var(--color-superficie-suave);
+
   /* ---------------------------------------------------------------------- */
   /* 3. TIPOGRAFÍA                                                           */
   /* ---------------------------------------------------------------------- */
@@ -146,6 +152,16 @@
   --texto-2xl: 1.5rem; /*  24px */
   --texto-3xl: 1.875rem; /* 30px */
   --texto-4xl: 2.25rem; /* 36px */
+
+  /* Alias de tipografía */
+  --tamano-xs: var(--texto-xs);
+  --tamano-sm: var(--texto-sm);
+  --tamano-base: var(--texto-base);
+  --tamano-lg: var(--texto-lg);
+  --tamano-xl: var(--texto-xl);
+  --tamano-h3: var(--texto-lg);
+  --tamano-h2: var(--texto-2xl);
+  --tamano-h1: var(--texto-3xl);
 
   --peso-normal: 400;
   --peso-medio: 500;

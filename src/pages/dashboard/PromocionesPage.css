@@ -1,23 +1,53 @@
 /**
  * ============================================================================
- * ESTILOS · PromocionesPage
+ * ESTILOS · PromocionesPage (Gestión de Descuentos)
  * ============================================================================
  */
 
+.promociones-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+  animation: aparecer 0.25s ease-out;
+}
+
 .promociones-page__header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--esp-4);
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--esp-3);
 }
 
+@media (min-width: 640px) {
+  .promociones-page__header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.promociones-page__cabecera-textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
 .promociones-page__titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-negrita);
+  letter-spacing: -0.015em;
   color: var(--color-texto);
   margin: 0;
 }
 
+.promociones-page__subtitulo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * LISTA DE PROMOCIONES
+ * ------------------------------------------------------------------------ */
 .promociones-page__lista {
   display: grid;
   grid-template-columns: 1fr;
@@ -30,7 +60,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1100px) {
   .promociones-page__lista {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -38,6 +68,20 @@
 
 .promociones-page__card {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radio-lg);
+  border: 1px solid var(--color-borde);
+  transition:
+    transform var(--transicion-rapida),
+    box-shadow var(--transicion-rapida),
+    border-color var(--transicion-rapida);
+}
+
+.promociones-page__card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+  border-color: var(--color-borde-fuerte);
 }
 
 .promociones-page__card-header {
@@ -45,46 +89,85 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--esp-2);
+  width: 100%;
 }
 
-.promociones-page__card-header h3 {
+.promociones-page__card-titulo {
   margin: 0;
   color: var(--color-texto);
-  font-size: 1.125rem;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-semi);
+}
+
+/* Banner de descuento destacado */
+.promociones-page__descuento-destacado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--esp-3);
+  background: linear-gradient(135deg, var(--ladrillo-50) 0%, var(--trigo-50) 100%);
+  border: 1px solid var(--ladrillo-200);
+  border-radius: var(--radio-md);
+  margin-bottom: var(--esp-3);
+}
+
+.promociones-page__descuento-valor {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-extra);
+  color: var(--color-primario);
+}
+
+.promociones-page__descuento-tipo {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  color: var(--ladrillo-700);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .promociones-page__detalles {
   display: flex;
   flex-direction: column;
   gap: var(--esp-2);
-  margin-bottom: var(--esp-4);
+  margin-bottom: var(--esp-3);
+  padding: var(--esp-2) 0;
+  border-top: 1px solid var(--color-borde);
+  border-bottom: 1px solid var(--color-borde);
 }
 
 .promociones-page__detalle {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-xs);
 }
 
 .promociones-page__detalle-etiqueta {
-  color: var(--color-texto-suave);
-  font-size: 0.875rem;
+  color: var(--color-texto-tenue);
+  font-weight: var(--peso-medio);
 }
 
-.promociones-page__detalle span:last-child {
+.promociones-page__detalle-valor {
   color: var(--color-texto);
-  font-weight: 500;
+  font-weight: var(--peso-semi);
+  text-align: right;
 }
 
 .promociones-page__preview {
-  margin-bottom: var(--esp-4);
+  margin-bottom: var(--esp-3);
 }
 
 .promociones-page__acciones {
   display: flex;
   gap: var(--esp-2);
+  justify-content: flex-end;
+  margin-top: auto;
 }
 
+/* ---------------------------------------------------------------------------
+ * MODAL DE FORMULARIO Y VISTA PREVIA
+ * ------------------------------------------------------------------------ */
 .promociones-page__form {
   display: flex;
   flex-direction: column;
@@ -99,38 +182,49 @@
 }
 
 .promociones-page__preview-modal {
-  padding: var(--esp-4);
+  padding: var(--esp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
 }
 
 .promociones-page__preview-producto {
-  margin-bottom: var(--esp-3);
+  background-color: var(--color-superficie-suave);
+  padding: var(--esp-3);
+  border-radius: var(--radio-md);
 }
 
 .promociones-page__preview-producto strong {
   display: block;
   color: var(--color-texto);
-  font-size: 1.125rem;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-semi);
   margin-bottom: var(--esp-1);
 }
 
 .promociones-page__preview-producto div {
   color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
 }
 
 .promociones-page__preview-detalle {
-  margin: var(--esp-3) 0;
   display: flex;
   flex-direction: column;
   gap: var(--esp-2);
+  padding: var(--esp-2) 0;
 }
 
 .promociones-page__preview-linea {
   color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
   padding-left: var(--esp-3);
+  border-left: 2px solid var(--color-primario);
 }
 
 .promociones-page__preview-final {
   text-align: right;
-  font-size: 1.5rem;
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-extra);
   color: var(--color-primario);
+  padding: var(--esp-2) 0;
 }

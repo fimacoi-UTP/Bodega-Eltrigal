@@ -1,8 +1,25 @@
+/**
+ * ============================================================================
+ * ESTILOS · PedidosPage (Gestión de Pedidos Web)
+ * ============================================================================
+ */
+
 .pedidos-page {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-6);
+  gap: var(--esp-5);
   animation: aparecer 0.25s ease-out;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .pedidos-page__header {
@@ -20,19 +37,22 @@
 }
 
 .pedidos-page__titulo {
-  font-size: var(--tamano-h2);
-  font-weight: 700;
-  color: var(--color-texto-fuerte);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-negrita);
+  letter-spacing: -0.015em;
+  color: var(--color-texto);
   margin: 0;
 }
 
 .pedidos-page__subtitulo {
-  color: var(--color-texto-suave);
-  font-size: var(--tamano-sm);
+  color: var(--color-texto-tenue);
+  font-size: var(--texto-sm);
   margin: var(--esp-1) 0 0 0;
 }
 
-/* Indicadores / Métricas superiores */
+/* ---------------------------------------------------------------------------
+ * MÉTRICAS SUPERIORES (FILTROS RÁPIDOS)
+ * ------------------------------------------------------------------------ */
 .pedidos-page__metricas {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -42,40 +62,106 @@
 @media (min-width: 768px) {
   .pedidos-page__metricas {
     grid-template-columns: repeat(5, 1fr);
+    gap: var(--esp-4);
   }
 }
 
 .pedidos-page__metrica-card {
-  text-align: center;
+  position: relative;
+  text-align: left;
   padding: var(--esp-3);
   cursor: pointer;
-  transition: transform var(--transicion-rapida), box-shadow var(--transicion-rapida), border-color var(--transicion-rapida);
+  border-top: 3px solid var(--color-borde);
+  transition:
+    transform var(--transicion-rapida),
+    box-shadow var(--transicion-rapida),
+    border-color var(--transicion-rapida),
+    background-color var(--transicion-rapida);
 }
 
 .pedidos-page__metrica-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--sombra-md);
+  border-color: var(--color-borde-fuerte);
+}
+
+.pedidos-page__metrica-card--todos {
+  border-top-color: var(--neutro-400);
+}
+
+.pedidos-page__metrica-card--alerta {
+  border-top-color: var(--color-advertencia);
+}
+
+.pedidos-page__metrica-card--info {
+  border-top-color: var(--color-info);
+}
+
+.pedidos-page__metrica-card--marca {
+  border-top-color: var(--color-primario);
+}
+
+.pedidos-page__metrica-card--exito {
+  border-top-color: var(--color-exito);
 }
 
 .pedidos-page__metrica-card--activa {
-  border-color: var(--color-marca);
-  background-color: var(--color-marca-fondo);
+  border-color: var(--color-primario);
+  background-color: var(--color-primario-suave);
+  box-shadow: var(--sombra-sm);
 }
 
-.pedidos-page__metrica-valor {
-  font-size: var(--tamano-xl);
-  font-weight: 800;
-  color: var(--color-texto-fuerte);
-  line-height: 1.2;
+.pedidos-page__metrica-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-1);
 }
 
 .pedidos-page__metrica-etiqueta {
-  font-size: var(--tamano-xs);
-  color: var(--color-texto-suave);
-  margin-top: var(--esp-1);
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-texto-tenue);
 }
 
-/* Filtros */
+.pedidos-page__metrica-pill {
+  font-size: 0.625rem;
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: var(--radio-pastilla);
+  background-color: var(--neutro-200);
+  color: var(--neutro-700);
+}
+
+.pedidos-page__metrica-pill--alerta {
+  background-color: var(--ambar-100);
+  color: var(--ambar-700);
+}
+
+.pedidos-page__metrica-valor {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-extra);
+  color: var(--color-texto);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.pedidos-page__metrica-valor--alerta {
+  color: var(--color-advertencia);
+}
+
+.pedidos-page__metrica-valor--exito {
+  color: var(--campo-700);
+}
+
+/* ---------------------------------------------------------------------------
+ * FILTROS
+ * ------------------------------------------------------------------------ */
 .pedidos-page__filtros {
   display: grid;
   grid-template-columns: 1fr;
@@ -89,7 +175,9 @@
   }
 }
 
-/* Lista de pedidos */
+/* ---------------------------------------------------------------------------
+ * LISTA / GRID DE TARJETAS DE PEDIDO
+ * ------------------------------------------------------------------------ */
 .pedidos-page__grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -114,11 +202,17 @@
   justify-content: space-between;
   height: 100%;
   border-radius: var(--radio-lg);
-  transition: box-shadow var(--transicion-rapida), transform var(--transicion-rapida);
+  border: 1px solid var(--color-borde);
+  transition:
+    box-shadow var(--transicion-rapida),
+    transform var(--transicion-rapida),
+    border-color var(--transicion-rapida);
 }
 
 .pedidos-card:hover {
+  transform: translateY(-2px);
   box-shadow: var(--sombra-md);
+  border-color: var(--color-borde-fuerte);
 }
 
 .pedidos-card__cabecera-top {
@@ -129,14 +223,15 @@
 }
 
 .pedidos-card__id {
-  font-weight: 700;
-  font-size: var(--tamano-base);
-  color: var(--color-texto-fuerte);
+  font-weight: var(--peso-negrita);
+  font-size: var(--texto-base);
+  color: var(--color-texto);
+  font-family: var(--fuente-mono);
 }
 
 .pedidos-card__fecha {
-  font-size: var(--tamano-xs);
-  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
   margin-top: 2px;
 }
 
@@ -144,17 +239,20 @@
   display: flex;
   flex-direction: column;
   gap: var(--esp-1);
-  padding: var(--esp-3) 0;
-  border-bottom: 1px solid var(--color-borde);
+  padding: var(--esp-3);
+  margin: var(--esp-2) 0;
+  background-color: var(--color-superficie-suave);
+  border-radius: var(--radio-md);
 }
 
 .pedidos-card__cliente-nombre {
-  font-weight: 600;
-  color: var(--color-texto-fuerte);
+  font-weight: var(--peso-semi);
+  font-size: var(--texto-sm);
+  color: var(--color-texto);
 }
 
 .pedidos-card__cliente-contacto {
-  font-size: var(--tamano-xs);
+  font-size: var(--texto-xs);
   color: var(--color-texto-suave);
   display: flex;
   flex-direction: column;
@@ -165,8 +263,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--esp-2);
-  padding-top: var(--esp-3);
-  font-size: var(--tamano-sm);
+  padding-top: var(--esp-2);
+  font-size: var(--texto-sm);
 }
 
 .pedidos-card__fila {
@@ -177,12 +275,13 @@
 
 .pedidos-card__fila-etiqueta {
   color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
 }
 
 .pedidos-card__total {
-  font-size: var(--tamano-lg);
-  font-weight: 800;
-  color: var(--color-marca);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-extra);
+  color: var(--color-primario);
 }
 
 .pedidos-card__acciones {
@@ -191,7 +290,9 @@
   gap: var(--esp-2);
 }
 
-/* Modal de gestión */
+/* ---------------------------------------------------------------------------
+ * MODAL DE GESTIÓN Y DETALLE DE PEDIDO
+ * ------------------------------------------------------------------------ */
 .pedidos-modal {
   display: flex;
   flex-direction: column;
@@ -205,11 +306,11 @@
 }
 
 .pedidos-modal__seccion-titulo {
-  font-size: var(--tamano-sm);
-  font-weight: 700;
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-texto-suave);
+  color: var(--color-texto-tenue);
   margin: 0;
 }
 
@@ -217,10 +318,10 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--esp-3);
-  background-color: var(--color-fondo-suave);
+  background-color: var(--color-superficie-suave);
   padding: var(--esp-3);
   border-radius: var(--radio-md);
-  font-size: var(--tamano-sm);
+  font-size: var(--texto-sm);
 }
 
 @media (min-width: 600px) {
@@ -232,7 +333,7 @@
 .pedidos-modal__items-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--tamano-sm);
+  font-size: var(--texto-sm);
 }
 
 .pedidos-modal__items-tabla th,
@@ -243,9 +344,10 @@
 }
 
 .pedidos-modal__items-tabla th {
-  background-color: var(--color-fondo-suave);
-  color: var(--color-texto-suave);
-  font-weight: 600;
+  background-color: var(--color-superficie-suave);
+  color: var(--color-texto-tenue);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
 }
 
 .pedidos-modal__items-tabla th:last-child,
@@ -259,18 +361,18 @@
   align-items: flex-end;
   gap: 4px;
   padding-top: var(--esp-2);
-  font-size: var(--tamano-sm);
+  font-size: var(--texto-sm);
 }
 
 .pedidos-modal__total-final {
-  font-size: var(--tamano-base);
-  font-weight: 800;
-  color: var(--color-marca);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-extra);
+  color: var(--color-primario);
 }
 
 /* Caja de estado del patrón State en el modal */
 .pedidos-modal__state-caja {
-  background-color: var(--color-superficie);
+  background-color: var(--color-superficie-suave);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   padding: var(--esp-4);
@@ -287,7 +389,7 @@
 }
 
 .pedidos-modal__state-desc {
-  font-size: var(--tamano-sm);
+  font-size: var(--texto-sm);
   color: var(--color-texto-suave);
   margin: 0;
 }
@@ -310,12 +412,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: var(--tamano-xs);
+  font-size: var(--texto-xs);
   padding: var(--esp-2) var(--esp-3);
-  background-color: var(--color-fondo-suave);
+  background-color: var(--color-superficie-suave);
   border-radius: var(--radio-sm);
 }
 
 .pedidos-modal__historial-fecha {
-  color: var(--color-texto-suave);
+  color: var(--color-texto-tenue);
 }

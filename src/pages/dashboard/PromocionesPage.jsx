@@ -348,12 +348,17 @@ export function PromocionesPage() {
 
   return (
     <div className="promociones-page">
-      <div className="promociones-page__header">
-        <h1 className="promociones-page__titulo">Promociones y descuentos</h1>
+      <header className="promociones-page__header">
+        <div className="promociones-page__cabecera-textos">
+          <h1 className="promociones-page__titulo">Promociones y descuentos</h1>
+          <p className="promociones-page__subtitulo">
+            Gestiona reglas de descuento dinámicas aplicadas en el mostrador y la tienda web (patrón Decorator).
+          </p>
+        </div>
         <Boton variante="primario" onClick={() => abrirModal()}>
-          Nueva promoción
+          + Nueva promoción
         </Boton>
-      </div>
+      </header>
 
       {error && (
         <Alerta variante="peligro" onClose={() => setError(null)}>
@@ -364,7 +369,7 @@ export function PromocionesPage() {
       {cargando ? (
         <Cargando texto="Cargando promociones..." />
       ) : promociones.length === 0 ? (
-        <EstadoVacio icono="🏷️" titulo="Sin promociones" descripcion="Crea tu primera promoción para ofrecer descuentos" />
+        <EstadoVacio icono="🏷️" titulo="Sin promociones activas" descripcion="Crea tu primera promoción para ofrecer descuentos en productos o categorías" />
       ) : (
         <div className="promociones-page__lista">
           {promociones.map((promo) => {
@@ -373,27 +378,26 @@ export function PromocionesPage() {
               <Card key={promo.id} className="promociones-page__card">
                 <CardCabecera>
                   <div className="promociones-page__card-header">
-                    <h3>{promo.nombre}</h3>
-                    <Badge variante={estado.variante}>{estado.texto}</Badge>
+                    <h3 className="promociones-page__card-titulo">{promo.nombre}</h3>
+                    <Badge variante={estado.variante} tamano="sm" punto>{estado.texto}</Badge>
                   </div>
                 </CardCabecera>
                 <CardCuerpo>
+                  <div className="promociones-page__descuento-destacado">
+                    <span className="promociones-page__descuento-valor">
+                      {promo.tipo === TIPOS_PROMOCION.PORCENTAJE
+                        ? `${promo.valor}% DCTO`
+                        : `${formatearSoles(promo.valor)} DCTO`}
+                    </span>
+                    <span className="promociones-page__descuento-tipo">
+                      {ETIQUETAS_TIPO_PROMOCION[promo.tipo]}
+                    </span>
+                  </div>
+
                   <div className="promociones-page__detalles">
                     <div className="promociones-page__detalle">
-                      <span className="promociones-page__detalle-etiqueta">Tipo:</span>
-                      <span>{ETIQUETAS_TIPO_PROMOCION[promo.tipo]}</span>
-                    </div>
-                    <div className="promociones-page__detalle">
-                      <span className="promociones-page__detalle-etiqueta">Valor:</span>
-                      <span>
-                        {promo.tipo === TIPOS_PROMOCION.PORCENTAJE
-                          ? `${promo.valor}%`
-                          : formatearSoles(promo.valor)}
-                      </span>
-                    </div>
-                    <div className="promociones-page__detalle">
                       <span className="promociones-page__detalle-etiqueta">Aplica a:</span>
-                      <span>
+                      <span className="promociones-page__detalle-valor">
                         {promo.aplicaA === "TODO"
                           ? "Todos los productos"
                           : promo.aplicaA === "PRODUCTO"
@@ -404,13 +408,13 @@ export function PromocionesPage() {
                     {promo.desde && (
                       <div className="promociones-page__detalle">
                         <span className="promociones-page__detalle-etiqueta">Desde:</span>
-                        <span>{formatearFecha(promo.desde)}</span>
+                        <span className="promociones-page__detalle-valor">{formatearFecha(promo.desde)}</span>
                       </div>
                     )}
                     {promo.hasta && (
                       <div className="promociones-page__detalle">
                         <span className="promociones-page__detalle-etiqueta">Hasta:</span>
-                        <span>{formatearFecha(promo.hasta)}</span>
+                        <span className="promociones-page__detalle-valor">{formatearFecha(promo.hasta)}</span>
                       </div>
                     )}
                   </div>
@@ -429,10 +433,10 @@ export function PromocionesPage() {
                   )}
 
                   <div className="promociones-page__acciones">
-                    <Boton variante="fantasma" onClick={() => abrirModal(promo)}>
+                    <Boton variante="fantasma" tamano="sm" onClick={() => abrirModal(promo)}>
                       Editar
                     </Boton>
-                    <Boton variante="peligro" onClick={() => eliminar(promo.id)}>
+                    <Boton variante="peligro" tamano="sm" onClick={() => eliminar(promo.id)}>
                       Eliminar
                     </Boton>
                   </div>

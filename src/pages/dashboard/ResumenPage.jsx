@@ -125,46 +125,79 @@ export function ResumenPage() {
 
   return (
     <div className="resumen-page">
-      <h1 className="resumen-page__titulo">Resumen del día</h1>
+      <header className="resumen-page__cabecera">
+        <h1 className="resumen-page__titulo">Resumen del día</h1>
+        <p className="resumen-page__subtitulo">
+          Métricas clave de ventas en mostrador, pedidos online y alertas de reposición de hoy.
+        </p>
+      </header>
 
-      {/* Indicadores clave */}
+      {/* Indicadores clave con jerarquía y colores semánticos */}
       <div className="resumen-page__indicadores">
-        {/* Desglose por canal: la bodega necesita saber cuánto vino del mostrador
-            y cuánto de la tienda web, no solo el total mezclado. */}
-        <Card className="resumen-page__indicador">
+        <Card className="resumen-page__indicador resumen-page__indicador--exito">
           <CardCuerpo>
+            <div className="resumen-page__indicador-top">
+              <span className="resumen-page__indicador-etiqueta">Ventas en tienda</span>
+              <span className="resumen-page__indicador-badge resumen-page__indicador-badge--exito">Mostrador</span>
+            </div>
             <div className="resumen-page__indicador-valor">{cantidadVentasTienda}</div>
             <div className="resumen-page__indicador-monto">{formatearSoles(totalVentasTienda)}</div>
-            <div className="resumen-page__indicador-etiqueta">Ventas en tienda</div>
           </CardCuerpo>
         </Card>
 
-        <Card className="resumen-page__indicador">
+        <Card className="resumen-page__indicador resumen-page__indicador--marca">
           <CardCuerpo>
+            <div className="resumen-page__indicador-top">
+              <span className="resumen-page__indicador-etiqueta">Ventas web</span>
+              <span className="resumen-page__indicador-badge resumen-page__indicador-badge--marca">Online</span>
+            </div>
             <div className="resumen-page__indicador-valor">{cantidadVentasWeb}</div>
             <div className="resumen-page__indicador-monto">{formatearSoles(totalVentasWeb)}</div>
-            <div className="resumen-page__indicador-etiqueta">Ventas web</div>
           </CardCuerpo>
         </Card>
 
-        <Card className="resumen-page__indicador">
+        <Card className="resumen-page__indicador resumen-page__indicador--total">
           <CardCuerpo>
-            <div className="resumen-page__indicador-valor">{formatearSoles(totalVendidoHoy)}</div>
-            <div className="resumen-page__indicador-etiqueta">Total vendido</div>
+            <div className="resumen-page__indicador-top">
+              <span className="resumen-page__indicador-etiqueta">Total vendido hoy</span>
+              <span className="resumen-page__indicador-badge resumen-page__indicador-badge--total">Global</span>
+            </div>
+            <div className="resumen-page__indicador-valor resumen-page__indicador-valor--total">
+              {formatearSoles(totalVendidoHoy)}
+            </div>
+            <div className="resumen-page__indicador-monto">
+              {cantidadVentasTienda + cantidadVentasWeb} {(cantidadVentasTienda + cantidadVentasWeb === 1) ? "operación" : "operaciones"}
+            </div>
           </CardCuerpo>
         </Card>
 
-        <Card className="resumen-page__indicador">
+        <Card className="resumen-page__indicador resumen-page__indicador--alerta">
           <CardCuerpo>
-            <div className="resumen-page__indicador-valor">{pedidosPendientes.length}</div>
-            <div className="resumen-page__indicador-etiqueta">Pedidos pendientes</div>
+            <div className="resumen-page__indicador-top">
+              <span className="resumen-page__indicador-etiqueta">Pedidos pendientes</span>
+              {pedidosPendientes.length > 0 && (
+                <span className="resumen-page__indicador-badge resumen-page__indicador-badge--alerta">Despacho</span>
+              )}
+            </div>
+            <div className="resumen-page__indicador-valor resumen-page__indicador-valor--alerta">
+              {pedidosPendientes.length}
+            </div>
+            <div className="resumen-page__indicador-monto">Por confirmar / enviar</div>
           </CardCuerpo>
         </Card>
 
-        <Card className="resumen-page__indicador">
+        <Card className="resumen-page__indicador resumen-page__indicador--peligro">
           <CardCuerpo>
-            <div className="resumen-page__indicador-valor">{productosBajoStock.length}</div>
-            <div className="resumen-page__indicador-etiqueta">Productos bajo stock</div>
+            <div className="resumen-page__indicador-top">
+              <span className="resumen-page__indicador-etiqueta">Bajo stock</span>
+              {productosBajoStock.length > 0 && (
+                <span className="resumen-page__indicador-badge resumen-page__indicador-badge--peligro">Atención</span>
+              )}
+            </div>
+            <div className="resumen-page__indicador-valor resumen-page__indicador-valor--peligro">
+              {productosBajoStock.length}
+            </div>
+            <div className="resumen-page__indicador-monto">Productos por reponer</div>
           </CardCuerpo>
         </Card>
       </div>

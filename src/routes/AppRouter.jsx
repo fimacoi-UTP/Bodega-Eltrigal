@@ -50,9 +50,8 @@ import UbicacionPage from "../pages/tienda/UbicacionPage";
 
 // Páginas del dashboard
 import ResumenPage from "../pages/dashboard/ResumenPage";
-import InventarioPage from "../pages/dashboard/InventarioPage";
+import CatalogoPage from "../pages/dashboard/CatalogoPage";
 import PedidosPage from "../pages/dashboard/PedidosPage";
-import ProductosPage from "../pages/dashboard/ProductosPage";
 import PromocionesPage from "../pages/dashboard/PromocionesPage";
 import VentasPage from "../pages/dashboard/VentasPage";
 
@@ -117,18 +116,14 @@ export function AppRouter() {
           {/* ADMIN y CAJERO */}
           <Route index element={<ResumenPage />} />
           <Route path="pedidos" element={<PedidosPage />} />
-          <Route path="inventario" element={<InventarioPage />} />
+          <Route path="catalogo" element={<CatalogoPage />} />
           <Route path="ventas" element={<VentasPage />} />
 
+          {/* Redirecciones de compatibilidad hacia el Catálogo Maestro */}
+          <Route path="inventario" element={<Navigate to={RUTAS.DASHBOARD_CATALOGO} replace />} />
+          <Route path="productos" element={<Navigate to={RUTAS.DASHBOARD_CATALOGO} replace />} />
+
           {/* Solo ADMIN · segunda capa de Proxy */}
-          <Route
-            path="productos"
-            element={
-              <RutaProtegida rol={ROLES.ADMIN}>
-                <ProductosPage />
-              </RutaProtegida>
-            }
-          />
           <Route
             path="promociones"
             element={

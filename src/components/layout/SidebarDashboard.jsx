@@ -44,16 +44,10 @@ const SECCIONES = [
     roles: ROLES_DASHBOARD,
   },
   {
-    a: RUTAS.DASHBOARD_INVENTARIO,
-    texto: "Inventario",
+    a: RUTAS.DASHBOARD_CATALOGO,
+    texto: "Catálogo",
     icono: "📦",
     roles: ROLES_DASHBOARD,
-  },
-  {
-    a: RUTAS.DASHBOARD_PRODUCTOS,
-    texto: "Productos",
-    icono: "🏷️",
-    roles: [ROLES.ADMIN], // solo el administrador
   },
   {
     a: RUTAS.DASHBOARD_PROMOCIONES,

@@ -260,6 +260,7 @@ a:hover {
   padding: var(--esp-3) var(--esp-4);
   border-bottom: 1px solid var(--color-borde);
   color: var(--color-texto-suave);
+  transition: background-color var(--transicion-rapida);
 }
 
 .ui-tabla tbody tr:last-child td {
