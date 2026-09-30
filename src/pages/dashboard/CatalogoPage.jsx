@@ -269,9 +269,12 @@ export function CatalogoPage() {
         <>
           {/* ──────────────────────────────────────────── Resumen ────── */}
           <section className="gestion__resumen" aria-label="Resumen de existencias">
-            <Card padding="sm">
+            <Card padding="sm" className="gestion__resumen-card gestion__resumen-card--total">
               <div className="gestion__dato">
-                <span className="gestion__dato-etiqueta">Productos</span>
+                <div className="gestion__dato-top">
+                  <span className="gestion__dato-etiqueta">Total productos</span>
+                  <span className="gestion__dato-badge gestion__dato-badge--total">Catálogo</span>
+                </div>
                 <span className="gestion__dato-valor">{resumen.total}</span>
                 <span className="gestion__dato-nota">
                   {resumen.unidades} {pluralizar(resumen.unidades, "unidad")} en almacén
@@ -279,9 +282,14 @@ export function CatalogoPage() {
               </div>
             </Card>
 
-            <Card padding="sm">
+            <Card padding="sm" className="gestion__resumen-card gestion__resumen-card--alerta">
               <div className="gestion__dato">
-                <span className="gestion__dato-etiqueta">Por reponer</span>
+                <div className="gestion__dato-top">
+                  <span className="gestion__dato-etiqueta">Por reponer</span>
+                  {resumen.bajos > 0 && (
+                    <span className="gestion__dato-badge gestion__dato-badge--alerta">Alerta</span>
+                  )}
+                </div>
                 <span
                   className={
                     "gestion__dato-valor" +
@@ -294,9 +302,14 @@ export function CatalogoPage() {
               </div>
             </Card>
 
-            <Card padding="sm">
+            <Card padding="sm" className="gestion__resumen-card gestion__resumen-card--peligro">
               <div className="gestion__dato">
-                <span className="gestion__dato-etiqueta">Agotados</span>
+                <div className="gestion__dato-top">
+                  <span className="gestion__dato-etiqueta">Agotados</span>
+                  {resumen.agotados > 0 && (
+                    <span className="gestion__dato-badge gestion__dato-badge--peligro">Crítico</span>
+                  )}
+                </div>
                 <span
                   className={
                     "gestion__dato-valor" +
@@ -309,11 +322,14 @@ export function CatalogoPage() {
               </div>
             </Card>
 
-            <Card padding="sm">
+            <Card padding="sm" className="gestion__resumen-card gestion__resumen-card--exito">
               <div className="gestion__dato">
-                <span className="gestion__dato-etiqueta">Valor total</span>
-                <span className="gestion__dato-valor">{formatearSoles(resumen.valor)}</span>
-                <span className="gestion__dato-nota">Precio × stock</span>
+                <div className="gestion__dato-top">
+                  <span className="gestion__dato-etiqueta">Valor total</span>
+                  <span className="gestion__dato-badge gestion__dato-badge--exito">Activo</span>
+                </div>
+                <span className="gestion__dato-valor gestion__dato-valor--exito">{formatearSoles(resumen.valor)}</span>
+                <span className="gestion__dato-nota">Precio × stock actual</span>
               </div>
             </Card>
           </section>

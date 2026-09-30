@@ -72,11 +72,49 @@
   }
 }
 
+.gestion__resumen-card {
+  position: relative;
+  border-top: 3px solid var(--color-borde);
+  transition:
+    transform var(--transicion),
+    box-shadow var(--transicion),
+    border-color var(--transicion);
+}
+
+.gestion__resumen-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+}
+
+.gestion__resumen-card--total {
+  border-top-color: var(--color-primario);
+}
+
+.gestion__resumen-card--alerta {
+  border-top-color: var(--color-advertencia);
+}
+
+.gestion__resumen-card--peligro {
+  border-top-color: var(--color-peligro);
+}
+
+.gestion__resumen-card--exito {
+  border-top-color: var(--color-exito);
+}
+
 .gestion__dato {
   display: flex;
   flex-direction: column;
   gap: var(--esp-1);
   min-width: 0;
+}
+
+.gestion__dato-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+  margin-bottom: 2px;
 }
 
 .gestion__dato-etiqueta {
@@ -85,6 +123,35 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-texto-tenue);
+}
+
+.gestion__dato-badge {
+  font-size: 0.625rem;
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: var(--radio-pastilla);
+}
+
+.gestion__dato-badge--total {
+  background-color: var(--ladrillo-100);
+  color: var(--ladrillo-700);
+}
+
+.gestion__dato-badge--alerta {
+  background-color: var(--ambar-100);
+  color: var(--ambar-700);
+}
+
+.gestion__dato-badge--peligro {
+  background-color: var(--rojo-100);
+  color: var(--rojo-700);
+}
+
+.gestion__dato-badge--exito {
+  background-color: var(--campo-100);
+  color: var(--campo-700);
 }
 
 .gestion__dato-valor {
@@ -102,6 +169,10 @@
 
 .gestion__dato-valor--peligro {
   color: var(--color-peligro);
+}
+
+.gestion__dato-valor--exito {
+  color: var(--campo-700);
 }
 
 .gestion__dato-nota {

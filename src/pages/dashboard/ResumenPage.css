@@ -4,50 +4,164 @@
  * ============================================================================
  */
 
-.resumen-page__titulo {
-  margin-bottom: var(--esp-4);
-  color: var(--color-texto);
+.resumen-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
 }
 
+.resumen-page__cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.resumen-page__titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-negrita);
+  letter-spacing: -0.015em;
+  color: var(--color-texto);
+  margin: 0;
+}
+
+.resumen-page__subtitulo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * TARJETAS KPI / INDICADORES
+ * ------------------------------------------------------------------------ */
 .resumen-page__indicadores {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--esp-3);
-  margin-bottom: var(--esp-4);
 }
 
 @media (min-width: 640px) {
   .resumen-page__indicadores {
-    /* 5 tarjetas no reparten parejo en 2 o 4 columnas fijas: con auto-fit,
-       cada tarjeta pide un ancho minimo y el navegador decide cuantas caben
-       por fila, sin dejar ninguna huerfana sola en su propia fila. */
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--esp-4);
   }
 }
 
 .resumen-page__indicador {
-  text-align: center;
+  position: relative;
+  border-top: 3px solid var(--color-borde);
+  transition:
+    transform var(--transicion),
+    box-shadow var(--transicion),
+    border-color var(--transicion);
 }
 
-.resumen-page__indicador-valor {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-primario);
-  margin-bottom: var(--esp-1);
+.resumen-page__indicador:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
 }
 
-.resumen-page__indicador-monto {
-  color: var(--color-texto);
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: var(--esp-1);
+.resumen-page__indicador--exito {
+  border-top-color: var(--color-exito);
+}
+
+.resumen-page__indicador--marca {
+  border-top-color: var(--color-primario);
+}
+
+.resumen-page__indicador--total {
+  border-top-color: var(--color-exito);
+  background: linear-gradient(180deg, var(--campo-50) 0%, var(--color-superficie) 40%);
+}
+
+.resumen-page__indicador--alerta {
+  border-top-color: var(--color-advertencia);
+}
+
+.resumen-page__indicador--peligro {
+  border-top-color: var(--color-peligro);
+}
+
+.resumen-page__indicador-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-2);
 }
 
 .resumen-page__indicador-etiqueta {
-  color: var(--color-texto-suave);
-  font-size: 0.875rem;
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-texto-tenue);
 }
 
+.resumen-page__indicador-badge {
+  font-size: 0.625rem;
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: var(--radio-pastilla);
+}
+
+.resumen-page__indicador-badge--exito {
+  background-color: var(--campo-100);
+  color: var(--campo-700);
+}
+
+.resumen-page__indicador-badge--marca {
+  background-color: var(--ladrillo-100);
+  color: var(--ladrillo-700);
+}
+
+.resumen-page__indicador-badge--total {
+  background-color: var(--campo-200);
+  color: var(--campo-700);
+}
+
+.resumen-page__indicador-badge--alerta {
+  background-color: var(--ambar-100);
+  color: var(--ambar-600);
+}
+
+.resumen-page__indicador-badge--peligro {
+  background-color: var(--rojo-100);
+  color: var(--rojo-600);
+}
+
+.resumen-page__indicador-valor {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-extra);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--color-texto);
+  margin-bottom: var(--esp-1);
+}
+
+.resumen-page__indicador-valor--total {
+  color: var(--campo-700);
+  font-size: var(--texto-2xl);
+}
+
+.resumen-page__indicador-valor--alerta {
+  color: var(--color-advertencia);
+}
+
+.resumen-page__indicador-valor--peligro {
+  color: var(--color-peligro);
+}
+
+.resumen-page__indicador-monto {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+}
+
+/* ---------------------------------------------------------------------------
+ * GRID DE SECCIONES INFERIORES
+ * ------------------------------------------------------------------------ */
 .resumen-page__grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -69,9 +183,10 @@
 .resumen-page__lista {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-3);
-  max-height: 400px;
+  gap: var(--esp-2);
+  max-height: 380px;
   overflow-y: auto;
+  padding-right: var(--esp-1);
 }
 
 .resumen-page__item {
@@ -80,30 +195,52 @@
   gap: var(--esp-3);
   padding: var(--esp-3);
   background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
+  transition:
+    transform var(--transicion-rapida),
+    background-color var(--transicion-rapida),
+    border-color var(--transicion-rapida);
+}
+
+.resumen-page__item:hover {
+  background-color: var(--color-superficie-hover);
+  border-color: var(--color-borde-fuerte);
+  transform: translateX(2px);
 }
 
 .resumen-page__item-rank {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-acento);
-  min-width: var(--esp-8);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: var(--radio-md);
+  background-color: var(--trigo-100);
+  color: var(--trigo-800);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-negrita);
 }
 
 .resumen-page__item-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--esp-1);
+  gap: 2px;
+  min-width: 0;
 }
 
 .resumen-page__item-nombre {
   color: var(--color-texto);
-  font-weight: 500;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .resumen-page__item-sub {
   color: var(--color-texto-tenue);
-  font-size: 0.875rem;
+  font-size: var(--texto-xs);
 }

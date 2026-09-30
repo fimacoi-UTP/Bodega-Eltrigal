@@ -222,53 +222,71 @@ export function PedidosPage() {
       {/* Métricas / Filtros rápidos por estado */}
       <div className="pedidos-page__metricas">
         <Card
-          className={`pedidos-page__metrica-card ${
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--todos ${
             filtroEstado === "TODOS" ? "pedidos-page__metrica-card--activa" : ""
           }`}
           onClick={() => setFiltroEstado("TODOS")}
         >
+          <div className="pedidos-page__metrica-top">
+            <span className="pedidos-page__metrica-etiqueta">Todos</span>
+            <span className="pedidos-page__metrica-pill">Total</span>
+          </div>
           <div className="pedidos-page__metrica-valor">{conteos.total}</div>
-          <div className="pedidos-page__metrica-etiqueta">Todos los pedidos</div>
         </Card>
 
         <Card
-          className={`pedidos-page__metrica-card ${
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--alerta ${
             filtroEstado === ESTADOS_PEDIDO.PENDIENTE ? "pedidos-page__metrica-card--activa" : ""
           }`}
           onClick={() => setFiltroEstado(ESTADOS_PEDIDO.PENDIENTE)}
         >
-          <div className="pedidos-page__metrica-valor">{conteos[ESTADOS_PEDIDO.PENDIENTE]}</div>
-          <div className="pedidos-page__metrica-etiqueta">Pendientes</div>
+          <div className="pedidos-page__metrica-top">
+            <span className="pedidos-page__metrica-etiqueta">Pendientes</span>
+            {conteos[ESTADOS_PEDIDO.PENDIENTE] > 0 && (
+              <span className="pedidos-page__metrica-pill pedidos-page__metrica-pill--alerta">Atención</span>
+            )}
+          </div>
+          <div className="pedidos-page__metrica-valor pedidos-page__metrica-valor--alerta">
+            {conteos[ESTADOS_PEDIDO.PENDIENTE]}
+          </div>
         </Card>
 
         <Card
-          className={`pedidos-page__metrica-card ${
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--info ${
             filtroEstado === ESTADOS_PEDIDO.CONFIRMADO ? "pedidos-page__metrica-card--activa" : ""
           }`}
           onClick={() => setFiltroEstado(ESTADOS_PEDIDO.CONFIRMADO)}
         >
+          <div className="pedidos-page__metrica-top">
+            <span className="pedidos-page__metrica-etiqueta">Confirmados</span>
+          </div>
           <div className="pedidos-page__metrica-valor">{conteos[ESTADOS_PEDIDO.CONFIRMADO]}</div>
-          <div className="pedidos-page__metrica-etiqueta">Confirmados</div>
         </Card>
 
         <Card
-          className={`pedidos-page__metrica-card ${
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--marca ${
             filtroEstado === ESTADOS_PEDIDO.EN_CAMINO ? "pedidos-page__metrica-card--activa" : ""
           }`}
           onClick={() => setFiltroEstado(ESTADOS_PEDIDO.EN_CAMINO)}
         >
+          <div className="pedidos-page__metrica-top">
+            <span className="pedidos-page__metrica-etiqueta">En camino</span>
+          </div>
           <div className="pedidos-page__metrica-valor">{conteos[ESTADOS_PEDIDO.EN_CAMINO]}</div>
-          <div className="pedidos-page__metrica-etiqueta">En camino</div>
         </Card>
 
         <Card
-          className={`pedidos-page__metrica-card ${
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--exito ${
             filtroEstado === ESTADOS_PEDIDO.ENTREGADO ? "pedidos-page__metrica-card--activa" : ""
           }`}
           onClick={() => setFiltroEstado(ESTADOS_PEDIDO.ENTREGADO)}
         >
-          <div className="pedidos-page__metrica-valor">{conteos[ESTADOS_PEDIDO.ENTREGADO]}</div>
-          <div className="pedidos-page__metrica-etiqueta">Entregados</div>
+          <div className="pedidos-page__metrica-top">
+            <span className="pedidos-page__metrica-etiqueta">Entregados</span>
+          </div>
+          <div className="pedidos-page__metrica-valor pedidos-page__metrica-valor--exito">
+            {conteos[ESTADOS_PEDIDO.ENTREGADO]}
+          </div>
         </Card>
       </div>
 

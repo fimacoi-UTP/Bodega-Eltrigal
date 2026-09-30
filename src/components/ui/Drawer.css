@@ -79,16 +79,16 @@
 }
 
 .ui-drawer__titulo {
-  font-size: var(--tamano-h3);
-  font-weight: 700;
-  color: var(--color-texto-fuerte);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-negrita);
+  color: var(--color-texto);
   margin: 0;
   line-height: var(--interlineado-ajustado);
 }
 
 .ui-drawer__subtitulo {
-  font-size: var(--tamano-sm);
-  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
   margin: 0;
 }
 

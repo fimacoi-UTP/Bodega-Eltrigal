@@ -1,76 +1,120 @@
 /**
  * ============================================================================
- * ESTILOS · VentasPage
+ * ESTILOS · VentasPage (Punto de Venta Mostrador)
  * ============================================================================
  */
 
+.ventas-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+  animation: aparecer 0.25s ease-out;
+}
+
+.ventas-page__cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
 .ventas-page__titulo {
-  margin-bottom: var(--esp-4);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-negrita);
+  letter-spacing: -0.015em;
   color: var(--color-texto);
+  margin: 0;
+}
+
+.ventas-page__subtitulo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+  margin: 0;
 }
 
 .ventas-page__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--esp-4);
+  gap: var(--esp-5);
 }
 
 @media (min-width: 1024px) {
   .ventas-page__grid {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1.6fr 1fr;
+    align-items: flex-start;
   }
 }
 
 .ventas-page__principal {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-4);
+  gap: var(--esp-5);
 }
 
+/* ---------------------------------------------------------------------------
+ * RESULTADOS DE BÚSQUEDA
+ * ------------------------------------------------------------------------ */
 .ventas-page__resultados {
   margin-top: var(--esp-3);
   display: flex;
   flex-direction: column;
   gap: var(--esp-2);
-  max-height: 300px;
+  max-height: 280px;
   overflow-y: auto;
+  padding-right: var(--esp-1);
 }
 
 .ventas-page__resultado {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--esp-3);
   padding: var(--esp-3);
   background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   cursor: pointer;
-  transition: background-color var(--transicion-rapida);
+  transition:
+    transform var(--transicion-rapida),
+    background-color var(--transicion-rapida),
+    border-color var(--transicion-rapida);
 }
 
 .ventas-page__resultado:hover {
-  background-color: var(--color-borde);
+  background-color: var(--color-superficie-hover);
+  border-color: var(--color-borde-fuerte);
+  transform: translateX(2px);
 }
 
 .ventas-page__resultado-info {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-1);
+  gap: 2px;
+  min-width: 0;
 }
 
 .ventas-page__resultado-nombre {
   color: var(--color-texto);
-  font-weight: 500;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
 }
 
 .ventas-page__resultado-precio {
   color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
 }
 
+/* ---------------------------------------------------------------------------
+ * CARRITO DE VENTA POS
+ * ------------------------------------------------------------------------ */
 .ventas-page__carrito {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-3);
+  gap: var(--esp-2);
   margin-bottom: var(--esp-4);
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: var(--esp-1);
 }
 
 .ventas-page__item {
@@ -78,71 +122,98 @@
   align-items: center;
   gap: var(--esp-3);
   padding: var(--esp-3);
-  background-color: var(--color-superficie);
+  background-color: var(--color-superficie-suave);
+  border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
+  transition: border-color var(--transicion-rapida);
+}
+
+.ventas-page__item:hover {
+  border-color: var(--color-borde-fuerte);
 }
 
 .ventas-page__item-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--esp-1);
+  gap: 2px;
+  min-width: 0;
 }
 
 .ventas-page__item-nombre {
   color: var(--color-texto);
-  font-weight: 500;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
 }
 
 .ventas-page__item-precio {
   color: var(--color-texto-suave);
-  font-size: 0.875rem;
+  font-size: var(--texto-xs);
 }
 
 .ventas-page__item-controles {
   display: flex;
   align-items: center;
-  gap: var(--esp-2);
+  gap: var(--esp-1);
 }
 
 .ventas-page__item-cantidad {
   min-width: var(--esp-6);
   text-align: center;
-  font-weight: 500;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
   color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
 }
 
 .ventas-page__item-subtotal {
   min-width: var(--esp-16);
   text-align: right;
-  font-weight: 600;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-negrita);
   color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
 }
 
 .ventas-page__total {
-  padding: var(--esp-3);
-  background-color: var(--color-acento);
+  padding: var(--esp-4);
+  background-color: var(--color-superficie-suave);
+  border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   text-align: right;
-  font-size: 1.25rem;
-  color: var(--color-texto);
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-extra);
+  color: var(--color-primario);
 }
 
 .ventas-page__pago {
   display: flex;
   flex-direction: column;
   gap: var(--esp-3);
-  margin-top: var(--esp-4);
+  margin: var(--esp-4) 0;
+  padding: var(--esp-3);
+  background-color: var(--color-superficie-suave);
+  border-radius: var(--radio-md);
 }
 
 .ventas-page__vuelto {
   padding: var(--esp-3);
-  background-color: var(--color-exito);
+  background-color: var(--campo-50);
+  border: 1px solid var(--campo-200);
   border-radius: var(--radio-md);
   text-align: center;
-  color: var(--color-texto);
+  color: var(--campo-700);
+  font-size: var(--texto-sm);
 }
 
+.ventas-page__vuelto strong {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-extra);
+}
+
+/* ---------------------------------------------------------------------------
+ * HISTORIAL LATERAL DE VENTAS
+ * ------------------------------------------------------------------------ */
 .ventas-page__historial {
   position: sticky;
   top: var(--esp-4);
@@ -152,22 +223,35 @@
   display: flex;
   flex-direction: column;
   gap: var(--esp-3);
-  max-height: 500px;
+  max-height: 520px;
   overflow-y: auto;
+  padding-right: var(--esp-1);
 }
 
 .ventas-page__venta {
   padding: var(--esp-3);
   background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   display: flex;
   flex-direction: column;
   gap: var(--esp-2);
+  transition:
+    transform var(--transicion-rapida),
+    box-shadow var(--transicion-rapida),
+    border-color var(--transicion-rapida);
+}
+
+.ventas-page__venta:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-sm);
+  border-color: var(--color-borde-fuerte);
 }
 
 .ventas-page__venta--anulada {
-  opacity: 0.6;
-  background-color: var(--color-peligro);
+  opacity: 0.7;
+  background-color: var(--rojo-50);
+  border-color: var(--rojo-200, #fecaca);
 }
 
 .ventas-page__venta-header {
@@ -177,55 +261,66 @@
 }
 
 .ventas-page__venta-hora {
-  color: var(--color-texto-suave);
-  font-size: 0.875rem;
+  color: var(--color-texto-tenue);
+  font-size: var(--texto-xs);
 }
 
 .ventas-page__venta-total {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-negrita);
   color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
 }
 
 .ventas-page__venta-cajero {
   color: var(--color-texto-tenue);
-  font-size: 0.875rem;
+  font-size: var(--texto-xs);
 }
 
+/* ---------------------------------------------------------------------------
+ * TICKET / RECIBO MODAL
+ * ------------------------------------------------------------------------ */
 .ventas-page__ticket {
   padding: var(--esp-4);
-  background-color: var(--color-superficie);
+  background-color: var(--color-superficie-suave);
+  border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   margin-bottom: var(--esp-4);
+  font-family: var(--fuente-mono);
 }
 
 .ventas-page__ticket h3 {
-  margin-bottom: var(--esp-2);
+  margin: 0 0 var(--esp-2) 0;
   color: var(--color-texto);
+  font-size: var(--texto-base);
 }
 
 .ventas-page__ticket p {
-  margin-bottom: var(--esp-1);
+  margin: 0 0 var(--esp-1) 0;
   color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
 }
 
 .ventas-page__ticket hr {
   margin: var(--esp-3) 0;
   border: none;
-  border-top: 1px solid var(--color-borde);
+  border-top: 1px dashed var(--color-borde-fuerte);
 }
 
 .ventas-page__ticket-item {
   display: flex;
   justify-content: space-between;
-  padding: var(--esp-2) 0;
+  padding: var(--esp-1) 0;
   color: var(--color-texto);
+  font-size: var(--texto-xs);
 }
 
 .ventas-page__ticket-total {
   text-align: right;
-  font-size: 1.25rem;
-  color: var(--color-texto);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-extra);
+  color: var(--color-primario);
+  margin-bottom: var(--esp-2);
 }
 
 .ventas-page__modal-botones {

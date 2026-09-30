@@ -205,7 +205,12 @@ export function VentasPage() {
 
   return (
     <div className="ventas-page">
-      <h1 className="ventas-page__titulo">Ventas en tienda</h1>
+      <header className="ventas-page__cabecera">
+        <h1 className="ventas-page__titulo">Ventas en tienda</h1>
+        <p className="ventas-page__subtitulo">
+          Punto de venta y caja para registrar ventas físicas en mostrador y emitir tickets.
+        </p>
+      </header>
 
       {error && (
         <Alerta variante="peligro" onClose={() => setError(null)}>
@@ -222,7 +227,7 @@ export function VentasPage() {
             </CardCabecera>
             <CardCuerpo>
               <Input
-                placeholder="Escribe para buscar productos..."
+                placeholder="Escribe el nombre o código del producto..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 autoFocus
@@ -245,7 +250,7 @@ export function VentasPage() {
                         <div style={{ display: "flex", gap: "var(--esp-2)", alignItems: "center" }}>
                           <span className="ventas-page__resultado-precio">{formatearSoles(producto.precio)}</span>
                           {producto.tieneDescuento && (
-                            <del style={{ color: "var(--color-texto-apagado)", fontSize: "var(--texto-xs)" }}>
+                            <del style={{ color: "var(--color-texto-tenue)", fontSize: "var(--texto-xs)" }}>
                               {formatearSoles(producto.precioOriginal)}
                             </del>
                           )}
@@ -283,7 +288,7 @@ export function VentasPage() {
                           <div style={{ display: "flex", gap: "var(--esp-2)", alignItems: "center" }}>
                             <span className="ventas-page__item-precio">{formatearSoles(item.precioUnitario)}</span>
                             {item.tieneDescuento && (
-                              <del style={{ color: "var(--color-texto-apagado)", fontSize: "var(--texto-xs)" }}>
+                              <del style={{ color: "var(--color-texto-tenue)", fontSize: "var(--texto-xs)" }}>
                                 {formatearSoles(item.precioOriginal)}
                               </del>
                             )}
