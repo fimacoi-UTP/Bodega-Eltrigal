@@ -79,6 +79,45 @@
   margin-left: auto;
 }
 
+.panel-barra__sonido {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radio-md);
+  border: 1px solid var(--color-borde);
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color var(--transicion-rapida),
+    border-color var(--transicion-rapida),
+    transform var(--transicion-rapida);
+}
+
+.panel-barra__sonido:hover {
+  background-color: var(--color-superficie-suave);
+  border-color: var(--color-primario-borde);
+}
+
+.panel-barra__sonido:active {
+  transform: scale(0.94);
+}
+
+.layout-panel__toast-total {
+  margin-top: var(--esp-1);
+  font-size: var(--texto-xs);
+  color: var(--color-texto);
+}
+
+.layout-panel__toast-total strong {
+  color: var(--color-primario);
+  font-weight: var(--peso-extra);
+}
+
 .panel-barra__usuario {
   display: flex;
   align-items: center;

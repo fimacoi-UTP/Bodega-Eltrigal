@@ -37,12 +37,24 @@ export const pedidoRepository = {
     const ahora = new Date().toISOString();
     const estadoInicial = datos.estado ?? ESTADOS_PEDIDO.PENDIENTE;
 
-    return base.crear({
+    const nuevoPedido = await base.crear({
       ...datos,
       fecha: datos.fecha ?? ahora,
       estado: estadoInicial,
       historialEstados: [{ estado: estadoInicial, fecha: ahora }],
     });
+
+    try {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("trigal:pedido-nuevo", { detail: nuevoPedido })
+        );
+      }
+    } catch {
+      // noop
+    }
+
+    return nuevoPedido;
   },
 
   /** Pedidos de un cliente, para su sección "Mis pedidos". */
@@ -64,10 +76,6 @@ export const pedidoRepository = {
   /**
    * Cambia el estado de un pedido y lo anota en su historial.
    *
-   * ⚠️ OJO: hoy este método acepta CUALQUIER cambio de estado. Deja pasar
-   * cosas absurdas como ENTREGADO → PENDIENTE. Eso es justamente lo que el
-   * patrón State viene a arreglar (ver el gancho de abajo).
-   *
    * @param {string} id
    * @param {string} nuevoEstado - uno de ESTADOS_PEDIDO
    */
@@ -86,7 +94,41 @@ export const pedidoRepository = {
       { estado: nuevoEstado, fecha: new Date().toISOString() },
     ];
 
-    return base.actualizar(id, { estado: nuevoEstado, historialEstados: historial });
+    const actualizado = await base.actualizar(id, {
+      estado: nuevoEstado,
+      historialEstados: historial,
+    });
+
+    try {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("trigal:pedido-actualizado", { detail: actualizado })
+        );
+      }
+    } catch {
+      // noop
+    }
+
+    return actualizado;
+  },
+
+  /**
+   * Actualiza un pedido y notifica en vivo a los escuchadores.
+   */
+  async actualizar(id, cambios) {
+    const actualizado = await base.actualizar(id, cambios);
+
+    try {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("trigal:pedido-actualizado", { detail: actualizado })
+        );
+      }
+    } catch {
+      // noop
+    }
+
+    return actualizado;
   },
 
   /* ==========================================================================
