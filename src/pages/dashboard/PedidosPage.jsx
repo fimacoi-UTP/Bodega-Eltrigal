@@ -14,6 +14,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { pedidoRepository } from "../../repositories";
+import { CLAVES } from "../../repositories/claves";
 import {
   ESTADOS_PEDIDO,
   ETIQUETAS_ESTADO_PEDIDO,
@@ -66,22 +67,60 @@ export function PedidosPage() {
   const [actualizando, setActualizando] = useState(false);
   const [modalCancelarAbierto, setModalCancelarAbierto] = useState(false);
 
-  // Carga inicial
+  // Carga inicial y escucha reactiva de nuevos pedidos y cambios de estado
   useEffect(() => {
+    let cancelado = false;
+
     async function cargarPedidos() {
       try {
         const todos = await pedidoRepository.obtenerTodos();
+        if (cancelado || !Array.isArray(todos)) return;
+
         // Ordenar por fecha descendente (más recientes primero)
         todos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
         setPedidos(todos);
+
+        // Si hay un modal abierto con un pedido, actualizarlo también
+        setPedidoSeleccionado((prev) => {
+          if (!prev) return null;
+          const actualizado = todos.find((p) => p.id === prev.id);
+          return actualizado || prev;
+        });
       } catch {
-        setError("Error al cargar la lista de pedidos.");
+        if (!cancelado) setError("Error al cargar la lista de pedidos.");
       } finally {
-        setCargando(false);
+        if (!cancelado) setCargando(false);
       }
     }
 
     cargarPedidos();
+
+    const handleActualizacion = () => {
+      cargarPedidos();
+    };
+
+    const handleStorage = (e) => {
+      if (e.key === CLAVES.PEDIDOS || !e.key) {
+        cargarPedidos();
+      }
+    };
+
+    window.addEventListener("trigal:pedido-nuevo", handleActualizacion);
+    window.addEventListener("trigal:pedido-actualizado", handleActualizacion);
+    window.addEventListener("storage", handleStorage);
+
+    // Polling de respaldo cada 3.5 segundos
+    const intervalo = setInterval(() => {
+      cargarPedidos();
+    }, 3500);
+
+    return () => {
+      cancelado = true;
+      window.removeEventListener("trigal:pedido-nuevo", handleActualizacion);
+      window.removeEventListener("trigal:pedido-actualizado", handleActualizacion);
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(intervalo);
+    };
   }, []);
 
   const refrescarPedidos = async () => {

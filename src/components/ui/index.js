@@ -23,3 +23,5 @@ export { Modal } from "./Modal";
 export { MenuKebab } from "./MenuKebab";
 export { Drawer } from "./Drawer";
 export { SkeletonTarjeta } from "./SkeletonTarjeta";
+export { Toast } from "./Toast";
+

@@ -11,6 +11,7 @@
 import { useState, useEffect } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { ventaRepository, pedidoRepository, productoRepository } from "../../repositories";
+import { CLAVES } from "../../repositories/claves";
 import { ESTADOS_PEDIDO, ETIQUETAS_ESTADO_PEDIDO } from "../../constantes";
 import { formatearSoles, formatearFecha } from "../../utils/formato";
 import {
@@ -45,6 +46,8 @@ export function ResumenPage() {
   const [pedidosWebHoy, setPedidosWebHoy] = useState([]);
 
   useEffect(() => {
+    let cancelado = false;
+
     async function cargarDatos() {
       try {
         const [ventas, pedidosActivos, bajoStock, todosLosPedidos] = await Promise.all([
@@ -56,6 +59,8 @@ export function ResumenPage() {
           // el mismo criterio de rango horario que usa ventaRepository.obtenerDeHoy().
           pedidoRepository.obtenerTodos(),
         ]);
+
+        if (cancelado) return;
 
         setVentasHoy(ventas);
         setPedidosPendientes(pedidosActivos.filter(p => p.estado === "PENDIENTE"));
@@ -98,13 +103,39 @@ export function ResumenPage() {
 
         setProductosMasVendidos(ranking);
       } catch (err) {
-        console.error("Error al cargar datos del resumen:", err);
+        if (!cancelado) console.error("Error al cargar datos del resumen:", err);
       } finally {
-        setCargando(false);
+        if (!cancelado) setCargando(false);
       }
     }
 
     cargarDatos();
+
+    const handleActualizacion = () => {
+      cargarDatos();
+    };
+
+    const handleStorage = (e) => {
+      if (e.key === CLAVES.PEDIDOS || e.key === CLAVES.VENTAS || !e.key) {
+        cargarDatos();
+      }
+    };
+
+    window.addEventListener("trigal:pedido-nuevo", handleActualizacion);
+    window.addEventListener("trigal:pedido-actualizado", handleActualizacion);
+    window.addEventListener("storage", handleStorage);
+
+    const intervalo = setInterval(() => {
+      cargarDatos();
+    }, 5000);
+
+    return () => {
+      cancelado = true;
+      window.removeEventListener("trigal:pedido-nuevo", handleActualizacion);
+      window.removeEventListener("trigal:pedido-actualizado", handleActualizacion);
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(intervalo);
+    };
   }, [productos]);
 
   // --- Canal TIENDA (mostrador) ---

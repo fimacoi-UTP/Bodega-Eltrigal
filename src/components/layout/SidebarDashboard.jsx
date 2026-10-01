@@ -57,7 +57,7 @@ const SECCIONES = [
   },
 ];
 
-export function SidebarDashboard({ abierto, alCerrar }) {
+export function SidebarDashboard({ abierto, alCerrar, pedidosPendientes = 0 }) {
   const { usuario, tieneRol } = useAuth();
 
   // Filtramos el menú con el mismo `tieneRol` que usa el control de acceso.
@@ -84,22 +84,37 @@ export function SidebarDashboard({ abierto, alCerrar }) {
       <p className="panel-lateral__etiqueta">Panel de gestión</p>
 
       <nav className="panel-lateral__nav" aria-label="Secciones del panel">
-        {seccionesVisibles.map((seccion) => (
-          <NavLink
-            key={seccion.a}
-            to={seccion.a}
-            end={seccion.exacto}
-            onClick={alCerrar}
-            className={({ isActive }) =>
-              clases("panel-lateral__enlace", isActive && "panel-lateral__enlace--activo")
-            }
-          >
-            <span className="panel-lateral__icono" aria-hidden="true">
-              {seccion.icono}
-            </span>
-            {seccion.texto}
-          </NavLink>
-        ))}
+        {seccionesVisibles.map((seccion) => {
+          const esPedidos = seccion.a === RUTAS.DASHBOARD_PEDIDOS;
+          const hayPendientes = esPedidos && pedidosPendientes > 0;
+
+          return (
+            <NavLink
+              key={seccion.a}
+              to={seccion.a}
+              end={seccion.exacto}
+              onClick={alCerrar}
+              className={({ isActive }) =>
+                clases("panel-lateral__enlace", isActive && "panel-lateral__enlace--activo")
+              }
+            >
+              <span className="panel-lateral__icono" aria-hidden="true">
+                {seccion.icono}
+              </span>
+              <span className="panel-lateral__texto">{seccion.texto}</span>
+
+              {hayPendientes && (
+                <span
+                  className="panel-lateral__badge-pedidos"
+                  title={`${pedidosPendientes} pedidos pendientes`}
+                  aria-label={`${pedidosPendientes} pedidos pendientes`}
+                >
+                  {pedidosPendientes}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       <div className="panel-lateral__pie">
