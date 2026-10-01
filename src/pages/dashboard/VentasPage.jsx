@@ -10,7 +10,7 @@
  * en una venta presencial de mostrador sin duplicar lógica.
  * ==========================================================================*/
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
 import { ventaRepository } from "../../repositories";
@@ -22,17 +22,140 @@ import {
 } from "../tienda/checkout/pagos";
 import {
   Boton,
-  Card,
-  CardCabecera,
-  CardCuerpo,
-  Input,
   Badge,
   Alerta,
   Modal,
+  Drawer,
   Cargando,
   EstadoVacio,
 } from "../../components/ui";
 import "./VentasPage.css";
+
+const ICONO_POR_CATEGORIA = {
+  Abarrotes: "🍚",
+  Lácteos: "🥛",
+  Bebidas: "🥤",
+  Snacks: "🍿",
+  Limpieza: "🧼",
+  Cuidado: "🧴",
+  Panadería: "🥖",
+  Frutas: "🍎",
+  Verduras: "🥦",
+  Carnes: "🥩",
+  Embutidos: "🌭",
+};
+
+/**
+ * ============================================================================
+ * Componente Tarjeta de Producto para el Catálogo del POS (con Imagen y Stock)
+ * ==========================================================================*/
+function TarjetaProductoPos({ producto, onAgregar }) {
+  const [errorImagen, setErrorImagen] = useState(false);
+
+  const stock = Number(producto.stock || 0);
+  const stockMinimo = Number(producto.stockMinimo || 5);
+  const unidad = (producto.unidad || "UND").toUpperCase();
+  
+  let stockClase = "pos-card__badge-stock--ok";
+  let stockTexto = `${stock} disp.`;
+  if (stock <= 0) {
+    stockClase = "pos-card__badge-stock--agotado";
+    stockTexto = "Agotado";
+  } else if (stock <= stockMinimo) {
+    stockClase = "pos-card__badge-stock--alerta";
+    stockTexto = `${stock} bajo`;
+  }
+
+  const iconoCategoria = ICONO_POR_CATEGORIA[producto.categoria] || "🌾";
+
+  return (
+    <article
+      className={`pos-card ${stock <= 0 ? "pos-card--agotado" : ""}`}
+      onClick={() => stock > 0 && onAgregar(producto)}
+      role="button"
+      tabIndex={stock > 0 ? 0 : -1}
+      onKeyDown={(e) => {
+        if ((e.key === "Enter" || e.key === " ") && stock > 0) {
+          e.preventDefault();
+          onAgregar(producto);
+        }
+      }}
+    >
+      {/* 1. Visual: Imagen del producto o Placeholder con color e icono */}
+      <div
+        className="pos-card__visual"
+        style={{
+          backgroundColor: producto.color || "var(--color-superficie-suave)",
+        }}
+      >
+        {/* Badges superiores flotantes */}
+        <div className="pos-card__badges">
+          <span className="pos-card__badge-unidad">{unidad}</span>
+          <span className={`pos-card__badge-stock ${stockClase}`}>
+            {stockTexto}
+          </span>
+        </div>
+
+        {producto.imagen && !errorImagen ? (
+          <img
+            src={producto.imagen}
+            alt={producto.nombre}
+            className="pos-card__imagen"
+            loading="lazy"
+            onError={() => setErrorImagen(true)}
+          />
+        ) : (
+          <div className="pos-card__placeholder">
+            <span className="pos-card__placeholder-icono" role="img" aria-label={producto.categoria}>
+              {iconoCategoria}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* 2. Metadata y Nombre */}
+      <div className="pos-card__cuerpo">
+        <span className="pos-card__meta">
+          {producto.marca ? `${producto.marca} · ` : ""}{producto.categoria}
+        </span>
+        <h3 className="pos-card__nombre" title={producto.nombre}>
+          {producto.nombre}
+        </h3>
+      </div>
+
+      {/* 3. Precios y Botón Circular de Agregar */}
+      <div className="pos-card__pie">
+        <div className="pos-card__precios">
+          <span className="pos-card__precio">
+            {formatearSoles(producto.precio)}
+          </span>
+          {producto.tieneDescuento && (
+            <div className="pos-card__promo-info">
+              <del className="pos-card__precio-original">
+                {formatearSoles(producto.precioOriginal)}
+              </del>
+              <span className="pos-card__promo-tag">Promo</span>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          className="pos-card__btn-agregar"
+          disabled={stock <= 0}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAgregar(producto);
+          }}
+          title={stock > 0 ? "Agregar a la venta" : "Producto agotado"}
+          aria-label={`Agregar ${producto.nombre} a la venta`}
+        >
+          +
+        </button>
+      </div>
+    </article>
+  );
+}
 
 /**
  * ============================================================================
@@ -265,12 +388,14 @@ function TicketVenta({ venta }) {
 }
 
 export function VentasPage() {
-  const { buscar, descontarStock, reponerStock, obtenerProducto } = useInventario();
+  const { productosActivos, categorias, descontarStock, reponerStock, obtenerProducto } = useInventario();
   const { usuario } = useAuth();
 
   const [busqueda, setBusqueda] = useState("");
-  const resultados = busqueda.trim() ? buscar(busqueda) : [];
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todos");
   const [carrito, setCarrito] = useState([]);
+  const inputBusquedaRef = useRef(null);
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
   
   // 🎯 PATRÓN STRATEGY: Estado del medio de pago activo y sus datos
   const [metodoPago, setMetodoPago] = useState(METODOS_PAGO.EFECTIVO);
@@ -291,6 +416,39 @@ export function VentasPage() {
   // Lista de estrategias registradas en el patrón Strategy
   const estrategias = useMemo(() => listarEstrategiasPago(), []);
   const estrategiaActual = useMemo(() => obtenerEstrategiaPago(metodoPago), [metodoPago]);
+
+  // Contadores por categoría para los chips de la barra
+  const conteoPorCategoria = useMemo(() => {
+    const conteo = { Todos: productosActivos.length };
+    for (const cat of categorias) {
+      conteo[cat] = 0;
+    }
+    for (const prod of productosActivos) {
+      if (prod.categoria) {
+        conteo[prod.categoria] = (conteo[prod.categoria] || 0) + 1;
+      }
+    }
+    return conteo;
+  }, [productosActivos, categorias]);
+
+  // Lista de productos filtrados por categoría y búsqueda de texto/código
+  const productosFiltrados = useMemo(() => {
+    let lista = productosActivos;
+    if (categoriaSeleccionada && categoriaSeleccionada !== "Todos") {
+      lista = lista.filter((p) => p.categoria === categoriaSeleccionada);
+    }
+    if (busqueda.trim()) {
+      const q = busqueda.toLowerCase().trim();
+      lista = lista.filter(
+        (p) =>
+          p.nombre?.toLowerCase().includes(q) ||
+          p.marca?.toLowerCase().includes(q) ||
+          p.categoria?.toLowerCase().includes(q) ||
+          p.id?.toLowerCase().includes(q)
+      );
+    }
+    return lista;
+  }, [productosActivos, categoriaSeleccionada, busqueda]);
 
   // Cargar ventas del día
   useEffect(() => {
@@ -320,6 +478,11 @@ export function VentasPage() {
   }, []);
 
   const agregarAlCarrito = (producto) => {
+    if (producto.stock <= 0) {
+      setError(`"${producto.nombre}" está agotado.`);
+      return;
+    }
+
     const existente = carrito.find((item) => item.productoId === producto.id);
     if (existente) {
       if (existente.cantidad < producto.stock) {
@@ -335,7 +498,7 @@ export function VentasPage() {
           )
         );
       } else {
-        setError("No hay suficiente stock disponible para este producto.");
+        setError(`No hay más stock disponible para "${producto.nombre}" (Máx: ${producto.stock}).`);
       }
     } else {
       setCarrito([
@@ -343,16 +506,17 @@ export function VentasPage() {
         {
           productoId: producto.id,
           nombre: producto.nombre,
+          unidad: producto.unidad || "UND",
           cantidad: 1,
           precioUnitario: producto.precio,
           precioOriginal: producto.precioOriginal ?? producto.precio,
           tieneDescuento: Boolean(producto.tieneDescuento),
           promocionesAplicadas: producto.promocionesAplicadas || [],
           subtotal: producto.precio,
+          stockMaximo: producto.stock,
         },
       ]);
     }
-    setBusqueda("");
   };
 
   const cambiarCantidad = (productoId, nuevaCantidad) => {
@@ -363,7 +527,7 @@ export function VentasPage() {
 
     const producto = obtenerProducto(productoId);
     if (producto && nuevaCantidad > producto.stock) {
-      setError("No hay suficiente stock disponible");
+      setError(`Stock máximo alcanzado para "${producto.nombre}" (${producto.stock} disponibles).`);
       return;
     }
 
@@ -385,6 +549,30 @@ export function VentasPage() {
   };
 
   const total = carrito.reduce((sum, item) => sum + item.subtotal, 0);
+  const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+
+  // Total vendido hoy
+  const totalVendidoHoy = useMemo(() => {
+    return ventasDelDia
+      .filter((v) => !v.anulada)
+      .reduce((sum, v) => sum + (Number(v.total) || 0), 0);
+  }, [ventasDelDia]);
+
+  // Al presionar Enter en el input de búsqueda, si hay 1 solo resultado, agregarlo
+  const handleKeyDownBusqueda = (e) => {
+    if (e.key === "Enter" && productosFiltrados.length === 1) {
+      e.preventDefault();
+      agregarAlCarrito(productosFiltrados[0]);
+      setBusqueda("");
+    }
+  };
+
+  const enfocarBuscador = () => {
+    if (inputBusquedaRef.current) {
+      inputBusquedaRef.current.focus();
+      inputBusquedaRef.current.select();
+    }
+  };
 
   // 🎯 Confirmación de venta con validación y procesamiento de estrategia
   const confirmarVenta = async () => {
@@ -500,12 +688,35 @@ export function VentasPage() {
   const FormularioEstrategia = estrategiaActual.Formulario;
 
   return (
-    <div className="ventas-page">
-      <header className="ventas-page__cabecera">
-        <h1 className="ventas-page__titulo">Ventas en tienda</h1>
-        <p className="ventas-page__subtitulo">
-          Punto de venta del mostrador: cobro en efectivo, tarjeta (débito/crédito), Yape o Plin.
-        </p>
+    <div className="pos-terminal">
+      {/* 1. Header de Terminal POS Estilo FinTech */}
+      <header className="pos-header">
+        <div className="pos-header__izq">
+          <div className="pos-header__status-badge">
+            <span className="pos-header__status-dot" />
+            <span className="pos-header__status-texto">PUNTO DE VENTA</span>
+          </div>
+          <div className="pos-header__titulos">
+            <h1 className="pos-header__titulo">Terminal de caja</h1>
+            <p className="pos-header__sub">
+              Cajero activo: <strong>{usuario?.nombre || "Cajero en turno"}</strong> · {formatearFecha(new Date().toISOString(), { conHora: false })}
+            </p>
+          </div>
+        </div>
+
+        <div className="pos-header__der">
+          <div className="pos-header__stats-pill">
+            <span className="pos-header__stats-label">Ventas hoy:</span>
+            <span className="pos-header__stats-valor">{ventasDelDia.filter((v) => !v.anulada).length} ({formatearSoles(totalVendidoHoy)})</span>
+          </div>
+          <button
+            type="button"
+            className={`pos-header__btn-historial ${mostrarHistorial ? "pos-header__btn-historial--activo" : ""}`}
+            onClick={() => setMostrarHistorial(true)}
+          >
+            🧾 Historial del turno ({ventasDelDia.filter((v) => !v.anulada).length})
+          </button>
+        </div>
       </header>
 
       {error && (
@@ -514,246 +725,331 @@ export function VentasPage() {
         </Alerta>
       )}
 
-      <div className="ventas-page__grid">
-        {/* Panel de búsqueda y carrito */}
-        <div className="ventas-page__principal">
-          <Card>
-            <CardCabecera>
-              <h2>Buscar productos</h2>
-            </CardCabecera>
-            <CardCuerpo>
-              <Input
-                placeholder="Escribe el nombre o categoría del producto..."
+      {/* 2. Layout Principal Split: Catálogo (~2/3) + Carrito Fijo (~1/3) */}
+      <div className="pos-layout">
+        {/* PANEL IZQUIERDO: Catálogo de productos */}
+        <section className="pos-catalogo">
+          {/* Barra de Búsqueda y Escáner */}
+          <div className="pos-busqueda-card">
+            <div className="pos-busqueda-input-wrapper">
+              <span className="pos-busqueda-icono">🔍</span>
+              <input
+                ref={inputBusquedaRef}
+                id="pos-input-busqueda"
+                type="text"
+                className="pos-busqueda-input"
+                placeholder="Buscar producto por nombre, marca o código... (Enter para agregar)"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
+                onKeyDown={handleKeyDownBusqueda}
                 autoFocus
               />
-              {resultados.length > 0 && (
-                <div className="ventas-page__resultados">
-                  {resultados.map((producto) => (
-                    <div
-                      key={producto.id}
-                      className="ventas-page__resultado"
-                      onClick={() => agregarAlCarrito(producto)}
-                    >
-                      <div className="ventas-page__resultado-info">
-                        <div style={{ display: "flex", alignItems: "center", gap: "var(--esp-2)" }}>
-                          <span className="ventas-page__resultado-nombre">{producto.nombre}</span>
-                          {producto.tieneDescuento && (
-                            <Badge variante="info" tamano="sm">Promo</Badge>
-                          )}
-                        </div>
-                        <div style={{ display: "flex", gap: "var(--esp-2)", alignItems: "center" }}>
-                          <span className="ventas-page__resultado-precio">{formatearSoles(producto.precio)}</span>
-                          {producto.tieneDescuento && (
-                            <del style={{ color: "var(--color-texto-tenue)", fontSize: "var(--texto-xs)" }}>
-                              {formatearSoles(producto.precioOriginal)}
-                            </del>
-                          )}
-                        </div>
-                      </div>
-                      <Badge variante={producto.stock > 0 ? "exito" : "peligro"}>
-                        Stock: {producto.stock}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+              {busqueda && (
+                <button
+                  type="button"
+                  className="pos-busqueda-btn-limpiar"
+                  onClick={() => setBusqueda("")}
+                  title="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
               )}
-            </CardCuerpo>
-          </Card>
+            </div>
+            <button
+              type="button"
+              className="pos-busqueda-btn-escanear"
+              onClick={enfocarBuscador}
+              title="Enfocar buscador para lector de código de barras"
+            >
+              📷 Escanear
+            </button>
+          </div>
 
-          <Card>
-            <CardCabecera>
-              <h2>Carrito de venta</h2>
-            </CardCabecera>
-            <CardCuerpo>
+          {/* Barra de Categorías (Chips con contador) */}
+          <nav className="pos-categorias-nav" aria-label="Categorías de productos">
+            <button
+              type="button"
+              className={`pos-categoria-chip ${categoriaSeleccionada === "Todos" ? "pos-categoria-chip--activo" : ""}`}
+              onClick={() => setCategoriaSeleccionada("Todos")}
+            >
+              <span>Todos</span>
+              <span className="pos-categoria-chip__contador">{conteoPorCategoria.Todos || 0}</span>
+            </button>
+
+            {categorias.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                className={`pos-categoria-chip ${categoriaSeleccionada === cat ? "pos-categoria-chip--activo" : ""}`}
+                onClick={() => setCategoriaSeleccionada(cat)}
+              >
+                <span>{cat}</span>
+                <span className="pos-categoria-chip__contador">{conteoPorCategoria[cat] || 0}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Grid de Productos con Imágenes */}
+          <div className="pos-grid">
+            {productosFiltrados.length === 0 ? (
+              <div className="pos-grid__vacio">
+                <EstadoVacio
+                  icono="📦"
+                  titulo="Sin productos encontrados"
+                  descripcion="No hay coincidencias con los filtros aplicados. Intenta con otra búsqueda o categoría."
+                />
+              </div>
+            ) : (
+              productosFiltrados.map((producto) => (
+                <TarjetaProductoPos
+                  key={producto.id}
+                  producto={producto}
+                  onAgregar={agregarAlCarrito}
+                />
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* PANEL DERECHO: Carrito "Venta en curso" Fijo */}
+        <aside className="pos-panel-carrito">
+          <div className="pos-carrito-card">
+            {/* Cabecera del Carrito */}
+            <div className="pos-carrito-card__cabecera">
+              <div className="pos-carrito-card__titulo-bloque">
+                <span className="pos-carrito-card__icono">🛒</span>
+                <h2 className="pos-carrito-card__titulo">Venta en curso</h2>
+                <span className="pos-carrito-card__contador">
+                  {totalItems} {totalItems === 1 ? "ítem" : "ítems"}
+                </span>
+              </div>
+              {carrito.length > 0 && (
+                <button
+                  type="button"
+                  className="pos-carrito-card__btn-vaciar"
+                  onClick={() => setCarrito([])}
+                  title="Vaciar carrito actual"
+                >
+                  Vaciar
+                </button>
+              )}
+            </div>
+
+            {/* Lista de Ítems o Estado Vacío */}
+            <div className="pos-carrito-card__cuerpo">
               {carrito.length === 0 ? (
-                <EstadoVacio icono="🛒" titulo="Carrito vacío" descripcion="Agrega productos para comenzar la venta" />
+                <div className="pos-carrito__vacio">
+                  <span className="pos-carrito__vacio-icono">🛒</span>
+                  <p className="pos-carrito__vacio-titulo">Venta vacía</p>
+                  <p className="pos-carrito__vacio-desc">
+                    Toca un producto del catálogo o búscalo con el lector para comenzar la venta.
+                  </p>
+                </div>
               ) : (
-                <>
-                  <div className="ventas-page__carrito">
-                    {carrito.map((item) => (
-                      <div key={item.productoId} className="ventas-page__item">
-                        <div className="ventas-page__item-info">
-                          <div style={{ display: "flex", alignItems: "center", gap: "var(--esp-2)" }}>
-                            <span className="ventas-page__item-nombre">{item.nombre}</span>
-                            {item.tieneDescuento && (
-                              <Badge variante="info" tamano="sm">Promo</Badge>
-                            )}
-                          </div>
-                          <div style={{ display: "flex", gap: "var(--esp-2)", alignItems: "center" }}>
-                            <span className="ventas-page__item-precio">{formatearSoles(item.precioUnitario)}</span>
-                            {item.tieneDescuento && (
-                              <del style={{ color: "var(--color-texto-tenue)", fontSize: "var(--texto-xs)" }}>
-                                {formatearSoles(item.precioOriginal)}
-                              </del>
-                            )}
-                          </div>
+                <div className="pos-carrito__items-lista">
+                  {carrito.map((item) => (
+                    <div key={item.productoId} className="pos-item-fila">
+                      <div className="pos-item-fila__info">
+                        <div className="pos-item-fila__nombre-linea">
+                          <span className="pos-item-fila__nombre" title={item.nombre}>{item.nombre}</span>
+                          {item.tieneDescuento && (
+                            <span className="pos-item-fila__promo-badge">Promo</span>
+                          )}
                         </div>
-                        <div className="ventas-page__item-controles">
-                          <Boton
-                            variante="fantasma"
-                            tamano="sm"
-                            onClick={() => cambiarCantidad(item.productoId, item.cantidad - 1)}
-                          >
-                            -
-                          </Boton>
-                          <span className="ventas-page__item-cantidad">{item.cantidad}</span>
-                          <Boton
-                            variante="fantasma"
-                            tamano="sm"
-                            onClick={() => cambiarCantidad(item.productoId, item.cantidad + 1)}
-                          >
-                            +
-                          </Boton>
+                        <div className="pos-item-fila__unitario">
+                          <span>{formatearSoles(item.precioUnitario)} c/u</span>
+                          {item.tieneDescuento && (
+                            <del className="pos-item-fila__tachado">{formatearSoles(item.precioOriginal)}</del>
+                          )}
                         </div>
-                        <div className="ventas-page__item-subtotal">{formatearSoles(item.subtotal)}</div>
-                        <Boton
-                          variante="fantasma"
-                          tamano="sm"
-                          onClick={() => eliminarDelCarrito(item.productoId)}
+                      </div>
+
+                      {/* Stepper +/- */}
+                      <div className="pos-item-fila__stepper">
+                        <button
+                          type="button"
+                          className="pos-item-fila__btn-paso"
+                          onClick={() => cambiarCantidad(item.productoId, item.cantidad - 1)}
+                          title="Disminuir cantidad"
                         >
-                          ✕
-                        </Boton>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="ventas-page__total">
-                    <span>Total a cobrar</span>
-                    <strong>{formatearSoles(total)}</strong>
-                  </div>
-
-                  {/* 🎯 PATRÓN STRATEGY: Selector y formulario del medio de pago */}
-                  <div className="ventas-page__pago">
-                    <label className="ventas-page__pago-etiqueta">Medio de pago</label>
-                    <div className="ventas-page__pagos-selector" role="radiogroup" aria-label="Medios de pago disponibles">
-                      {estrategias.map((est) => {
-                        const activa = est.id === metodoPago;
-                        return (
-                          <button
-                            key={est.id}
-                            type="button"
-                            role="radio"
-                            aria-checked={activa}
-                            className={`ventas-page__pago-boton ${activa ? "ventas-page__pago-boton--activo" : ""}`}
-                            onClick={() => handleSeleccionarMetodoPago(est.id)}
-                          >
-                            <span className="ventas-page__pago-icono">{est.icono}</span>
-                            <span className="ventas-page__pago-nombre">{est.nombre}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Formulario de la estrategia concreta */}
-                    <div className="ventas-page__pago-formulario">
-                      {FormularioEstrategia && (
-                        <FormularioEstrategia
-                          datos={datosPago}
-                          onChange={handleCambioDatoPago}
-                          errores={erroresPago}
-                          monto={total}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <Boton
-                    variante="primario"
-                    bloque
-                    onClick={confirmarVenta}
-                    cargando={procesando}
-                    disabled={carrito.length === 0}
-                  >
-                    Confirmar y registrar venta ({formatearSoles(total)})
-                  </Boton>
-                </>
-              )}
-            </CardCuerpo>
-          </Card>
-        </div>
-
-        {/* Historial de ventas del día */}
-        <div className="ventas-page__historial">
-          <Card>
-            <CardCabecera>
-              <h2>Ventas de hoy</h2>
-            </CardCabecera>
-            <CardCuerpo>
-              {cargandoVentas ? (
-                <Cargando texto="Cargando ventas..." />
-              ) : ventasDelDia.length === 0 ? (
-                <EstadoVacio icono="🧾" titulo="Sin ventas hoy" />
-              ) : (
-                <div className="ventas-page__lista">
-                  {ventasDelDia.map((venta) => (
-                    <div
-                      key={venta.id}
-                      className={`ventas-page__venta ${venta.anulada ? "ventas-page__venta--anulada" : ""}`}
-                      onClick={() => setVentaDetalle(venta)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setVentaDetalle(venta);
-                        }
-                      }}
-                      title="Clic para ver detalle de la venta"
-                    >
-                      <div className="ventas-page__venta-header">
-                        <span className="ventas-page__venta-hora">
-                          {formatearFecha(venta.fecha, { conHora: true })}
-                        </span>
-                        {venta.anulada ? (
-                          <Badge variante="peligro">Anulada</Badge>
-                        ) : (
-                          <Badge variante="exito">
-                            {ETIQUETAS_METODO_PAGO[venta.metodoPago] || venta.metodoPago}
-                          </Badge>
-                        )}
+                          −
+                        </button>
+                        <span className="pos-item-fila__cantidad">{item.cantidad}</span>
+                        <button
+                          type="button"
+                          className="pos-item-fila__btn-paso"
+                          disabled={item.cantidad >= item.stockMaximo}
+                          onClick={() => cambiarCantidad(item.productoId, item.cantidad + 1)}
+                          title="Aumentar cantidad"
+                        >
+                          +
+                        </button>
                       </div>
 
-                      <div className="ventas-page__venta-total">{formatearSoles(venta.total)}</div>
+                      {/* Subtotal y Quitar */}
+                      <span className="pos-item-fila__subtotal">
+                        {formatearSoles(item.subtotal)}
+                      </span>
 
-                      <div className="ventas-page__venta-meta">
-                        <span className="ventas-page__venta-items-count">
-                          {venta.items?.length || 0} {venta.items?.length === 1 ? "producto" : "productos"}
-                        </span>
-                        <span>·</span>
-                        <span className="ventas-page__venta-cajero">{venta.cajeroNombre}</span>
-                      </div>
-
-                      <div
-                        className="ventas-page__venta-acciones"
-                        onClick={(e) => e.stopPropagation()}
+                      <button
+                        type="button"
+                        className="pos-item-fila__btn-quitar"
+                        onClick={() => eliminarDelCarrito(item.productoId)}
+                        title="Quitar producto"
                       >
-                        <Boton
-                          variante="fantasma"
-                          tamano="sm"
-                          onClick={() => setVentaDetalle(venta)}
-                        >
-                          Ver detalle
-                        </Boton>
-                        {!venta.anulada && (
-                          <Boton
-                            variante="contorno"
-                            tamano="sm"
-                            onClick={() => setVentaAAnular(venta)}
-                          >
-                            Anular
-                          </Boton>
-                        )}
-                      </div>
+                        ✕
+                      </button>
                     </div>
                   ))}
                 </div>
               )}
-            </CardCuerpo>
-          </Card>
-        </div>
+            </div>
+
+            {/* Selector de Medios de Pago (Strategy Pattern) */}
+            {carrito.length > 0 && (
+              <div className="pos-carrito__seccion-pago">
+                <label className="pos-carrito__pago-label">Medio de pago</label>
+                <div className="pos-carrito__pagos-grid" role="radiogroup" aria-label="Medios de pago disponibles">
+                  {estrategias.map((est) => {
+                    const activa = est.id === metodoPago;
+                    return (
+                      <button
+                        key={est.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={activa}
+                        className={`pos-pago-tab ${activa ? "pos-pago-tab--activo" : ""}`}
+                        onClick={() => handleSeleccionarMetodoPago(est.id)}
+                      >
+                        <span className="pos-pago-tab__icono">{est.icono}</span>
+                        <span className="pos-pago-tab__nombre">{est.nombre}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Formulario concreto de la estrategia */}
+                <div className="pos-carrito__pago-formulario">
+                  {FormularioEstrategia && (
+                    <FormularioEstrategia
+                      datos={datosPago}
+                      onChange={handleCambioDatoPago}
+                      errores={erroresPago}
+                      monto={total}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Footer con Totales y Botón de Cobro */}
+            <div className="pos-carrito-card__pie">
+              <div className="pos-carrito__resumen-fila">
+                <span className="pos-carrito__resumen-etiqueta">Subtotal</span>
+                <span className="pos-carrito__monto-mono">{formatearSoles(total)}</span>
+              </div>
+
+              <div className="pos-carrito__total-fila">
+                <span className="pos-carrito__total-etiqueta">TOTAL</span>
+                <span className="pos-carrito__total-monto">{formatearSoles(total)}</span>
+              </div>
+
+              <Boton
+                variante="primario"
+                bloque
+                tamano="lg"
+                onClick={confirmarVenta}
+                cargando={procesando}
+                disabled={carrito.length === 0}
+                className="pos-carrito__btn-cobrar"
+              >
+                Cobrar venta → {formatearSoles(total)}
+              </Boton>
+            </div>
+          </div>
+        </aside>
       </div>
+
+      {/* 3. Panel Lateral Deslizante (Drawer): Historial de Ventas del Turno */}
+      <Drawer
+        abierto={mostrarHistorial}
+        alCerrar={() => setMostrarHistorial(false)}
+        titulo="Historial de ventas del turno"
+        subtitulo={`Ventas hoy: ${ventasDelDia.filter((v) => !v.anulada).length} · Total: ${formatearSoles(totalVendidoHoy)}`}
+        tamano="md"
+      >
+        {cargandoVentas ? (
+          <Cargando texto="Cargando ventas del turno..." />
+        ) : ventasDelDia.length === 0 ? (
+          <EstadoVacio
+            icono="🧾"
+            titulo="Sin ventas hoy"
+            descripcion="Las ventas cobradas en este turno se listarán aquí en tiempo real."
+          />
+        ) : (
+          <div className="pos-historial__lista">
+            {ventasDelDia.map((venta) => (
+              <div
+                key={venta.id}
+                className={`pos-historial__item ${venta.anulada ? "pos-historial__item--anulada" : ""}`}
+                onClick={() => setVentaDetalle(venta)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setVentaDetalle(venta);
+                  }
+                }}
+                title="Clic para ver comprobante térmico"
+              >
+                <div className="pos-historial__item-header">
+                  <span className="pos-historial__item-hora">
+                    {formatearFecha(venta.fecha, { conHora: true })}
+                  </span>
+                  {venta.anulada ? (
+                    <Badge variante="peligro" tamano="sm">Anulada</Badge>
+                  ) : (
+                    <Badge variante="exito" tamano="sm">
+                      {ETIQUETAS_METODO_PAGO[venta.metodoPago] || venta.metodoPago}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="pos-historial__item-total">{formatearSoles(venta.total)}</div>
+
+                <div className="pos-historial__item-meta">
+                  <span>{venta.items?.length || 0} {venta.items?.length === 1 ? "producto" : "productos"}</span>
+                  <span>·</span>
+                  <span>{venta.cajeroNombre}</span>
+                </div>
+
+                <div
+                  className="pos-historial__item-acciones"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Boton
+                    variante="fantasma"
+                    tamano="sm"
+                    onClick={() => setVentaDetalle(venta)}
+                  >
+                    Ver ticket
+                  </Boton>
+                  {!venta.anulada && (
+                    <Boton
+                      variante="contorno"
+                      tamano="sm"
+                      onClick={() => setVentaAAnular(venta)}
+                    >
+                      Anular
+                    </Boton>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Drawer>
 
       {/* Modal 1: Venta recién registrada con éxito */}
       <Modal
