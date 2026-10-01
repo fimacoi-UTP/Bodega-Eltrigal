@@ -14,7 +14,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
 import { ventaRepository } from "../../repositories";
-import { METODOS_PAGO, ETIQUETAS_METODO_PAGO } from "../../constantes";
+import { BODEGA, METODOS_PAGO, ETIQUETAS_METODO_PAGO } from "../../constantes";
 import { formatearSoles, formatearFecha } from "../../utils/formato";
 import {
   obtenerEstrategiaPago,
@@ -36,16 +36,69 @@ import "./VentasPage.css";
 
 /**
  * ============================================================================
- * Componente reutilizable del Ticket de Venta de mostrador
+ * Componente reutilizable del Ticket de Venta de mostrador (Optimizado POS Térmico)
  * ----------------------------------------------------------------------------
  * Usado tanto para confirmar una venta nueva como para consultar el detalle
  * completo de cualquier venta registrada en el historial del día.
+ * Soporta impresión térmica con preajustes de 80mm y 58mm.
  * ==========================================================================*/
 function TicketVenta({ venta }) {
+  const [anchoPapel, setAnchoPapel] = useState("80mm");
+
   if (!venta) return null;
 
+  const total = Number(venta.total || 0);
+  const opGravada = total / 1.18;
+  const igv = total - opGravada;
+
+  const handleImprimir = () => {
+    window.print();
+  };
+
   return (
-    <div className="ventas-page__ticket">
+    <div className={`ventas-page__ticket ventas-page__ticket--papel-${anchoPapel}`}>
+      {/* Ajuste dinámico de @page según el ancho de papel seleccionado (80mm / 58mm) y alto automático */}
+      <style>{`
+        @media print {
+          @page {
+            size: ${anchoPapel === "58mm" ? "58mm auto" : "80mm auto"};
+            margin: 0;
+          }
+        }
+      `}</style>
+
+      {/* Barra de herramientas para pantalla (Oculta al imprimir) */}
+      <div className="ventas-page__ticket-toolbar no-print">
+        <div className="ventas-page__ticket-papel-selector">
+          <span className="ventas-page__ticket-papel-label">Formato papel:</span>
+          <button
+            type="button"
+            className={`ventas-page__ticket-papel-btn ${anchoPapel === "80mm" ? "ventas-page__ticket-papel-btn--activo" : ""}`}
+            onClick={() => setAnchoPapel("80mm")}
+            title="Formato de ticket térmico estándar de 80mm"
+          >
+            80mm
+          </button>
+          <button
+            type="button"
+            className={`ventas-page__ticket-papel-btn ${anchoPapel === "58mm" ? "ventas-page__ticket-papel-btn--activo" : ""}`}
+            onClick={() => setAnchoPapel("58mm")}
+            title="Formato de ticket térmico compacto de 58mm"
+          >
+            58mm
+          </button>
+        </div>
+
+        <Boton
+          variante="secundario"
+          tamano="sm"
+          onClick={handleImprimir}
+          className="ventas-page__ticket-btn-imprimir"
+        >
+          🖨️ Imprimir ticket
+        </Boton>
+      </div>
+
       {venta.anulada && (
         <div className="ventas-page__ticket-alerta-anulada">
           <Badge variante="peligro" tamano="md">⚠️ VENTA ANULADA</Badge>
@@ -57,14 +110,28 @@ function TicketVenta({ venta }) {
         </div>
       )}
 
+      {/* Cabecera del comprobante */}
       <div className="ventas-page__ticket-cabecera">
-        <h3 className="ventas-page__ticket-titulo">BODEGA EL TRIGAL</h3>
-        <p className="ventas-page__ticket-sub">Ticket de Venta Mostrador</p>
-        <p className="ventas-page__ticket-meta">Ticket #{venta.id}</p>
-        <p className="ventas-page__ticket-meta">
-          Fecha: {formatearFecha(venta.fecha, { conHora: true })}
-        </p>
-        <p className="ventas-page__ticket-meta">Cajero: {venta.cajeroNombre}</p>
+        <h3 className="ventas-page__ticket-titulo">{BODEGA.nombre.toUpperCase()}</h3>
+        {BODEGA.razonSocial && (
+          <p className="ventas-page__ticket-razon">{BODEGA.razonSocial}</p>
+        )}
+        {BODEGA.ruc && (
+          <p className="ventas-page__ticket-ruc">RUC: {BODEGA.ruc}</p>
+        )}
+        <p className="ventas-page__ticket-sub">{BODEGA.lema}</p>
+        <p className="ventas-page__ticket-contacto">{BODEGA.direccion} · {BODEGA.ciudad}</p>
+        <p className="ventas-page__ticket-contacto">Tel: {BODEGA.telefono}</p>
+
+        <hr className="ventas-page__ticket-divisor" />
+
+        <div className="ventas-page__ticket-metas">
+          <p className="ventas-page__ticket-meta">Ticket: <strong>#{venta.id}</strong></p>
+          <p className="ventas-page__ticket-meta">
+            Fecha: {formatearFecha(venta.fecha, { conHora: true })}
+          </p>
+          <p className="ventas-page__ticket-meta">Cajero: {venta.cajeroNombre}</p>
+        </div>
       </div>
 
       <hr className="ventas-page__ticket-divisor" />
@@ -106,9 +173,21 @@ function TicketVenta({ venta }) {
 
       <hr className="ventas-page__ticket-divisor" />
 
+      {/* Desglose de impuestos */}
+      <div className="ventas-page__ticket-impuestos">
+        <div className="ventas-page__ticket-impuesto-fila">
+          <span>Op. Gravada:</span>
+          <span>{formatearSoles(opGravada)}</span>
+        </div>
+        <div className="ventas-page__ticket-impuesto-fila">
+          <span>IGV (18%):</span>
+          <span>{formatearSoles(igv)}</span>
+        </div>
+      </div>
+
       <div className="ventas-page__ticket-total">
-        <span>TOTAL</span>
-        <strong>{formatearSoles(venta.total)}</strong>
+        <span>IMPORTE TOTAL</span>
+        <strong>{formatearSoles(total)}</strong>
       </div>
 
       {/* Información detallada del medio de pago */}
@@ -172,6 +251,14 @@ function TicketVenta({ venta }) {
             </div>
           </>
         )}
+      </div>
+
+      {/* Pie térmico */}
+      <div className="ventas-page__ticket-pie-termico">
+        <hr className="ventas-page__ticket-divisor" />
+        <p className="ventas-page__ticket-agradecimiento">¡GRACIAS POR SU COMPRA!</p>
+        <p className="ventas-page__ticket-aviso">Conserve este comprobante de venta</p>
+        <p className="ventas-page__ticket-web">www.eltrigal.pe</p>
       </div>
     </div>
   );
@@ -675,9 +762,24 @@ export function VentasPage() {
         titulo="¡Venta registrada con éxito!"
       >
         <TicketVenta venta={ventaExitosa} />
-        <Boton variante="primario" bloque onClick={cerrarModalVentaExitosa}>
-          + Nueva venta
-        </Boton>
+        <div style={{ display: "flex", gap: "var(--esp-2)", marginTop: "var(--esp-3)" }} className="no-print">
+          <Boton
+            variante="secundario"
+            tamano="md"
+            onClick={() => window.print()}
+            style={{ flex: 1 }}
+          >
+            🖨️ Imprimir ticket
+          </Boton>
+          <Boton
+            variante="primario"
+            tamano="md"
+            onClick={cerrarModalVentaExitosa}
+            style={{ flex: 1.5 }}
+          >
+            + Nueva venta
+          </Boton>
+        </div>
       </Modal>
 
       {/* Modal 2: Consulta de detalle de venta histórica */}
@@ -687,23 +789,33 @@ export function VentasPage() {
         titulo={`Detalle de venta #${ventaDetalle?.id?.slice(-6) || ""}`}
         tamano="md"
         pie={
-          <div style={{ display: "flex", gap: "var(--esp-2)", width: "100%", justifyContent: "flex-end" }}>
-            {!ventaDetalle?.anulada && (
-              <Boton
-                variante="peligro"
-                tamano="sm"
-                onClick={() => {
-                  const v = ventaDetalle;
-                  setVentaDetalle(null);
-                  setVentaAAnular(v);
-                }}
-              >
-                Anular venta
-              </Boton>
-            )}
-            <Boton variante="contorno" tamano="sm" onClick={() => setVentaDetalle(null)}>
-              Cerrar
+          <div style={{ display: "flex", gap: "var(--esp-2)", width: "100%", justifyContent: "space-between", alignItems: "center" }} className="no-print">
+            <Boton
+              variante="secundario"
+              tamano="sm"
+              onClick={() => window.print()}
+            >
+              🖨️ Imprimir ticket
             </Boton>
+
+            <div style={{ display: "flex", gap: "var(--esp-2)" }}>
+              {!ventaDetalle?.anulada && (
+                <Boton
+                  variante="peligro"
+                  tamano="sm"
+                  onClick={() => {
+                    const v = ventaDetalle;
+                    setVentaDetalle(null);
+                    setVentaAAnular(v);
+                  }}
+                >
+                  Anular venta
+                </Boton>
+              )}
+              <Boton variante="contorno" tamano="sm" onClick={() => setVentaDetalle(null)}>
+                Cerrar
+              </Boton>
+            </div>
           </div>
         }
       >

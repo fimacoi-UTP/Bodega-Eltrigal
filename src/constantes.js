@@ -133,6 +133,8 @@ export const ETIQUETAS_METODO_PAGO = {
  */
 export const BODEGA = {
   nombre: "Bodega El Trigal",
+  razonSocial: "COMERCIAL EL TRIGAL E.I.R.L.",
+  ruc: "20601234567",
   lema: "Tu bodega de confianza en Piura",
 
   // Fundación del negocio. La página Nosotros calcula los años de
