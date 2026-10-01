@@ -12,3 +12,11 @@
   flex: 1; /* empuja el footer hacia abajo aunque haya poco contenido */
   width: 100%;
 }
+
+/* Espacio inferior en móvil para evitar que la barra flotante tape el contenido */
+@media (max-width: 767px) {
+  .layout-tienda--con-barra-flotante {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
