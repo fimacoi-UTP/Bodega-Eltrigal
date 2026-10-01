@@ -180,6 +180,121 @@
   border-color: var(--color-exito) !important;
 }
 
+/* Stepper interactivo de cantidad en la tarjeta */
+.catalogo-tarjeta__stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 38px;
+  background-color: var(--color-primario-suave);
+  border: 1px solid var(--color-primario-borde);
+  border-radius: var(--radio-md);
+  padding: 2px;
+  box-shadow: var(--sombra-xs);
+  box-sizing: border-box;
+  animation: catalogoStepperEntrada var(--transicion-rapida) ease-out;
+}
+
+@keyframes catalogoStepperEntrada {
+  from {
+    opacity: 0.7;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.catalogo-tarjeta__stepper-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  min-width: 38px;
+  height: 34px;
+  min-height: 34px;
+  background-color: var(--color-primario);
+  color: var(--color-sobre-primario);
+  border: none;
+  border-radius: var(--radio-sm);
+  font-family: var(--fuente-base);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-negrita);
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--transicion-rapida),
+    transform var(--transicion-rapida),
+    opacity var(--transicion-rapida),
+    box-shadow var(--transicion-rapida);
+}
+
+.catalogo-tarjeta__stepper-btn:hover:not(:disabled) {
+  background-color: var(--color-primario-hover);
+  box-shadow: var(--sombra-xs);
+}
+
+.catalogo-tarjeta__stepper-btn:active:not(:disabled) {
+  background-color: var(--color-primario-activo);
+  transform: scale(0.92);
+}
+
+.catalogo-tarjeta__stepper-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--anillo-foco);
+}
+
+.catalogo-tarjeta__stepper-btn:disabled {
+  background-color: var(--color-borde);
+  color: var(--color-texto-tenue);
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.catalogo-tarjeta__stepper-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--esp-1);
+  padding: 0 var(--esp-1);
+  user-select: none;
+  min-width: 0;
+  flex: 1;
+}
+
+.catalogo-tarjeta__stepper-cantidad {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-extra);
+  color: var(--color-primario);
+  line-height: 1;
+}
+
+.catalogo-tarjeta__stepper-etiqueta {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-suave);
+  white-space: nowrap;
+}
+
+@media (max-width: 360px) {
+  .catalogo-tarjeta__stepper-btn {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .catalogo-tarjeta__stepper-etiqueta {
+    font-size: var(--texto-2xs);
+  }
+}
+
 /* ============================================================================
  * MEJORA DE HOVER · elevación más marcada y foco visible
  * ----------------------------------------------------------------------------

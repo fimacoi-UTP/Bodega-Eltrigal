@@ -12,6 +12,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Boton } from "../../../components/ui";
+import { useCarrito } from "../../../context/CarritoContext";
 import { aRuta } from "../../../routes/rutas";
 import { formatearSoles } from "../../../utils/formato";
 import { useAgregarAlCarrito } from "./useAgregarAlCarrito";
@@ -35,6 +36,7 @@ export function TarjetaProducto({ producto, alAgregar, agregando = false }) {
   const [errorImagen, setErrorImagen] = useState(false);
   const [recienAgregado, setRecienAgregado] = useState(false);
   const { agregarAlCarrito: agregarPorDefecto, agregandoId } = useAgregarAlCarrito();
+  const { items, cambiarCantidad, quitar } = useCarrito();
 
   if (!producto) return null;
 
@@ -43,8 +45,13 @@ export function TarjetaProducto({ producto, alAgregar, agregando = false }) {
   const pocoStock = !sinStock && Number(producto.stock) <= stockMinimo;
 
   const estaCargando = agregando || agregandoId === producto.id;
-
   const iconoCategoria = ICONO_POR_CATEGORIA[producto.categoria] || "🌾";
+
+  // Sincronización con el estado global del carrito
+  const itemEnCarrito = items?.find((item) => String(item.id) === String(producto.id));
+  const cantidadEnCarrito = itemEnCarrito ? Number(itemEnCarrito.cantidad) : 0;
+  const stockMaximo = Number(producto.stock) || 0;
+  const limiteAlcanzado = cantidadEnCarrito >= stockMaximo;
 
   const handleAgregar = async (e) => {
     e.preventDefault();
@@ -62,6 +69,25 @@ export function TarjetaProducto({ producto, alAgregar, agregando = false }) {
     setTimeout(() => {
       setRecienAgregado(false);
     }, 1200);
+  };
+
+  const handleAumentar = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (limiteAlcanzado) return;
+    cambiarCantidad(producto.id, cantidadEnCarrito + 1);
+  };
+
+  const handleDisminuir = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (cantidadEnCarrito <= 1) {
+      quitar(producto.id);
+    } else {
+      cambiarCantidad(producto.id, cantidadEnCarrito - 1);
+    }
   };
 
   const enlaceDetalle = aRuta.productoDetalle(producto.id);
@@ -153,24 +179,70 @@ export function TarjetaProducto({ producto, alAgregar, agregando = false }) {
         </div>
       </div>
 
-      {/* Acción principal: Agregar al carrito */}
+      {/* Acción principal: Botón Agregar o Stepper interactivo */}
       <div className="catalogo-tarjeta__pie">
-        <Boton
-          variante={recienAgregado ? "secundario" : "primario"}
-          tamano="sm"
-          bloque
-          disabled={sinStock}
-          cargando={estaCargando}
-          onClick={handleAgregar}
-          className={recienAgregado ? "catalogo-tarjeta__boton-agregado" : ""}
-          aria-label={`Agregar ${producto.nombre} al carrito`}
-        >
-          {sinStock
-            ? "Sin stock"
-            : recienAgregado
-              ? "✓ ¡Agregado!"
-              : "🛒 Agregar al carrito"}
-        </Boton>
+        {cantidadEnCarrito > 0 ? (
+          <div
+            className="catalogo-tarjeta__stepper"
+            role="group"
+            aria-label={`Control de cantidad para ${producto.nombre} en el carrito`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <button
+              type="button"
+              className="catalogo-tarjeta__stepper-btn catalogo-tarjeta__stepper-btn--menos"
+              onClick={handleDisminuir}
+              aria-label={
+                cantidadEnCarrito === 1
+                  ? `Quitar ${producto.nombre} del carrito`
+                  : `Disminuir cantidad de ${producto.nombre}`
+              }
+              title={cantidadEnCarrito === 1 ? "Quitar del carrito" : "Disminuir cantidad"}
+            >
+              <span aria-hidden="true">−</span>
+            </button>
+
+            <div className="catalogo-tarjeta__stepper-info">
+              <span className="catalogo-tarjeta__stepper-cantidad">
+                {cantidadEnCarrito}
+              </span>
+              <span className="catalogo-tarjeta__stepper-etiqueta">
+                en carrito
+              </span>
+            </div>
+
+            <button
+              type="button"
+              className="catalogo-tarjeta__stepper-btn catalogo-tarjeta__stepper-btn--mas"
+              onClick={handleAumentar}
+              disabled={limiteAlcanzado}
+              aria-label={`Aumentar cantidad de ${producto.nombre}`}
+              title={limiteAlcanzado ? `Stock máximo disponible (${stockMaximo})` : "Aumentar cantidad"}
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+          </div>
+        ) : (
+          <Boton
+            variante={recienAgregado ? "secundario" : "primario"}
+            tamano="sm"
+            bloque
+            disabled={sinStock}
+            cargando={estaCargando}
+            onClick={handleAgregar}
+            className={recienAgregado ? "catalogo-tarjeta__boton-agregado" : ""}
+            aria-label={`Agregar ${producto.nombre} al carrito`}
+          >
+            {sinStock
+              ? "Sin stock"
+              : recienAgregado
+                ? "✓ ¡Agregado!"
+                : "🛒 Agregar al carrito"}
+          </Boton>
+        )}
       </div>
     </article>
   );
