@@ -1,0 +1,143 @@
+/* ============================================================================
+ * BarraFlotanteCarrito.css · Estilos de la barra flotante móvil
+ * ----------------------------------------------------------------------------
+ * Mobile-first con tokens de tokens.css.
+ * Se muestra únicamente en pantallas móviles (< 768px).
+ * ==========================================================================*/
+
+.barra-flotante-carrito {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-navegacion);
+  padding: var(--esp-2) var(--esp-4);
+  padding-bottom: calc(var(--esp-3) + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  animation: barraFlotanteAparecer var(--transicion-lenta) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes barraFlotanteAparecer {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.barra-flotante-carrito__caja {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--esp-3) var(--esp-4);
+  background-color: var(--neutro-900);
+  color: var(--color-texto-invertido);
+  border-radius: var(--radio-pastilla);
+  box-shadow:
+    0 10px 25px -3px rgba(26, 23, 20, 0.35),
+    0 4px 10px -2px rgba(26, 23, 20, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-decoration: none;
+  pointer-events: auto;
+  min-height: 52px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--transicion-rapida),
+    background-color var(--transicion-rapida),
+    box-shadow var(--transicion-rapida);
+}
+
+.barra-flotante-carrito__caja:active {
+  transform: scale(0.98);
+  background-color: var(--neutro-800);
+}
+
+.barra-flotante-carrito__caja:focus-visible {
+  outline: none;
+  box-shadow: var(--anillo-foco), 0 10px 25px rgba(26, 23, 20, 0.35);
+}
+
+.barra-flotante-carrito__info {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  min-width: 0;
+}
+
+.barra-flotante-carrito__icono {
+  font-size: var(--texto-lg);
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+.barra-flotante-carrito__textos {
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-2);
+  font-size: var(--texto-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barra-flotante-carrito__conteo {
+  color: var(--neutro-200);
+  font-weight: var(--peso-medio);
+}
+
+.barra-flotante-carrito__separador {
+  color: var(--neutro-500);
+  font-weight: var(--peso-negrita);
+}
+
+.barra-flotante-carrito__total {
+  color: var(--color-acento);
+  font-weight: var(--peso-extra);
+  font-size: var(--texto-base);
+  letter-spacing: -0.01em;
+}
+
+.barra-flotante-carrito__accion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+  background-color: var(--color-primario);
+  color: var(--color-sobre-primario);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-negrita);
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--radio-pastilla);
+  flex-shrink: 0;
+  box-shadow: var(--sombra-xs);
+  transition:
+    background-color var(--transicion-rapida),
+    transform var(--transicion-rapida);
+}
+
+.barra-flotante-carrito__flecha {
+  font-size: var(--texto-sm);
+  line-height: 1;
+  transition: transform var(--transicion-rapida);
+}
+
+.barra-flotante-carrito__caja:hover .barra-flotante-carrito__flecha {
+  transform: translateX(2px);
+}
+
+/* ============================================================================
+ * ESCRITORIO · Se oculta por completo (el carrito ya está en el navbar)
+ * ==========================================================================*/
+@media (min-width: 768px) {
+  .barra-flotante-carrito {
+    display: none !important;
+  }
+}
