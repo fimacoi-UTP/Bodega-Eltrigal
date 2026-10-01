@@ -22,3 +22,4 @@ export { EstadoVacio } from "./EstadoVacio";
 export { Modal } from "./Modal";
 export { MenuKebab } from "./MenuKebab";
 export { Drawer } from "./Drawer";
+export { SkeletonTarjeta } from "./SkeletonTarjeta";
