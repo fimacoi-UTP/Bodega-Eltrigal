@@ -23,9 +23,9 @@ import {
   Alerta,
   Badge,
   Boton,
-  Cargando,
   EstadoVacio,
   Input,
+  SkeletonTarjeta,
 } from "../../components/ui";
 import { CarruselHero, TarjetaProducto, useAgregarAlCarrito } from "./catalogo";
 import "./HomePage.css";
@@ -213,14 +213,22 @@ export function HomePage() {
         )}
       </section>
 
-      {/* 3. CONTENIDO: CARGANDO / VACÍO / GRILLA */}
+      {/* 3. CONTENIDO: SKELETON LOADERS / VACÍO / GRILLA */}
       <section
         id="catalogo-productos"
         className="seccion catalogo-productos catalogo-aparece catalogo-aparece--3"
         aria-label="Lista de productos"
       >
         {cargando ? (
-          <Cargando texto="Cargando catálogo de productos…" />
+          <div
+            className="rejilla catalogo-rejilla"
+            aria-busy="true"
+            aria-label="Cargando productos del catálogo"
+          >
+            {Array.from({ length: 8 }).map((_, index) => (
+              <SkeletonTarjeta key={index} />
+            ))}
+          </div>
         ) : productosVisibles.length === 0 ? (
           <EstadoVacio
             icono="🔍"
