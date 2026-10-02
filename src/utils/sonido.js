@@ -53,3 +53,38 @@ export function reproducirChimeNotificacion() {
     console.warn("[Sonido] No se pudo reproducir el chime de notificación:", err);
   }
 }
+
+/**
+ * Reproduce un bip corto de alerta con Web Audio API para aviso de stock mínimo.
+ * Utiliza un OscillatorNode (sine, ~880 Hz) con GainNode bajo (~0.1),
+ * suena ~0.25 s con fade-out y cierra el contexto al terminar.
+ */
+export function reproducirAlertaStock() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+
+    osc.onended = () => {
+      ctx.close().catch(() => {});
+    };
+  } catch {
+    // Ignorar si el audio no está disponible o está bloqueado en el navegador
+  }
+}
+

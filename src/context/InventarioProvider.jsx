@@ -143,10 +143,10 @@ export function InventarioProvider({ children }) {
    * Para ingresos de mercadería usen delta positivo; para mermas, negativo.
    */
   const ajustarStock = useCallback(
-    async (id, delta) => {
-      const actualizado = await productoRepository.ajustarStock(id, delta);
+    async (id, delta, motivo = "") => {
+      const r = await productoRepository.ajustarStock(id, delta, motivo);
       await refrescar();
-      return actualizado;
+      return r;
     },
     [refrescar],
   );

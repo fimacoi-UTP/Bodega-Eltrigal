@@ -22,6 +22,7 @@ import { crearRepositorioBase } from "./repositorioBase";
 import { CLAVES } from "./claves";
 import { normalizarTexto } from "../utils/formato";
 import { productosApi } from "../api/productosApi";
+import { movimientosApi } from "../api/movimientosApi";
 
 const base = crearRepositorioBase({
   clave: CLAVES.PRODUCTOS,
@@ -135,27 +136,15 @@ export const productoRepository = {
   /* ---------------------------------------------------------------- STOCK */
 
   /**
-   * Suma o resta unidades al stock de UN producto.
+   * Suma o resta unidades al stock de UN producto mediante la API de movimientos.
    *
-   * @param {string} id
-   * @param {number} delta - positivo para ingresar mercadería, negativo para
-   *                         descontar por una venta.
-   * @returns {Promise<object>} el producto actualizado.
+   * @param {string|number} id
+   * @param {number} delta - positivo para ingresar mercadería, negativo para salida/merma.
+   * @param {string} [motivo=""]
+   * @returns {Promise<object>} resultado del movimiento registrado.
    */
-  async ajustarStock(id, delta) {
-    const producto = await base.obtenerPorId(id);
-    if (!producto) {
-      throw new Error(`No existe el producto "${id}".`);
-    }
-
-    const nuevoStock = Number(producto.stock) + Number(delta);
-    if (nuevoStock < 0) {
-      throw new Error(
-        `Stock insuficiente de "${producto.nombre}". Disponible: ${producto.stock}, solicitado: ${Math.abs(delta)}.`,
-      );
-    }
-
-    return base.actualizar(id, { stock: nuevoStock });
+  async ajustarStock(id, delta, motivo = "") {
+    return movimientosApi.registrar({ productoId: id, delta, motivo });
   },
 
   /**
