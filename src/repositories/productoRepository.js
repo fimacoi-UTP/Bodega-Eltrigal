@@ -21,6 +21,7 @@
 import { crearRepositorioBase } from "./repositorioBase";
 import { CLAVES } from "./claves";
 import { normalizarTexto } from "../utils/formato";
+import { productosApi } from "../api/productosApi";
 
 const base = crearRepositorioBase({
   clave: CLAVES.PRODUCTOS,
@@ -29,9 +30,51 @@ const base = crearRepositorioBase({
 });
 
 export const productoRepository = {
-  // Hereda: obtenerTodos, obtenerPorId, obtenerDonde, contar,
-  //         crear, actualizar, eliminar, reemplazarTodos
+  // Hereda métodos de escritura: crear, actualizar, eliminar, reemplazarTodos, etc.
   ...base,
+
+  /* ------------------------------------------------------------- LECTURA (API) */
+
+  /**
+   * Obtiene todos los productos desde el backend Spring Boot.
+   * @returns {Promise<Array<object>>}
+   */
+  async obtenerTodos() {
+    return productosApi.listar();
+  },
+
+  /** Alias para listar() */
+  async listar() {
+    return this.obtenerTodos();
+  },
+
+  /**
+   * Busca un producto por su id en el backend Spring Boot.
+   * @param {string|number} id
+   * @returns {Promise<object|null>}
+   */
+  async obtenerPorId(id) {
+    return productosApi.obtenerPorId(id);
+  },
+
+  /**
+   * Devuelve los productos que cumplan una condición dada.
+   * Filtra en memoria sobre la lista obtenida de la API.
+   * @param {(producto: object) => boolean} condicion
+   */
+  async obtenerDonde(condicion) {
+    const productos = await this.obtenerTodos();
+    return productos.filter(condicion);
+  },
+
+  /**
+   * Cuenta cuántos productos existen en el catálogo.
+   * @returns {Promise<number>}
+   */
+  async contar() {
+    const productos = await this.obtenerTodos();
+    return productos.length;
+  },
 
   /* ------------------------------------------------------------- CONSULTAS */
 
@@ -41,12 +84,12 @@ export const productoRepository = {
    * desactivados para poder reactivarlos.
    */
   async obtenerActivos() {
-    return base.obtenerDonde((producto) => producto.activo !== false);
+    return this.obtenerDonde((producto) => producto.activo !== false);
   },
 
   /** Productos de una categoría. @param {string} categoria */
   async obtenerPorCategoria(categoria) {
-    return base.obtenerDonde((producto) => producto.categoria === categoria);
+    return this.obtenerDonde((producto) => producto.categoria === categoria);
   },
 
   /**
@@ -56,7 +99,7 @@ export const productoRepository = {
    * @returns {Promise<string[]>}
    */
   async obtenerCategorias() {
-    const productos = await base.obtenerTodos();
+    const productos = await this.obtenerTodos();
     const categorias = new Set(
       productos.map((producto) => producto.categoria).filter(Boolean),
     );
@@ -69,10 +112,11 @@ export const productoRepository = {
    */
   async buscar(texto) {
     const consulta = normalizarTexto(texto).trim();
-    if (!consulta) return base.obtenerTodos();
+    if (!consulta) return this.obtenerTodos();
 
-    return base.obtenerDonde((producto) =>
+    return this.obtenerDonde((producto) =>
       [producto.nombre, producto.marca, producto.categoria]
+        .filter(Boolean)
         .map(normalizarTexto)
         .some((campo) => campo.includes(consulta)),
     );
@@ -83,7 +127,7 @@ export const productoRepository = {
    * inventario para las alertas de reposición.
    */
   async obtenerBajoStock() {
-    return base.obtenerDonde(
+    return this.obtenerDonde(
       (producto) => Number(producto.stock) <= Number(producto.stockMinimo ?? 0),
     );
   },

@@ -31,6 +31,7 @@
  * ==========================================================================*/
 
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import ScrollToTop from "../components/ScrollToTop";
 
 // Layouts
 import LayoutTienda from "../components/layout/LayoutTienda";
@@ -65,6 +66,7 @@ import { ROLES, ROLES_DASHBOARD } from "../constantes";
 export function AppRouter() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* ================================================================
          * 1. LOGIN · pantalla propia, sin navbar ni sidebar
