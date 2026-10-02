@@ -18,7 +18,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "./AuthContext";
-import { usuarioRepository } from "../repositories";
+import { authApi } from "../api/authApi";
 import { ROLES_DASHBOARD } from "../constantes";
 
 export function AuthProvider({ children }) {
@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
 
     async function restaurarSesion() {
       try {
-        const guardado = await usuarioRepository.obtenerSesion();
+        const guardado = authApi.obtenerUsuarioSesion();
         if (!cancelado) setUsuario(guardado);
       } catch (fallo) {
         console.error("[El Trigal] No se pudo restaurar la sesión:", fallo);
@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
    * --------------------------------------------------------------------- */
 
   /**
-   * Inicia sesión.
+   * Inicia sesión llamando a la API de autenticación del backend Spring Boot.
    * @param {string} correo
    * @param {string} clave
    * @returns {Promise<object>} el usuario autenticado (útil para redirigir
@@ -76,8 +76,7 @@ export function AuthProvider({ children }) {
    */
   const iniciarSesion = useCallback(async (correo, clave) => {
     try {
-      const autenticado = await usuarioRepository.autenticar(correo, clave);
-      await usuarioRepository.guardarSesion(autenticado);
+      const autenticado = await authApi.login(correo, clave);
       setError(null);
       setUsuario(autenticado); // ← aquí se dispara el re-render global (Observer)
       return autenticado;
@@ -89,7 +88,7 @@ export function AuthProvider({ children }) {
 
   /** Cierra la sesión y limpia el estado. */
   const cerrarSesion = useCallback(async () => {
-    await usuarioRepository.cerrarSesion();
+    authApi.logout();
     setUsuario(null);
     setError(null);
   }, []);
