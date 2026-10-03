@@ -13,7 +13,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useInventario } from "../../hooks/useInventario";
-import { pedidoRepository } from "../../repositories";
+import { pedidosApi } from "../../api/pedidosApi";
 import { CLAVES } from "../../repositories/claves";
 import {
   ESTADOS_PEDIDO,
@@ -37,7 +37,6 @@ import {
 } from "../../components/ui";
 import {
   obtenerEstadoPedido,
-  transicionarEstadoPedido,
 } from "../tienda/checkout/estados";
 import "./PedidosPage.css";
 
@@ -50,7 +49,7 @@ const VARIANTES_ESTADO_PEDIDO = {
 };
 
 export function PedidosPage() {
-  const { reponerStock } = useInventario();
+  const { refrescar } = useInventario();
 
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -67,20 +66,46 @@ export function PedidosPage() {
   const [actualizando, setActualizando] = useState(false);
   const [modalCancelarAbierto, setModalCancelarAbierto] = useState(false);
 
+  const cargarPedidos = async () => {
+    try {
+      const todos = await pedidosApi.listar();
+      if (!Array.isArray(todos)) return;
+
+      todos.sort((a, b) => {
+        const fa = new Date(b.fechaCreacion || b.fecha || 0).getTime();
+        const fb = new Date(a.fechaCreacion || a.fecha || 0).getTime();
+        return fa - fb;
+      });
+      setPedidos(todos);
+
+      setPedidoSeleccionado((prev) => {
+        if (!prev) return null;
+        const actualizado = todos.find((p) => p.id === prev.id);
+        return actualizado || prev;
+      });
+    } catch {
+      setError("Error al cargar la lista de pedidos.");
+    } finally {
+      setCargando(false);
+    }
+  };
+
   // Carga inicial y escucha reactiva de nuevos pedidos y cambios de estado
   useEffect(() => {
     let cancelado = false;
 
-    async function cargarPedidos() {
+    async function sincronizar() {
       try {
-        const todos = await pedidoRepository.obtenerTodos();
+        const todos = await pedidosApi.listar();
         if (cancelado || !Array.isArray(todos)) return;
 
-        // Ordenar por fecha descendente (más recientes primero)
-        todos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+        todos.sort((a, b) => {
+          const fa = new Date(b.fechaCreacion || b.fecha || 0).getTime();
+          const fb = new Date(a.fechaCreacion || a.fecha || 0).getTime();
+          return fa - fb;
+        });
         setPedidos(todos);
 
-        // Si hay un modal abierto con un pedido, actualizarlo también
         setPedidoSeleccionado((prev) => {
           if (!prev) return null;
           const actualizado = todos.find((p) => p.id === prev.id);
@@ -93,15 +118,15 @@ export function PedidosPage() {
       }
     }
 
-    cargarPedidos();
+    sincronizar();
 
     const handleActualizacion = () => {
-      cargarPedidos();
+      sincronizar();
     };
 
     const handleStorage = (e) => {
       if (e.key === CLAVES.PEDIDOS || !e.key) {
-        cargarPedidos();
+        sincronizar();
       }
     };
 
@@ -111,7 +136,7 @@ export function PedidosPage() {
 
     // Polling de respaldo cada 3.5 segundos
     const intervalo = setInterval(() => {
-      cargarPedidos();
+      sincronizar();
     }, 3500);
 
     return () => {
@@ -124,13 +149,8 @@ export function PedidosPage() {
   }, []);
 
   const refrescarPedidos = async () => {
-    try {
-      const todos = await pedidoRepository.obtenerTodos();
-      todos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-      setPedidos(todos);
-    } catch {
-      setError("Error al recargar pedidos.");
-    }
+    setCargando(true);
+    await cargarPedidos();
   };
 
   // Métricas rápidas
@@ -178,35 +198,37 @@ export function PedidosPage() {
     });
   }, [pedidos, filtroEstado, filtroEntrega, busqueda]);
 
-  // Manejador de transición con el Patrón State
-  const ejecutarTransicion = async (nuevoEstado) => {
-    if (!pedidoSeleccionado) return;
+  // Manejador de transición
+  const aplicarTransicion = async (pedido, nuevoEstado) => {
+    const pedidoTarget = pedido || pedidoSeleccionado;
+    if (!pedidoTarget) return;
+
     setActualizando(true);
     setError(null);
     setMensajeExito(null);
 
     try {
-      const pedidoActualizado = await transicionarEstadoPedido(
-        pedidoSeleccionado,
-        nuevoEstado,
-        { reponerStock }
-      );
+      const pedidoActualizado = await pedidosApi.cambiarEstado(pedidoTarget.id, nuevoEstado);
+      await cargarPedidos();
+      await refrescar(); // para que el catálogo refleje el stock cuando se cancela
 
-      // Actualizar en el estado local de pedidos
-      setPedidos((prev) =>
-        prev.map((p) => (p.id === pedidoActualizado.id ? pedidoActualizado : p))
-      );
-      setPedidoSeleccionado(pedidoActualizado);
+      if (pedidoActualizado) {
+        setPedidoSeleccionado(pedidoActualizado);
+      }
       setModalCancelarAbierto(false);
 
       const etiquetaNuevo = ETIQUETAS_ESTADO_PEDIDO[nuevoEstado] || nuevoEstado;
-      setMensajeExito(`Pedido #${pedidoActualizado.id.slice(-6)} actualizado a "${etiquetaNuevo}".`);
+      const codigoVisible = pedidoTarget.codigo || `#${String(pedidoTarget.id).slice(-6)}`;
+      setMensajeExito(`Pedido ${codigoVisible} actualizado a "${etiquetaNuevo}".`);
     } catch (err) {
+      console.error("Error al actualizar estado del pedido:", err);
       setError(err.message || "Error al realizar la transición de estado.");
     } finally {
       setActualizando(false);
     }
   };
+
+  const ejecutarTransicion = (nuevoEstado) => aplicarTransicion(pedidoSeleccionado, nuevoEstado);
 
   const abrirDetalle = (pedido) => {
     setPedidoSeleccionado(pedido);
@@ -390,9 +412,9 @@ export function PedidosPage() {
                 <CardCabecera>
                   <div className="pedidos-card__cabecera-top">
                     <div>
-                      <div className="pedidos-card__id">Pedido #{pedido.id.slice(-6)}</div>
+                      <div className="pedidos-card__id">{pedido.codigo || `Pedido #${String(pedido.id).slice(-6)}`}</div>
                       <div className="pedidos-card__fecha">
-                        {formatearFecha(pedido.fecha, { conHora: true })}
+                        {formatearFecha(pedido.fechaCreacion || pedido.fecha, { conHora: true })}
                       </div>
                     </div>
                     <Badge variante={varianteBadge} punto>
@@ -458,7 +480,7 @@ export function PedidosPage() {
         <Modal
           abierto={pedidoSeleccionado !== null}
           alCerrar={cerrarDetalle}
-          titulo={`Gestión de Pedido #${pedidoSeleccionado.id}`}
+          titulo={`Gestión de Pedido ${pedidoSeleccionado.codigo || `#${pedidoSeleccionado.id}`}`}
         >
           <div className="pedidos-modal">
             {/* Información del Cliente y Entrega */}
@@ -611,7 +633,7 @@ export function PedidosPage() {
                   {pedidoSeleccionado.historialEstados.map((h, i) => (
                     <div key={i} className="pedidos-modal__historial-item">
                       <strong>
-                        {ETIQUETAS_ESTADO_PEDIDO[h.estado] || h.estado}
+                        {ETIQUETAS_ESTADO_PEDIDO[h.estadoNuevo || h.estado] || h.estadoNuevo || h.estado}
                       </strong>
                       <span className="pedidos-modal__historial-fecha">
                         {formatearFecha(h.fecha, { conHora: true })}

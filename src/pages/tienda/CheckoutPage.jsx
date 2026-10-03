@@ -29,12 +29,11 @@ import { Link } from "react-router-dom";
 import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
 import { useCarrito } from "../../context/CarritoContext";
-import { pedidoRepository } from "../../repositories";
+import { pedidosApi } from "../../api/pedidosApi";
 import { RUTAS } from "../../routes/rutas";
 import {
   METODOS_PAGO,
   TIPOS_ENTREGA,
-  ESTADOS_PEDIDO,
 } from "../../constantes";
 import { formatearSoles } from "../../utils/formato";
 
@@ -73,9 +72,16 @@ function FormularioCheckoutPrincipal({
   subtotalCarrito,
   vaciarCarrito,
   onPedidoCreado,
-  descontarStock,
+  refrescar: refrescarProp,
   onCargarProductosEjemplo,
 }) {
+  const { refrescar: refrescarInventario } = useInventario();
+  const refrescar = refrescarProp || refrescarInventario;
+
+  // Paso actual y pedido completado para seguimiento
+  const [paso, setPaso] = useState(1);
+  const [pedidoCompletado, setPedidoCompletado] = useState(null);
+
   // Datos del Cliente (prellenados desde sesión si existe)
   const [datosCliente, setDatosCliente] = useState({
     nombre: usuario?.nombre || "",
@@ -173,7 +179,7 @@ function FormularioCheckoutPrincipal({
     );
   };
 
-  const handleConfirmarCompra = async (e) => {
+  const confirmarPedido = async (e) => {
     e?.preventDefault();
     setErrorGlobal(null);
 
@@ -196,57 +202,49 @@ function FormularioCheckoutPrincipal({
       const estrategia = obtenerEstrategiaPago(metodoPago);
       const resultadoPago = await estrategia.procesarPago(total, datosPago);
 
-      /* ======================================================================
-       * 🥇 LA REGLA DE ORO DEL PROYECTO
-       * Descontar stock ANTES de registrar el pedido.
-       * ==================================================================== */
-      const itemsParaStock = items.map((it) => ({
-        productoId: it.productoId ?? it.id,
-        cantidad: Number(it.cantidad ?? 1),
-      }));
+      // Resolver el método de pago al valor que espera el backend
+      let metodoPagoBackend;
+      if (metodoPago === METODOS_PAGO.EFECTIVO) metodoPagoBackend = "EFECTIVO";
+      else if (metodoPago === METODOS_PAGO.TARJETA) metodoPagoBackend = "TARJETA";
+      else metodoPagoBackend = (datosPago.billetera === "Plin" ? "PLIN" : "YAPE"); // BILLETERA_DIGITAL
 
-      // Paso 1: Descontar stock atómicamente
-      await descontarStock(itemsParaStock);
+      // Para delivery, conservar la referencia dentro de la dirección (el backend no tiene campo aparte)
+      const direccionFinal = tipoEntrega === TIPOS_ENTREGA.DELIVERY
+        ? (datosEntrega.direccion.trim() + (datosEntrega.referencia?.trim() ? ` (Ref: ${datosEntrega.referencia.trim()})` : ""))
+        : "Recojo en tienda - Bodega El Trigal";
 
-      // Paso 2: Crear el pedido en el repositorio con canal 'web'
-      const datosNuevoPedido = {
-        clienteId: usuario?.id ?? "cliente-invitado",
-        clienteNombre: datosCliente.nombre.trim(),
-        clienteCorreo: datosCliente.correo.trim(),
-        clienteTelefono: datosCliente.telefono.trim(),
-        canal: "web",
-        items: items.map((it) => {
-          const pId = it.productoId ?? it.id;
-          const precioU = Number(it.precio ?? it.precioUnitario ?? 0);
-          const c = Number(it.cantidad ?? 1);
-          return {
-            productoId: pId,
-            nombre: it.nombre,
-            cantidad: c,
-            precioUnitario: precioU,
-            subtotal: precioU * c,
-          };
-        }),
-        subtotal,
-        costoEnvio,
-        total,
+      const pedidoCreado = await pedidosApi.crear({
+        idUsuario: usuario?.id,
         tipoEntrega,
-        direccionEntrega:
-          tipoEntrega === TIPOS_ENTREGA.DELIVERY
-            ? datosEntrega.direccion.trim()
-            : "Recojo en tienda - Bodega El Trigal",
-        referenciaEntrega: datosEntrega.referencia?.trim() || "",
-        metodoPago,
-        datosPago: resultadoPago,
-        estado: ESTADOS_PEDIDO.PENDIENTE,
-      };
+        direccionEntrega: direccionFinal,
+        metodoPago: metodoPagoBackend,
+        referenciaPago: resultadoPago.referencia ?? resultadoPago.numeroOperacion ?? null,
+        costoEnvio,
+        items: items.map((it) => ({ productoId: it.productoId ?? it.id, cantidad: Number(it.cantidad ?? 1) })),
+      });
 
-      const pedidoCreado = await pedidoRepository.crear(datosNuevoPedido);
+      await refrescar(); // regla de oro: el stock ya bajó en la BD
 
-      // Paso 3: vaciar el carrito real. El contador del navbar y la página
-      // /carrito se actualizan solos (Context + re-render).
       vaciarCarrito();
-      onPedidoCreado(pedidoCreado);
+      // Enriquecer la pantalla de éxito con datos locales que el backend no guarda:
+      Object.assign(pedidoCreado, {
+        fecha: pedidoCreado.fechaCreacion || new Date().toISOString(),
+        canal: "web",
+        datosPago: resultadoPago,
+        clienteNombre: datosCliente.nombre,
+        clienteCorreo: datosCliente.correo,
+        clienteTelefono: datosCliente.telefono,
+      });
+
+      setPedidoCompletado({
+        ...pedidoCreado,
+        datosPago: resultadoPago,
+        clienteNombre: datosCliente.nombre,
+        clienteCorreo: datosCliente.correo,
+        clienteTelefono: datosCliente.telefono,
+      });
+      setPaso(3);
+      if (onPedidoCreado) onPedidoCreado(pedidoCreado);
     } catch (err) {
       console.error("[Checkout] Error en confirmación:", err);
       setErrorGlobal(err.message || "Ocurrió un error inesperado al procesar la compra.");
@@ -254,6 +252,22 @@ function FormularioCheckoutPrincipal({
       setProcesando(false);
     }
   };
+
+  const handleConfirmarCompra = confirmarPedido;
+
+  if (paso === 3 && pedidoCompletado) {
+    return (
+      <SeguimientoPedido
+        pedido={pedidoCompletado}
+        onActualizarPedido={setPedidoCompletado}
+        onNuevaCompra={() => {
+          setPedidoCompletado(null);
+          setPaso(1);
+          onCargarProductosEjemplo?.();
+        }}
+      />
+    );
+  }
 
   return (
     <>
@@ -347,7 +361,7 @@ function FormularioCheckoutPrincipal({
 }
 
 export function CheckoutPage() {
-  const { productosActivos, cargando: cargandoInventario, descontarStock } = useInventario();
+  const { productosActivos, cargando: cargandoInventario, refrescar } = useInventario();
   const { usuario, estaAutenticado, cargando: cargandoAuth } = useAuth();
 
   /* 🛒 FUENTE ÚNICA DEL PEDIDO
@@ -439,7 +453,7 @@ export function CheckoutPage() {
         subtotalCarrito={totalCarrito}
         vaciarCarrito={vaciar}
         onPedidoCreado={setPedidoConfirmado}
-        descontarStock={descontarStock}
+        refrescar={refrescar}
         onCargarProductosEjemplo={cargarProductosEjemplo}
       />
     </div>
