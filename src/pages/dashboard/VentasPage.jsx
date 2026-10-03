@@ -13,7 +13,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
-import { ventaRepository } from "../../repositories";
+import { ventasApi } from "../../api/ventasApi";
 import { BODEGA, METODOS_PAGO, ETIQUETAS_METODO_PAGO } from "../../constantes";
 import { formatearSoles, formatearFecha } from "../../utils/formato";
 import {
@@ -388,7 +388,7 @@ function TicketVenta({ venta }) {
 }
 
 export function VentasPage() {
-  const { productosActivos, categorias, descontarStock, reponerStock, obtenerProducto } = useInventario();
+  const { productosActivos, categorias, refrescar, obtenerProducto } = useInventario();
   const { usuario } = useAuth();
 
   const [busqueda, setBusqueda] = useState("");
@@ -454,7 +454,7 @@ export function VentasPage() {
   useEffect(() => {
     async function cargarVentas() {
       try {
-        const ventas = await ventaRepository.obtenerDeHoy();
+        const ventas = await ventasApi.obtenerDeHoy();
         setVentasDelDia(ventas);
       } catch (err) {
         console.error("Error al cargar ventas:", err);
@@ -593,62 +593,34 @@ export function VentasPage() {
     setError(null);
 
     try {
-      // 2. REGLA DE ORO: Descontar stock PRIMERO
-      const itemsParaStock = carrito.map((item) => ({
-        productoId: item.productoId,
-        cantidad: item.cantidad,
-      }));
-      await descontarStock(itemsParaStock);
-
-      // 3. Procesar el pago con la estrategia (Strategy Pattern)
+      // 2. Procesar el pago con la estrategia (Strategy Pattern)
       const resultadoPago = await estrategiaActual.procesarPago(total, datosPago);
 
-      // 4. Calcular montos de cobro y vuelto
       const montoRecibido = metodoPago === METODOS_PAGO.EFECTIVO
         ? (datosPago.montoExacto ? total : Number(datosPago.pagaCon) || total)
-        : total;
-      const vuelto = metodoPago === METODOS_PAGO.EFECTIVO
-        ? (resultadoPago.vuelto ?? 0)
-        : 0;
+        : null;
 
-      // 5. Registrar la venta en ventaRepository
-      const nuevaVenta = {
-        fecha: new Date().toISOString(),
-        cajeroId: usuario?.id || "cajero",
-        cajeroNombre: usuario?.nombre || "Cajero",
-        items: carrito.map((item) => ({
-          productoId: item.productoId,
-          nombre: item.nombre,
-          cantidad: item.cantidad,
-          precioUnitario: item.precioUnitario,
-          precioOriginal: item.precioOriginal,
-          tieneDescuento: item.tieneDescuento,
-          promocionesAplicadas: item.promocionesAplicadas || [],
-          subtotal: item.subtotal,
-        })),
-        total,
+      const ventaRegistrada = await ventasApi.crear({
+        idUsuario: usuario?.id,
         metodoPago,
-        datosPago: {
-          ...datosPago,
-          ...resultadoPago,
-        },
         montoRecibido,
-        vuelto,
         referenciaPago: resultadoPago.referencia,
+        items: carrito.map((i) => ({ productoId: i.productoId, cantidad: i.cantidad })),
+      });
+
+      await refrescar(); // regla de oro: el stock ya bajó en la BD; refresca catálogo/tienda
+
+      // Enriquecer el ticket inmediato con datos que el backend no guarda:
+      setVentaExitosa({
+        ...ventaRegistrada,
+        cajeroNombre: usuario?.nombre,
+        datosPago: { ...datosPago, ...resultadoPago },
         detallePago: resultadoPago.detalle,
-        anulada: false,
-      };
-
-      const ventaRegistrada = await ventaRepository.crear(nuevaVenta);
-
-      // 6. Actualizar estados locales y mostrar ticket
-      setVentaExitosa(ventaRegistrada);
+      });
       setCarrito([]);
       setDatosPago(metodoPago === METODOS_PAGO.TARJETA ? { tipoTarjeta: "DEBITO" } : {});
       setErroresPago({});
-
-      // Recargar ventas del día
-      const ventasActualizadas = await ventaRepository.obtenerDeHoy();
+      const ventasActualizadas = await ventasApi.obtenerDeHoy();
       setVentasDelDia(ventasActualizadas);
     } catch (err) {
       setError(err.message || "Error al registrar la venta");
@@ -661,20 +633,10 @@ export function VentasPage() {
     if (!ventaAAnular) return;
 
     try {
-      // Devolver el stock
-      const itemsParaReponer = ventaAAnular.items.map((item) => ({
-        productoId: item.productoId,
-        cantidad: item.cantidad,
-      }));
-      await reponerStock(itemsParaReponer);
-
-      // Anular la venta
-      await ventaRepository.anular(ventaAAnular.id, "Anulada por el cajero");
-
-      // Recargar ventas
-      const ventasActualizadas = await ventaRepository.obtenerDeHoy();
+      await ventasApi.anular(ventaAAnular.id, "Anulada por el cajero");
+      await refrescar();
+      const ventasActualizadas = await ventasApi.obtenerDeHoy();
       setVentasDelDia(ventasActualizadas);
-
       setVentaAAnular(null);
     } catch (err) {
       setError("Error al anular la venta: " + err.message);
