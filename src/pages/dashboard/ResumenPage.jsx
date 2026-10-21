@@ -10,8 +10,9 @@
 
 import { useState, useEffect } from "react";
 import { useInventario } from "../../hooks/useInventario";
-import { ventaRepository, pedidoRepository, productoRepository } from "../../repositories";
-import { CLAVES } from "../../repositories/claves";
+import { productoRepository } from "../../repositories";
+import { ventasApi } from "../../api/ventasApi";
+import { pedidosApi } from "../../api/pedidosApi";
 import { ESTADOS_PEDIDO, ETIQUETAS_ESTADO_PEDIDO } from "../../constantes";
 import { formatearSoles, formatearFecha } from "../../utils/formato";
 import {
@@ -50,40 +51,34 @@ export function ResumenPage() {
 
     async function cargarDatos() {
       try {
-        const [ventas, pedidosActivos, bajoStock, todosLosPedidos] = await Promise.all([
-          ventaRepository.obtenerDeHoy(),
-          pedidoRepository.obtenerActivos(),
+        const [ventas, todosLosPedidos, bajoStock] = await Promise.all([
+          ventasApi.obtenerDeHoy(),
+          pedidosApi.listar(),
           productoRepository.obtenerBajoStock(),
-          // pedidoRepository no tiene un obtenerDeHoy() propio (solo ventaRepository
-          // lo tiene). Traemos todos los pedidos y filtramos el día aquí mismo, con
-          // el mismo criterio de rango horario que usa ventaRepository.obtenerDeHoy().
-          pedidoRepository.obtenerTodos(),
         ]);
 
         if (cancelado) return;
 
         setVentasHoy(ventas);
-        setPedidosPendientes(pedidosActivos.filter(p => p.estado === "PENDIENTE"));
+        setPedidosPendientes(todosLosPedidos.filter((p) => p.estado === "PENDIENTE"));
         setProductosBajoStock(bajoStock);
 
-        // Ventas web de HOY: fecha de hoy y que no esté cancelado. A propósito NO
-        // reutilizamos `pedidosActivos` (obtenerActivos() excluye ENTREGADO además
-        // de CANCELADO), porque un pedido ya entregado hoy sigue siendo una venta
-        // de hoy para efectos de este indicador.
+        // Ventas web de HOY: fecha de hoy y que no esté cancelado.
         const inicioDelDia = new Date();
         inicioDelDia.setHours(0, 0, 0, 0);
         const finDelDia = new Date();
         finDelDia.setHours(23, 59, 59, 999);
 
         const pedidosDeHoy = todosLosPedidos.filter((p) => {
-          const momento = new Date(p.fecha).getTime();
+          const momento = new Date(p.fecha ?? p.fechaCreacion).getTime();
           return momento >= inicioDelDia.getTime() && momento <= finDelDia.getTime();
         });
         setPedidosWebHoy(pedidosDeHoy.filter((p) => p.estado !== ESTADOS_PEDIDO.CANCELADO));
 
-        // Calcular productos más vendidos (ventas + pedidos)
-        const ventasItems = ventas.flatMap(v => v.items);
-        const pedidosItems = pedidosActivos.flatMap(p => p.items || []);
+        // Calcular productos más vendidos (ventas + pedidos no cancelados)
+        const pedidosValidos = todosLosPedidos.filter((p) => p.estado !== ESTADOS_PEDIDO.CANCELADO);
+        const ventasItems = ventas.flatMap((v) => v.items || []);
+        const pedidosItems = pedidosValidos.flatMap((p) => p.items || []);
         const todosLosItems = [...ventasItems, ...pedidosItems];
 
         const ventasPorProducto = todosLosItems.reduce((acc, item) => {
@@ -95,9 +90,9 @@ export function ResumenPage() {
           .map(([productoId, cantidad]) => ({
             productoId,
             cantidad,
-            producto: productos.find(p => p.id === productoId),
+            producto: productos.find((p) => p.id === productoId),
           }))
-          .filter(item => item.producto)
+          .filter((item) => item.producto)
           .sort((a, b) => b.cantidad - a.cantidad)
           .slice(0, 5);
 
@@ -111,29 +106,12 @@ export function ResumenPage() {
 
     cargarDatos();
 
-    const handleActualizacion = () => {
-      cargarDatos();
-    };
-
-    const handleStorage = (e) => {
-      if (e.key === CLAVES.PEDIDOS || e.key === CLAVES.VENTAS || !e.key) {
-        cargarDatos();
-      }
-    };
-
-    window.addEventListener("trigal:pedido-nuevo", handleActualizacion);
-    window.addEventListener("trigal:pedido-actualizado", handleActualizacion);
-    window.addEventListener("storage", handleStorage);
-
     const intervalo = setInterval(() => {
       cargarDatos();
     }, 5000);
 
     return () => {
       cancelado = true;
-      window.removeEventListener("trigal:pedido-nuevo", handleActualizacion);
-      window.removeEventListener("trigal:pedido-actualizado", handleActualizacion);
-      window.removeEventListener("storage", handleStorage);
       clearInterval(intervalo);
     };
   }, [productos]);
@@ -299,7 +277,7 @@ export function ResumenPage() {
                   <div key={pedido.id} className="resumen-page__item">
                     <div className="resumen-page__item-info">
                       <span className="resumen-page__item-nombre">Pedido #{pedido.id.slice(-6)}</span>
-                      <span className="resumen-page__item-sub">{formatearFecha(pedido.fecha, { conHora: true })}</span>
+                      <span className="resumen-page__item-sub">{formatearFecha(pedido.fecha ?? pedido.fechaCreacion, { conHora: true })}</span>
                     </div>
                     <Badge variante={VARIANTES_ESTADO_PEDIDO[pedido.estado] || "neutro"}>
                       {ETIQUETAS_ESTADO_PEDIDO[pedido.estado] || pedido.estado}
