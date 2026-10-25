@@ -283,9 +283,8 @@ export function PedidosPage() {
       {/* Métricas / Filtros rápidos por estado */}
       <div className="pedidos-page__metricas">
         <Card
-          className={`pedidos-page__metrica-card pedidos-page__metrica-card--todos ${
-            filtroEstado === "TODOS" ? "pedidos-page__metrica-card--activa" : ""
-          }`}
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--todos ${filtroEstado === "TODOS" ? "pedidos-page__metrica-card--activa" : ""
+            }`}
           onClick={() => setFiltroEstado("TODOS")}
         >
           <div className="pedidos-page__metrica-top">
@@ -296,9 +295,8 @@ export function PedidosPage() {
         </Card>
 
         <Card
-          className={`pedidos-page__metrica-card pedidos-page__metrica-card--alerta ${
-            filtroEstado === ESTADOS_PEDIDO.PENDIENTE ? "pedidos-page__metrica-card--activa" : ""
-          }`}
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--alerta ${filtroEstado === ESTADOS_PEDIDO.PENDIENTE ? "pedidos-page__metrica-card--activa" : ""
+            }`}
           onClick={() => setFiltroEstado(ESTADOS_PEDIDO.PENDIENTE)}
         >
           <div className="pedidos-page__metrica-top">
@@ -313,9 +311,8 @@ export function PedidosPage() {
         </Card>
 
         <Card
-          className={`pedidos-page__metrica-card pedidos-page__metrica-card--info ${
-            filtroEstado === ESTADOS_PEDIDO.CONFIRMADO ? "pedidos-page__metrica-card--activa" : ""
-          }`}
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--info ${filtroEstado === ESTADOS_PEDIDO.CONFIRMADO ? "pedidos-page__metrica-card--activa" : ""
+            }`}
           onClick={() => setFiltroEstado(ESTADOS_PEDIDO.CONFIRMADO)}
         >
           <div className="pedidos-page__metrica-top">
@@ -325,9 +322,8 @@ export function PedidosPage() {
         </Card>
 
         <Card
-          className={`pedidos-page__metrica-card pedidos-page__metrica-card--marca ${
-            filtroEstado === ESTADOS_PEDIDO.EN_CAMINO ? "pedidos-page__metrica-card--activa" : ""
-          }`}
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--marca ${filtroEstado === ESTADOS_PEDIDO.EN_CAMINO ? "pedidos-page__metrica-card--activa" : ""
+            }`}
           onClick={() => setFiltroEstado(ESTADOS_PEDIDO.EN_CAMINO)}
         >
           <div className="pedidos-page__metrica-top">
@@ -337,9 +333,8 @@ export function PedidosPage() {
         </Card>
 
         <Card
-          className={`pedidos-page__metrica-card pedidos-page__metrica-card--exito ${
-            filtroEstado === ESTADOS_PEDIDO.ENTREGADO ? "pedidos-page__metrica-card--activa" : ""
-          }`}
+          className={`pedidos-page__metrica-card pedidos-page__metrica-card--exito ${filtroEstado === ESTADOS_PEDIDO.ENTREGADO ? "pedidos-page__metrica-card--activa" : ""
+            }`}
           onClick={() => setFiltroEstado(ESTADOS_PEDIDO.ENTREGADO)}
         >
           <div className="pedidos-page__metrica-top">

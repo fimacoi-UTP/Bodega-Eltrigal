@@ -27,8 +27,12 @@ import { InventarioContext } from "./InventarioContext";
 import { productoRepository, promocionRepository } from "../repositories";
 import { normalizarTexto } from "../utils/formato";
 import { calcularPrecioFinal } from "../pages/dashboard/promociones/decoradores";
+import { useAuth } from "../hooks/useAuth";
 
 export function InventarioProvider({ children }) {
+  const { usuario } = useAuth();
+  const esStaff = usuario?.rol === "ADMIN" || usuario?.rol === "CAJERO";
+
   /** Copia en memoria del catálogo. Es lo que React observa y renderiza. */
   const [productos, setProductos] = useState([]);
   const [promociones, setPromociones] = useState([]);
@@ -37,11 +41,13 @@ export function InventarioProvider({ children }) {
 
   /**
    * Vuelve a leer el catálogo y promociones desde los repositorios.
+   * Si el usuario es ADMIN o CAJERO, consulta el catálogo completo de gestión.
+   * Si es visitante o cliente, consulta el catálogo público.
    */
   const refrescar = useCallback(async () => {
     try {
       const [lista, promos] = await Promise.all([
-        productoRepository.obtenerTodos(),
+        productoRepository.obtenerTodos({ publico: !esStaff }),
         promocionRepository.obtenerVigentes(),
       ]);
       setProductos(lista);
@@ -53,19 +59,10 @@ export function InventarioProvider({ children }) {
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [esStaff]);
 
   /* ------------------------------------------------------------------------
-   * Carga inicial, al montar la aplicación.
-   *
-   * La lectura va escrita DENTRO del efecto, en su propia función async, en vez
-   * de llamar a `refrescar()`. Dos razones:
-   *   · La bandera `cancelado` evita actualizar el estado si el componente ya
-   *     se desmontó (React 19 en modo estricto monta y desmonta dos veces en
-   *     desarrollo, así que esto pasa de verdad).
-   *   · ESLint (react-hooks/set-state-in-effect) pide que un efecto no dispare
-   *     cambios de estado a través de funciones externas, porque eso encadena
-   *     renders difíciles de seguir.
+   * Carga inicial y al cambiar de rol/sesión (Staff <-> Público).
    * --------------------------------------------------------------------- */
   useEffect(() => {
     let cancelado = false;
@@ -73,7 +70,7 @@ export function InventarioProvider({ children }) {
     async function cargarCatalogo() {
       try {
         const [lista, promos] = await Promise.all([
-          productoRepository.obtenerTodos(),
+          productoRepository.obtenerTodos({ publico: !esStaff }),
           promocionRepository.obtenerVigentes(),
         ]);
         if (cancelado) return;
@@ -93,7 +90,7 @@ export function InventarioProvider({ children }) {
     return () => {
       cancelado = true;
     };
-  }, []);
+  }, [esStaff]);
 
   /* ========================================================================
    * OPERACIONES DE ESCRITURA
@@ -121,11 +118,12 @@ export function InventarioProvider({ children }) {
   /** Modifica un producto (precio, nombre, categoría, etc.). */
   const actualizarProducto = useCallback(
     async (id, cambios) => {
-      const actualizado = await productoRepository.actualizar(id, cambios);
+      const actual = productos.find((p) => String(p.id) === String(id));
+      const actualizado = await productoRepository.actualizar(id, { ...actual, ...cambios });
       await refrescar();
       return actualizado;
     },
-    [refrescar],
+    [productos, refrescar],
   );
 
   /** Elimina un producto del catálogo. */
@@ -151,47 +149,6 @@ export function InventarioProvider({ children }) {
     [refrescar],
   );
 
-  /**
-   * ⭐ DESCUENTA STOCK POR UNA VENTA ⭐
-   *
-   * Este es el método que DEBEN llamar tanto el checkout de la tienda web como
-   * el registro de ventas del dashboard. Es lo que mantiene el stock cuadrado
-   * entre las dos zonas.
-   *
-   * Es atómico: si un solo producto no tiene stock suficiente, lanza un error
-   * y NO descuenta nada.
-   *
-   * @param {{ productoId: string, cantidad: number }[]} items
-   * @throws {Error} con un mensaje listo para mostrar, ej.
-   *                 "Stock insuficiente de 'Inca Kola 1.5 L'. Disponible: 2..."
-   *
-   * @example
-   * try {
-   *   await descontarStock(carrito.map(i => ({ productoId: i.id, cantidad: i.cantidad })))
-   *   await pedidoRepository.crear({ ... })
-   * } catch (e) {
-   *   mostrarError(e.message)
-   * }
-   */
-  const descontarStock = useCallback(
-    async (items) => {
-      await productoRepository.descontarStock(items);
-      await refrescar();
-      return true;
-    },
-    [refrescar],
-  );
-
-  /** Devuelve stock al inventario (venta anulada / pedido cancelado). */
-  const reponerStock = useCallback(
-    async (items) => {
-      await productoRepository.reponerStock(items);
-      await refrescar();
-      return true;
-    },
-    [refrescar],
-  );
-
   /* ========================================================================
    * CONSULTAS DERIVADAS Y DESCUENTOS (Patrón Decorator)
    * Se calculan a partir de `productos` y `promociones` en memoria: son síncronas
@@ -204,12 +161,16 @@ export function InventarioProvider({ children }) {
   const aplicarDescuentoAProducto = useCallback(
     (producto, listaPromociones = promociones) => {
       if (!producto) return null;
+      const prodId = String(producto.id);
+      const catId = producto.categoriaId != null ? Number(producto.categoriaId) : null;
+
       const promosParaProducto = (listaPromociones || []).filter((promo) => {
         if (promo.activa === false) return false;
-        if (promo.aplicaA === "TODO") return true;
-        if (promo.aplicaA === "PRODUCTO") return promo.objetivo === producto.id;
-        if (promo.aplicaA === "CATEGORIA") return promo.objetivo === producto.categoria;
-        return false;
+        return (
+          Boolean(promo.aplicaTodos) ||
+          Boolean(promo.productoIds?.includes(prodId)) ||
+          (catId != null && Boolean(promo.categoriaIds?.includes(catId)))
+        );
       });
       return calcularPrecioFinal(producto, promosParaProducto);
     },
@@ -293,8 +254,6 @@ export function InventarioProvider({ children }) {
       actualizarProducto,
       eliminarProducto,
       ajustarStock,
-      descontarStock,
-      reponerStock,
       refrescar,
 
       // Consultas y descuentos
@@ -315,8 +274,6 @@ export function InventarioProvider({ children }) {
       actualizarProducto,
       eliminarProducto,
       ajustarStock,
-      descontarStock,
-      reponerStock,
       refrescar,
       obtenerProducto,
       obtenerProductoConDescuento,

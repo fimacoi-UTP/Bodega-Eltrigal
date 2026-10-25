@@ -89,14 +89,24 @@
 /* Badges flotantes sobre el visual */
 .catalogo-tarjeta__insignias {
   position: absolute;
-  top: var(--esp-3);
-  left: var(--esp-3);
-  right: var(--esp-3);
+  top: var(--esp-2);
+  left: var(--esp-2);
+  right: 44px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   pointer-events: none;
-  gap: var(--esp-2);
+  gap: var(--esp-1);
+  flex-wrap: wrap;
+  z-index: 2;
+}
+
+/* Botón flotante de favoritos arriba a la derecha */
+.catalogo-tarjeta__favorito-envoltorio {
+  position: absolute;
+  top: var(--esp-2);
+  right: var(--esp-2);
+  z-index: 3;
 }
 
 /* Cuerpo de la tarjeta */

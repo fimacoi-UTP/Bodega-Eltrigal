@@ -20,7 +20,11 @@ export const USUARIO_KEY = "trigal:usuario";
  */
 export function guardarToken(token) {
   if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
+    try {
+      localStorage.setItem(TOKEN_KEY, token);
+    } catch (err) {
+      console.warn("[El Trigal] Error al guardar token en localStorage:", err);
+    }
   }
 }
 
@@ -29,14 +33,22 @@ export function guardarToken(token) {
  * @returns {string|null}
  */
 export function obtenerToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
 }
 
 /**
  * Elimina el token JWT de localStorage.
  */
 export function borrarToken() {
-  localStorage.removeItem(TOKEN_KEY);
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch (err) {
+    console.warn("[El Trigal] Error al borrar token de localStorage:", err);
+  }
 }
 
 /**
@@ -60,9 +72,10 @@ export async function apiFetch(ruta, opciones = {}) {
     : `${BASE_URL}${ruta.startsWith("/") ? "" : "/"}${ruta}`;
 
   const token = obtenerToken();
+  const esFormData = typeof FormData !== "undefined" && opciones.body instanceof FormData;
 
   const headers = {
-    "Content-Type": "application/json",
+    ...(!esFormData ? { "Content-Type": "application/json" } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(opciones.headers || {}),
   };
@@ -116,7 +129,9 @@ export async function apiFetch(ruta, opciones = {}) {
         // Ignorar error al leer texto
       }
     }
-    throw new Error(mensajeError);
+    const error = new Error(mensajeError);
+    error.status = respuesta.status;
+    throw error;
   }
 
   // Si no hay contenido (ej. HTTP 204)
@@ -135,3 +150,17 @@ export async function apiFetch(ruta, opciones = {}) {
     );
   }
 }
+
+/**
+ * Convierte una ruta relativa de imagen (/uploads/...) a una URL absoluta
+ * apuntando al backend, o conserva la URL si ya es absoluta.
+ * @param {string|null} path
+ * @returns {string}
+ */
+export function urlImagen(path) {
+  if (!path) return "";
+  if (/^https?:\/\//.test(path)) return path;
+  if (path.startsWith("/uploads")) return `${BASE_URL}${path}`;
+  return path;
+}
+

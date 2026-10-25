@@ -11,10 +11,11 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Badge, Boton } from "../../../components/ui";
+import { Badge, Boton, BotonFavorito } from "../../../components/ui";
 import { useCarrito } from "../../../context/CarritoContext";
 import { aRuta } from "../../../routes/rutas";
 import { formatearSoles } from "../../../utils/formato";
+import { urlImagen } from "../../../api/apiClient";
 import { useAgregarAlCarrito } from "./useAgregarAlCarrito";
 import "./TarjetaProducto.css";
 
@@ -109,7 +110,7 @@ export function TarjetaProducto({ producto, alAgregar, agregando = false }) {
         >
           {producto.imagen && !errorImagen ? (
             <img
-              src={producto.imagen}
+              src={urlImagen(producto.imagen)}
               alt={producto.nombre}
               className="catalogo-tarjeta__imagen"
               loading="lazy"
@@ -145,6 +146,11 @@ export function TarjetaProducto({ producto, alAgregar, agregando = false }) {
               En stock
             </Badge>
           )}
+        </div>
+
+        {/* Botón flotante de favoritos arriba a la derecha */}
+        <div className="catalogo-tarjeta__favorito-envoltorio">
+          <BotonFavorito productoId={producto.id} tamano="sm" />
         </div>
       </div>
 

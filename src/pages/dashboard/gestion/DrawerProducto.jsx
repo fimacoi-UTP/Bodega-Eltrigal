@@ -16,6 +16,8 @@ import { useState } from "react";
 import { Alerta, Boton, Drawer, Input, Select } from "../../../components/ui";
 import { UMBRAL_STOCK_BAJO } from "../../../constantes";
 import { COLORES_SUGERIDOS, UNIDADES } from "./utilesInventario";
+import { imagenesApi } from "../../../api/imagenesApi";
+import { urlImagen } from "../../../api/apiClient";
 
 const CATEGORIA_NUEVA = "__NUEVA__";
 
@@ -35,17 +37,43 @@ export function DrawerProducto({
     marca: producto?.marca ?? "",
     descripcion: producto?.descripcion ?? "",
     precio: producto?.precio != null ? String(producto.precio) : "",
+    costo: producto?.costo != null ? String(producto.costo) : "",
     stock: producto?.stock != null ? String(producto.stock) : "0",
     stockMinimo:
       producto?.stockMinimo != null ? String(producto.stockMinimo) : String(UMBRAL_STOCK_BAJO),
     unidad: producto?.unidad ?? "unidad",
     color: producto?.color || COLORES_SUGERIDOS[0],
+    imagen: producto?.imagen ?? null,
     activo: producto?.activo !== false,
   }));
 
   const [errores, setErrores] = useState({});
   const [errorEnvio, setErrorEnvio] = useState(null);
   const [guardando, setGuardando] = useState(false);
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
+  const [errorImagen, setErrorImagen] = useState(null);
+
+  const handleArchivoImagen = async (e) => {
+    const archivo = e.target.files?.[0];
+    if (!archivo) return;
+
+    setErrorImagen(null);
+    setSubiendoImagen(true);
+    try {
+      const urlRelativa = await imagenesApi.subir(archivo);
+      setCampo("imagen", urlRelativa);
+    } catch (err) {
+      setErrorImagen(err.message || "Error al subir la imagen.");
+    } finally {
+      setSubiendoImagen(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleQuitarFoto = () => {
+    setCampo("imagen", null);
+    setErrorImagen(null);
+  };
 
   if (!abierto) return null;
 
@@ -79,6 +107,11 @@ export function DrawerProducto({
       nuevosErrores.precio = "El precio es obligatorio.";
     } else if (!Number.isFinite(precioNum) || precioNum <= 0) {
       nuevosErrores.precio = "El precio debe ser un número mayor a 0.";
+    }
+
+    const costoNum = Number(form.costo);
+    if (form.costo.trim() && (!Number.isFinite(costoNum) || costoNum < 0)) {
+      nuevosErrores.costo = "El costo debe ser 0 o mayor.";
     }
 
     const stockNum = Number(form.stock);
@@ -115,10 +148,12 @@ export function DrawerProducto({
         marca: form.marca.trim() || undefined,
         descripcion: form.descripcion.trim() || undefined,
         precio: Number(Number(form.precio).toFixed(2)),
+        costo: form.costo.trim() ? Number(Number(form.costo).toFixed(2)) : null,
         stock: Number(form.stock),
         stockMinimo: Number(form.stockMinimo) || UMBRAL_STOCK_BAJO,
         unidad: form.unidad,
         color: form.color,
+        imagen: form.imagen ?? null,
         activo: form.activo,
       };
 
@@ -143,16 +178,21 @@ export function DrawerProducto({
       tamano="md"
       pie={
         <div style={{ display: "flex", gap: "var(--esp-2)", width: "100%", justifyContent: "flex-end" }}>
-          <Boton variante="contorno" onClick={alCerrar} disabled={guardando} type="button">
+          <Boton variante="contorno" onClick={alCerrar} disabled={guardando || subiendoImagen} type="button">
             Cancelar
           </Boton>
-          <Boton type="submit" form="form-drawer-producto" cargando={guardando}>
+          <Boton type="submit" form="form-drawer-producto" cargando={guardando} disabled={subiendoImagen}>
             {editando ? "Guardar cambios" : "Crear producto"}
           </Boton>
         </div>
       }
     >
-      <form id="form-drawer-producto" className="gestion__formulario" onSubmit={enviar}>
+      <form
+        id="form-drawer-producto"
+        className="gestion__formulario"
+        onSubmit={enviar}
+        autoComplete="off"
+      >
         {errorEnvio && <Alerta variante="peligro">{errorEnvio}</Alerta>}
 
         {/* ── 1. Información general ─────────────────────────────────── */}
@@ -235,6 +275,21 @@ export function DrawerProducto({
             requerido
           />
 
+          <Input
+            etiqueta="Costo unitario (opcional)"
+            type="number"
+            step="0.01"
+            min="0"
+            prefijo="S/"
+            value={form.costo}
+            onChange={(e) => setCampo("costo", e.target.value)}
+            placeholder="0.00"
+            error={errores.costo}
+            ayuda="Costo de compra al proveedor"
+          />
+        </div>
+
+        <div className="gestion__fila-campos">
           <Select
             etiqueta="Unidad de medida"
             value={form.unidad}
@@ -248,8 +303,61 @@ export function DrawerProducto({
           </Select>
         </div>
 
+        {/* ── Campo Foto del Producto ── */}
         <div className="gestion__campo">
-          <span className="gestion__campo-etiqueta">Color identificador</span>
+          <label className="gestion__campo-etiqueta" htmlFor="drawer-prod-foto">
+            Foto del producto (opcional)
+          </label>
+          {errorImagen && (
+            <Alerta variante="peligro" style={{ marginBottom: "var(--esp-2)" }}>
+              {errorImagen}
+            </Alerta>
+          )}
+
+          {form.imagen ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--esp-3)", marginBottom: "var(--esp-2)" }}>
+              <img
+                src={urlImagen(form.imagen)}
+                alt="Vista previa"
+                style={{
+                  width: "64px",
+                  height: "64px",
+                  objectFit: "cover",
+                  borderRadius: "var(--radio-md)",
+                  border: "1px solid var(--color-borde)",
+                }}
+              />
+              <Boton
+                type="button"
+                variante="contorno"
+                tamano="sm"
+                onClick={handleQuitarFoto}
+                disabled={subiendoImagen || guardando}
+              >
+                Quitar foto
+              </Boton>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--esp-2)" }}>
+              <input
+                id="drawer-prod-foto"
+                type="file"
+                accept="image/*"
+                onChange={handleArchivoImagen}
+                disabled={subiendoImagen || guardando}
+                style={{ fontSize: "var(--texto-sm)" }}
+              />
+              {subiendoImagen && (
+                <small style={{ color: "var(--color-marca, #c2410c)" }}>
+                  Subiendo imagen…
+                </small>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="gestion__campo">
+          <span className="gestion__campo-etiqueta">Color identificador (fallback si no hay foto)</span>
           <div className="gestion__colores" role="radiogroup" aria-label="Color del producto">
             {COLORES_SUGERIDOS.map((colorHex) => (
               <button

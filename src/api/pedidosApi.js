@@ -27,6 +27,7 @@ export function mapPedidoDesdeApi(api) {
         referenciaPago: api.referenciaPago,
         fechaCreacion: api.creadoEn,
         fechaActualizacion: api.actualizadoEn,
+        imagenPrimerProducto: api.primerProductoImagen || api.imagen || api.items?.[0]?.productoImagen || api.items?.[0]?.imagen || null,
         items: Array.isArray(api.items)
             ? api.items.map((d) => ({
                 productoId: String(d.productoId),
@@ -35,6 +36,7 @@ export function mapPedidoDesdeApi(api) {
                 precioUnitario: d.precioUnitario,
                 precioOriginal: d.precioOriginal,
                 subtotal: d.subtotal,
+                imagen: d.productoImagen || d.imagen || d.urlImagen || null,
             }))
             : [],
         historialEstados: Array.isArray(api.historial)
@@ -44,9 +46,23 @@ export function mapPedidoDesdeApi(api) {
 }
 
 export const pedidosApi = {
-    async crear({ idUsuario, tipoEntrega, direccionEntrega, metodoPago, referenciaPago, costoEnvio, items }) {
+    async crear({
+        idUsuario,
+        clienteNombre,
+        clienteTelefono,
+        clienteCorreo,
+        tipoEntrega,
+        direccionEntrega,
+        metodoPago,
+        referenciaPago,
+        costoEnvio,
+        items,
+    }) {
         const body = {
-            idUsuario: Number(idUsuario),
+            idUsuario: idUsuario != null ? Number(idUsuario) : null,
+            clienteNombre: clienteNombre ?? null,
+            clienteTelefono: clienteTelefono ?? null,
+            clienteCorreo: clienteCorreo ?? null,
             tipoEntrega: tipoEntregaABackend(tipoEntrega),
             direccionEntrega: direccionEntrega ?? "",
             metodoPago: String(metodoPago).toUpperCase(),
@@ -66,6 +82,14 @@ export const pedidosApi = {
     async cambiarEstado(id, nuevoEstado) {
         const data = await apiFetch(`/api/pedidos/${id}/estado?nuevoEstado=${encodeURIComponent(nuevoEstado)}`, { method: "PUT" });
         return mapPedidoDesdeApi(data);
+    },
+    async obtenerPorCodigo(numeroPedido) {
+        const data = await apiFetch(`/api/pedidos/seguimiento/${encodeURIComponent(numeroPedido)}`);
+        return mapPedidoDesdeApi(data);
+    },
+    async obtenerMios() {
+        const data = await apiFetch("/api/pedidos/mios");
+        return Array.isArray(data) ? data.map(mapPedidoDesdeApi) : [];
     },
 };
 

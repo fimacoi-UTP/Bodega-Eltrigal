@@ -20,14 +20,24 @@ export function Input({
   ayuda,
   /** Texto fijo al inicio del campo, ej. "S/". */
   prefijo,
+  /** Elemento opcional al final del campo, ej. botón mostrar contraseña. */
+  sufijo,
   requerido = false,
   className,
   id,
+  type = "text",
+  autoComplete,
   ...props
 }) {
   const idGenerado = useId();
   const idCampo = id ?? idGenerado;
   const idDescripcion = `${idCampo}-desc`;
+
+  // Desactivación global de autocompletado del navegador:
+  // type="password" usa "new-password" para bloquear sugerencias de credenciales;
+  // los demás tipos usan "off". La prop autoComplete permite sobreescribir si fuera necesario.
+  const autoCompletadoDefecto = type === "password" ? "new-password" : "off";
+  const valorAutoComplete = autoComplete ?? autoCompletadoDefecto;
 
   return (
     <div className={clases("ui-campo", className)}>
@@ -47,17 +57,21 @@ export function Input({
           "ui-campo__caja",
           error && "ui-campo__caja--error",
           prefijo && "ui-campo__caja--con-prefijo",
+          sufijo && "ui-campo__caja--con-sufijo",
         )}
       >
         {prefijo && <span className="ui-campo__prefijo">{prefijo}</span>}
         <input
           id={idCampo}
+          type={type}
+          autoComplete={valorAutoComplete}
           className="ui-campo__input"
           aria-invalid={error ? true : undefined}
           aria-describedby={error || ayuda ? idDescripcion : undefined}
           required={requerido}
           {...props}
         />
+        {sufijo && <div className="ui-campo__sufijo">{sufijo}</div>}
       </div>
 
       {error && (

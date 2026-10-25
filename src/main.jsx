@@ -12,7 +12,11 @@ import { createRoot } from "react-dom/client";
 
 import App from "./App.jsx";
 import { inicializarDatos, reiniciarDatos } from "./repositories";
+import { ejecutarLimpiezaStorage } from "./utils/limpiezaStorage";
 import "./index.css";
+
+// 0. Purgar claves muertas/obsoletas acumuladas en desarrollo.
+ejecutarLimpiezaStorage();
 
 // 1. Preparar los datos (siembra desde src/data/ solo si hace falta).
 inicializarDatos();

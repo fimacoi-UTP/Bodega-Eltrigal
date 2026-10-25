@@ -1462,9 +1462,13 @@
     max-height: none !important;
   }
 
-  /* Hacer visible exclusivamente el ticket */
+  /* Hacer visible exclusivamente el ticket o la etiqueta de góndola */
   .ventas-page__ticket,
-  .ventas-page__ticket * {
+  .ventas-page__ticket *,
+  .etiqueta-imprimible,
+  .etiqueta-imprimible *,
+  .etiqueta-gondola,
+  .etiqueta-gondola * {
     visibility: visible !important;
   }
 

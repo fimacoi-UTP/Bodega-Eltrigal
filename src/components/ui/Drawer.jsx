@@ -33,6 +33,7 @@ export function Drawer({
   className,
 }) {
   const drawerRef = useRef(null);
+  const presionadoEnFondo = useRef(false);
   const cerrarFn = onClose || alCerrar;
   const cerrarRef = useRef(cerrarFn);
 
@@ -67,8 +68,14 @@ export function Drawer({
   return (
     <div
       className="ui-drawer__fondo"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) cerrarFn?.();
+      onMouseDown={(e) => {
+        presionadoEnFondo.current = e.target === e.currentTarget;
+      }}
+      onMouseUp={(e) => {
+        if (presionadoEnFondo.current && e.target === e.currentTarget) {
+          cerrarFn?.();
+        }
+        presionadoEnFondo.current = false;
       }}
     >
       <div

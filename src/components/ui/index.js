@@ -24,4 +24,5 @@ export { MenuKebab } from "./MenuKebab";
 export { Drawer } from "./Drawer";
 export { SkeletonTarjeta } from "./SkeletonTarjeta";
 export { Toast } from "./Toast";
+export { BotonFavorito } from "../comunes/BotonFavorito";
 

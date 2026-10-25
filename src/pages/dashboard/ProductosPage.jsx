@@ -37,6 +37,7 @@ import {
   Select,
 } from "../../components/ui";
 import { formatearSoles } from "../../utils/formato";
+import { urlImagen } from "../../api/apiClient";
 import ModalProducto from "./gestion/ModalProducto";
 import { estadoStock, filtrarProductos } from "./gestion/utilesInventario";
 import "./gestion/gestion.css";
@@ -320,13 +321,23 @@ export function ProductosPage() {
                         >
                           <td className="gestion__celda-nombre">
                             <div className="gestion__producto">
-                              <span
-                                className="gestion__swatch"
-                                style={{
-                                  backgroundColor: producto.color || "var(--neutro-300)",
-                                }}
-                                aria-hidden="true"
-                              />
+                              {producto.imagen ? (
+                                <img
+                                  src={urlImagen(producto.imagen)}
+                                  alt=""
+                                  className="gestion__swatch"
+                                  style={{ objectFit: "cover" }}
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <span
+                                  className="gestion__swatch"
+                                  style={{
+                                    backgroundColor: producto.color || "var(--neutro-300)",
+                                  }}
+                                  aria-hidden="true"
+                                />
+                              )}
                               <div className="gestion__producto-datos">
                                 <span className="gestion__producto-nombre">
                                   {producto.nombre}

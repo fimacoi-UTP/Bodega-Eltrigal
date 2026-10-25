@@ -19,7 +19,6 @@
 
 export { productoRepository } from "./productoRepository";
 export { usuarioRepository } from "./usuarioRepository";
-export { ventaRepository } from "./ventaRepository";
 export { pedidoRepository } from "./pedidoRepository";
 export { promocionRepository } from "./promocionRepository";
 

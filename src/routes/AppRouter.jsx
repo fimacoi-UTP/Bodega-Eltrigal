@@ -45,9 +45,19 @@ import HomePage from "../pages/tienda/HomePage";
 import ProductoDetallePage from "../pages/tienda/ProductoDetallePage";
 import CarritoPage from "../pages/tienda/CarritoPage";
 import CheckoutPage from "../pages/tienda/CheckoutPage";
+import SeguimientoPedidoPage from "../pages/tienda/SeguimientoPedidoPage";
 import LoginPage from "../pages/tienda/LoginPage";
+import RegistroPage from "../pages/tienda/RegistroPage";
 import NosotrosPage from "../pages/tienda/NosotrosPage";
 import UbicacionPage from "../pages/tienda/UbicacionPage";
+
+// Páginas de Mi Cuenta
+import LayoutMiCuenta from "../pages/tienda/micuenta/LayoutMiCuenta";
+import MisPedidosPage from "../pages/tienda/micuenta/MisPedidosPage";
+import MisPromocionesPage from "../pages/tienda/micuenta/MisPromocionesPage";
+import DireccionesPage from "../pages/tienda/micuenta/DireccionesPage";
+import MiDespensaPage from "../pages/tienda/micuenta/MiDespensaPage";
+import PerfilPage from "../pages/tienda/micuenta/PerfilPage";
 
 // Páginas del dashboard
 import ResumenPage from "../pages/dashboard/ResumenPage";
@@ -55,6 +65,7 @@ import CatalogoPage from "../pages/dashboard/CatalogoPage";
 import PedidosPage from "../pages/dashboard/PedidosPage";
 import PromocionesPage from "../pages/dashboard/PromocionesPage";
 import VentasPage from "../pages/dashboard/VentasPage";
+import GestionUsuariosPage from "../pages/dashboard/GestionUsuariosPage";
 
 // Páginas del sistema
 import NoEncontradaPage from "../pages/NoEncontradaPage";
@@ -69,9 +80,10 @@ export function AppRouter() {
       <ScrollToTop />
       <Routes>
         {/* ================================================================
-         * 1. LOGIN · pantalla propia, sin navbar ni sidebar
+         * 1. LOGIN Y REGISTRO · pantalla propia, sin navbar ni sidebar
          * ============================================================== */}
         <Route path={RUTAS.LOGIN} element={<LoginPage />} />
+        <Route path={RUTAS.REGISTRO} element={<RegistroPage />} />
         <Route path={RUTAS.SIN_ACCESO} element={<SinAccesoPage />} />
 
         {/* ================================================================
@@ -88,14 +100,28 @@ export function AppRouter() {
               concreto: un ADMIN también puede comprar como cliente.
               TODO rama checkout: si el grupo decide permitir la compra como
               invitado, basta con sacar el <RutaProtegida> de esta línea. */}
+
+          <Route path={RUTAS.CHECKOUT} element={<CheckoutPage />} />
+          <Route path={RUTAS.SEGUIMIENTO} element={<SeguimientoPedidoPage />} />
+
+          {/* ==============================================================
+           * MI CUENTA · Protegido solo para rol CLIENTE
+           * ============================================================ */}
           <Route
-            path={RUTAS.CHECKOUT}
+            path={RUTAS.MI_CUENTA}
             element={
-              <RutaProtegida>
-                <CheckoutPage />
+              <RutaProtegida rol={ROLES.CLIENTE}>
+                <LayoutMiCuenta />
               </RutaProtegida>
             }
-          />
+          >
+            <Route index element={<Navigate to={RUTAS.MI_CUENTA_PEDIDOS} replace />} />
+            <Route path="pedidos" element={<MisPedidosPage />} />
+            <Route path="promociones" element={<MisPromocionesPage />} />
+            <Route path="direcciones" element={<DireccionesPage />} />
+            <Route path="despensa" element={<MiDespensaPage />} />
+            <Route path="perfil" element={<PerfilPage />} />
+          </Route>
 
           {/* 404 dentro de la tienda: conserva el navbar y el footer. */}
           <Route path="*" element={<NoEncontradaPage />} />
@@ -131,6 +157,14 @@ export function AppRouter() {
             element={
               <RutaProtegida rol={ROLES.ADMIN}>
                 <PromocionesPage />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="usuarios"
+            element={
+              <RutaProtegida rol={ROLES.ADMIN}>
+                <GestionUsuariosPage />
               </RutaProtegida>
             }
           />

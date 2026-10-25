@@ -30,7 +30,7 @@ import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
 import { useCarrito } from "../../context/CarritoContext";
 import { pedidosApi } from "../../api/pedidosApi";
-import { RUTAS } from "../../routes/rutas";
+import { RUTAS, aRuta } from "../../routes/rutas";
 import {
   METODOS_PAGO,
   TIPOS_ENTREGA,
@@ -84,7 +84,7 @@ function FormularioCheckoutPrincipal({
 
   // Datos del Cliente (prellenados desde sesión si existe)
   const [datosCliente, setDatosCliente] = useState({
-    nombre: usuario?.nombre || "",
+    nombre: (usuario?.nombre || `${usuario?.nombres ?? ""} ${usuario?.apellidos ?? ""}`.trim()) || "",
     correo: usuario?.correo || "",
     telefono: usuario?.telefono || "",
   });
@@ -214,7 +214,10 @@ function FormularioCheckoutPrincipal({
         : "Recojo en tienda - Bodega El Trigal";
 
       const pedidoCreado = await pedidosApi.crear({
-        idUsuario: usuario?.id,
+        idUsuario: estaAutenticado && usuario?.id ? usuario.id : null,
+        clienteNombre: datosCliente.nombre,
+        clienteTelefono: datosCliente.telefono,
+        clienteCorreo: datosCliente.correo,
         tipoEntrega,
         direccionEntrega: direccionFinal,
         metodoPago: metodoPagoBackend,
@@ -308,6 +311,7 @@ function FormularioCheckoutPrincipal({
             datos={datosEntrega}
             onChange={handleCambioEntrega}
             errores={erroresEntrega}
+            estaAutenticado={estaAutenticado}
           />
 
           <FormularioPago
@@ -393,6 +397,23 @@ export function CheckoutPage() {
   if (pedidoConfirmado) {
     return (
       <div className="contenedor checkout-pagina">
+        {pedidoConfirmado.codigo && (
+          <div style={{ marginBottom: "var(--esp-4)", textAlign: "right" }}>
+            <Link
+              to={aRuta.seguimiento(pedidoConfirmado.codigo)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "var(--esp-1)",
+                fontWeight: 600,
+                color: "var(--color-primario, #c2410c)",
+                textDecoration: "underline",
+              }}
+            >
+              Ver seguimiento de mi pedido
+            </Link>
+          </div>
+        )}
         <SeguimientoPedido
           pedido={pedidoConfirmado}
           onActualizarPedido={setPedidoConfirmado}

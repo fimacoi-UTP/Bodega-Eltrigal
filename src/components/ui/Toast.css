@@ -1,80 +1,130 @@
 /* ============================================================================
- * Toast.css · Estilos de la notificación emergente flotante
+ * Toast.css · Rediseño Premium de la Notificación Emergente Flotante
  * ----------------------------------------------------------------------------
- * Mobile-first con tokens de tokens.css.
+ * Notorio, elegante, con tinte de color de variante, barra lateral sólida,
+ * chip circular para ícono, animación slide-in con overshoot y barra de progreso.
  * ==========================================================================*/
 
-.ui-toast {
+/* Contenedor apilador (Stack) arriba a la derecha */
+.ui-toast-stack {
   position: fixed;
-  top: var(--esp-4);
-  right: var(--esp-4);
-  z-index: var(--z-aviso);
+  top: var(--esp-5, 1.25rem);
+  right: var(--esp-5, 1.25rem);
+  z-index: 99999;
   display: flex;
-  align-items: flex-start;
-  gap: var(--esp-3);
-  max-width: min(92vw, 400px);
-  padding: var(--esp-3) var(--esp-4);
-  background-color: var(--color-superficie);
-  border-radius: var(--radio-lg);
-  border: 1px solid var(--color-borde);
-  box-shadow: var(--sombra-xl);
-  cursor: default;
-  animation: uiToastEntrada var(--transicion-lenta) cubic-bezier(0.16, 1, 0.3, 1);
-  box-sizing: border-box;
+  flex-direction: column;
+  gap: var(--esp-3, 0.75rem);
+  pointer-events: none;
+  max-width: min(92vw, 420px);
+  width: 100%;
 }
 
-@keyframes uiToastEntrada {
-  from {
-    transform: translateY(-24px) scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+.ui-toast {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3, 0.85rem);
+  padding: 14px 16px;
+  border-radius: var(--radio-lg, 14px);
+  border: 1px solid var(--toast-color-borde);
+  border-left: 6px solid var(--toast-color-solido);
+  background: var(--toast-color-fondo);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.16),
+    0 3px 8px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  overflow: hidden;
+  animation: uiToastSlideIn 0.38s cubic-bezier(0.18, 0.9, 0.25, 1.15) forwards;
+  transition: transform var(--transicion-rapida), box-shadow var(--transicion-rapida);
+}
+
+.ui-toast:hover {
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.2),
+    0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
 .ui-toast--interactivo {
   cursor: pointer;
-  transition:
-    transform var(--transicion-rapida),
-    box-shadow var(--transicion-rapida),
-    border-color var(--transicion-rapida);
 }
 
 .ui-toast--interactivo:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(67, 60, 52, 0.2);
-  border-color: var(--color-primario-borde);
 }
 
-.ui-toast__icono {
-  font-size: 1.5rem;
-  line-height: 1;
+.ui-toast--saliendo {
+  animation: uiToastSlideOut 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Animaciones */
+@keyframes uiToastSlideIn {
+  0% {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+  75% {
+    transform: translateX(-6px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes uiToastSlideOut {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(105%) scale(0.96);
+    opacity: 0;
+  }
+}
+
+/* Chip circular del ícono */
+.ui-toast__chip-icono {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: var(--radio-circulo, 9999px);
+  background-color: var(--toast-color-solido);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  padding-top: 2px;
+  font-size: 1.1rem;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
 }
 
+/* Cuerpo de texto */
 .ui-toast__cuerpo {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding-top: 1px;
 }
 
 .ui-toast__titulo {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-negrita);
-  color: var(--color-texto);
-  line-height: var(--interlineado-ajustado);
-  margin: 0 0 var(--esp-1) 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--toast-color-titulo);
+  margin: 0 0 2px 0;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .ui-toast__contenido {
-  font-size: var(--texto-xs);
-  color: var(--color-texto-suave);
-  line-height: var(--interlineado-base);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--toast-color-texto);
+  line-height: 1.4;
 }
 
 .ui-toast__contenido p {
@@ -82,8 +132,8 @@
 }
 
 .ui-toast__contenido strong {
-  color: var(--color-texto);
-  font-weight: var(--peso-semi);
+  font-weight: 700;
+  color: var(--toast-color-titulo);
 }
 
 .ui-toast__accion {
@@ -91,60 +141,127 @@
   align-items: center;
   gap: var(--esp-1);
   margin-top: var(--esp-2);
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-negrita);
-  color: var(--color-primario);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--toast-color-solido);
+  cursor: pointer;
 }
 
+.ui-toast__accion:hover {
+  text-decoration: underline;
+}
+
+/* Botón de cierre */
 .ui-toast__cerrar {
   display: grid;
   place-items: center;
   width: 26px;
   height: 26px;
-  border-radius: var(--radio-sm);
+  border-radius: var(--radio-sm, 6px);
   border: none;
   background: transparent;
-  color: var(--color-texto-tenue);
+  color: var(--toast-color-texto);
+  opacity: 0.65;
   cursor: pointer;
-  font-size: var(--texto-xs);
   flex-shrink: 0;
+  padding: 0;
   margin: -4px -4px 0 0;
-  transition:
-    background-color var(--transicion-rapida),
-    color var(--transicion-rapida);
+  transition: opacity var(--transicion-rapida), background var(--transicion-rapida);
 }
 
 .ui-toast__cerrar:hover {
-  background-color: var(--color-superficie-suave);
-  color: var(--color-texto);
+  opacity: 1;
+  background: var(--toast-color-cerrar-hover);
 }
 
-/* Variantes */
-.ui-toast--marca {
-  border-left: 4px solid var(--color-primario);
+/* Barra de progreso inferior */
+.ui-toast__progreso {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3.5px;
+  width: 100%;
+  background-color: var(--toast-color-solido);
+  opacity: 0.75;
+  transform-origin: left;
+  animation: uiToastProgreso linear forwards;
 }
 
+.ui-toast:hover .ui-toast__progreso {
+  animation-play-state: paused;
+}
+
+@keyframes uiToastProgreso {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* ============================================================================
+ * VARIANTES DE COLOR Y TINTES
+ * ==========================================================================*/
+
+/* 1. Éxito / Success (Verde #16a34a) */
+.ui-toast--success,
 .ui-toast--exito {
-  border-left: 4px solid var(--color-exito);
+  --toast-color-solido: #16a34a;
+  --toast-color-fondo: #ecfdf3;
+  --toast-color-borde: rgba(22, 163, 74, 0.28);
+  --toast-color-texto: #064e3b;
+  --toast-color-titulo: #052e16;
+  --toast-color-cerrar-hover: rgba(22, 163, 74, 0.12);
 }
 
-.ui-toast--advertencia {
-  border-left: 4px solid var(--color-advertencia);
-}
-
+/* 2. Error / Peligro (Rojo #dc2626) */
+.ui-toast--error,
 .ui-toast--peligro {
-  border-left: 4px solid var(--color-peligro);
+  --toast-color-solido: #dc2626;
+  --toast-color-fondo: #fef2f2;
+  --toast-color-borde: rgba(220, 38, 38, 0.28);
+  --toast-color-texto: #7f1d1d;
+  --toast-color-titulo: #450a0a;
+  --toast-color-cerrar-hover: rgba(220, 38, 38, 0.12);
 }
 
-.ui-toast--info {
-  border-left: 4px solid var(--color-info);
+/* 3. Advertencia / Warning (Ámbar #d97706) */
+.ui-toast--warning,
+.ui-toast--advertencia {
+  --toast-color-solido: #d97706;
+  --toast-color-fondo: #fffbeb;
+  --toast-color-borde: rgba(217, 119, 6, 0.28);
+  --toast-color-texto: #78350f;
+  --toast-color-titulo: #451a03;
+  --toast-color-cerrar-hover: rgba(217, 119, 6, 0.12);
 }
 
+/* 4. Info / Marca (Terracota y Oro El Trigal) */
+.ui-toast--info,
+.ui-toast--marca,
+.ui-toast--neutro {
+  --toast-color-solido: var(--color-marca, #b0441f);
+  --toast-color-fondo: #fef9ec;
+  --toast-color-borde: rgba(176, 68, 31, 0.25);
+  --toast-color-texto: #431407;
+  --toast-color-titulo: #1c0702;
+  --toast-color-cerrar-hover: rgba(176, 68, 31, 0.12);
+}
+
+/* ============================================================================
+ * RESPONSIVE MÓVIL
+ * ==========================================================================*/
 @media (max-width: 480px) {
-  .ui-toast {
-    top: var(--esp-3);
-    right: var(--esp-3);
-    left: var(--esp-3);
+  .ui-toast-stack {
+    top: var(--esp-3, 0.75rem);
+    right: var(--esp-3, 0.75rem);
+    left: var(--esp-3, 0.75rem);
     max-width: none;
+    width: auto;
+  }
+
+  .ui-toast {
+    padding: 12px 14px;
   }
 }

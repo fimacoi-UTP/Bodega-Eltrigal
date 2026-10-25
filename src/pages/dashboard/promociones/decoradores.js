@@ -134,8 +134,26 @@ export function calcularPrecioFinal(producto, promociones = []) {
     (promo) => promo && DECORADORES[promo.tipo]
   );
 
-  // Apilar todas las promociones usando reduce()
-  return promocionesValidas.reduce(
+  if (promocionesValidas.length === 0) {
+    return precioBase(producto);
+  }
+
+  // Ordenar las promociones aplicables por prioridad ASC (desempata por id/orden)
+  const ordenadas = [...promocionesValidas].sort((a, b) => {
+    const prioA = Number(a.prioridad) || 0;
+    const prioB = Number(b.prioridad) || 0;
+    if (prioA !== prioB) return prioA - prioB;
+    return String(a.id || "").localeCompare(String(b.id || ""));
+  });
+
+  // Regla de acumulables (alineada con el backend):
+  // - Si TODAS son esAcumulable=true -> se apilan todas en ese orden.
+  // - Si hay alguna esAcumulable=false -> usa SOLO la primera (menor prioridad).
+  const todasAcumulables = ordenadas.every((p) => p.esAcumulable !== false);
+  const promosAEjecutar = todasAcumulables ? ordenadas : [ordenadas[0]];
+
+  // Apilar todas las promociones resultantes usando reduce()
+  return promosAEjecutar.reduce(
     (productoDecorado, promo) => DECORADORES[promo.tipo](productoDecorado, promo),
     precioBase(producto)
   );

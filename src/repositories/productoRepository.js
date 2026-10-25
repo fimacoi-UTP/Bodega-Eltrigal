@@ -31,31 +31,74 @@ const base = crearRepositorioBase({
 });
 
 export const productoRepository = {
-  // Hereda métodos de escritura: crear, actualizar, eliminar, reemplazarTodos, etc.
+  // Hereda métodos utilitarios de base (claves, almacenamiento auxiliar, etc.)
   ...base,
+
+  /* ------------------------------------------------------------- ESCRITURA (API) */
+
+  /**
+   * Crea un producto en el backend Spring Boot.
+   * @param {object} datos
+   * @returns {Promise<object>}
+   */
+  async crear(datos) {
+    return productosApi.crear(datos);
+  },
+
+  /**
+   * Actualiza un producto en el backend Spring Boot.
+   * @param {string|number} id
+   * @param {object} datos
+   * @returns {Promise<object>}
+   */
+  async actualizar(id, datos) {
+    return productosApi.actualizar(id, datos);
+  },
+
+  /**
+   * Elimina un producto en el backend Spring Boot (soft delete).
+   * @param {string|number} id
+   * @returns {Promise<boolean>}
+   */
+  async eliminar(id) {
+    return productosApi.eliminar(id);
+  },
 
   /* ------------------------------------------------------------- LECTURA (API) */
 
   /**
    * Obtiene todos los productos desde el backend Spring Boot.
+   * Por defecto consume /api/productos/gestion (para Dashboard y POS).
+   * @param {{ publico?: boolean }} [opciones={}]
    * @returns {Promise<Array<object>>}
    */
-  async obtenerTodos() {
-    return productosApi.listar();
+  async obtenerTodos(opciones = {}) {
+    return productosApi.listar(opciones);
   },
 
   /** Alias para listar() */
-  async listar() {
-    return this.obtenerTodos();
+  async listar(opciones = {}) {
+    return this.obtenerTodos(opciones);
+  },
+
+  /** Obtiene explícitamente el catálogo de gestión */
+  async obtenerGestion() {
+    return productosApi.listarGestion();
+  },
+
+  /** Obtiene explícitamente el catálogo público */
+  async obtenerPublico() {
+    return productosApi.listarPublico();
   },
 
   /**
    * Busca un producto por su id en el backend Spring Boot.
    * @param {string|number} id
+   * @param {{ publico?: boolean }} [opciones={}]
    * @returns {Promise<object|null>}
    */
-  async obtenerPorId(id) {
-    return productosApi.obtenerPorId(id);
+  async obtenerPorId(id, opciones = {}) {
+    return productosApi.obtenerPorId(id, opciones);
   },
 
   /**
@@ -146,101 +189,5 @@ export const productoRepository = {
   async ajustarStock(id, delta, motivo = "") {
     return movimientosApi.registrar({ productoId: id, delta, motivo });
   },
-
-  /**
-   * ⭐ EL MÉTODO DE LA REGLA DE ORO ⭐
-   *
-   * Descuenta el stock de VARIOS productos a la vez, de forma atómica: o baja
-   * todo, o no baja nada. Lo usan por igual el checkout de la tienda web y el
-   * registro de ventas del dashboard.
-   *
-   * ¿Por qué todo junto y no un `ajustarStock` por producto en un bucle?
-   * Porque si el carrito tiene 3 productos y el tercero no tiene stock, un
-   * bucle ya habría descontado los dos primeros y quedaría el inventario
-   * cuadrado a medias. Aquí validamos TODO primero y recién después guardamos
-   * una sola vez.
-   *
-   * @param {{ productoId: string, cantidad: number }[]} items
-   * @returns {Promise<object[]>} la lista de productos ya actualizada.
-   *
-   * @example
-   * await productoRepository.descontarStock([
-   *   { productoId: 'prod-001', cantidad: 2 },
-   *   { productoId: 'prod-013', cantidad: 1 },
-   * ])
-   */
-  async descontarStock(items) {
-    if (!Array.isArray(items) || items.length === 0) {
-      throw new Error("descontarStock espera una lista de items con productoId y cantidad.");
-    }
-
-    const productos = base._leerColeccion();
-
-    // --- Paso 1: validar TODO antes de escribir nada -----------------------
-    const cambios = items.map(({ productoId, cantidad }) => {
-      const indice = productos.findIndex((p) => p.id === productoId);
-      if (indice === -1) {
-        throw new Error(`No existe el producto "${productoId}".`);
-      }
-
-      const unidades = Number(cantidad);
-      if (!Number.isFinite(unidades) || unidades <= 0) {
-        throw new Error(
-          `La cantidad de "${productos[indice].nombre}" debe ser un número mayor a 0.`,
-        );
-      }
-
-      const restante = Number(productos[indice].stock) - unidades;
-      if (restante < 0) {
-        throw new Error(
-          `Stock insuficiente de "${productos[indice].nombre}". ` +
-            `Disponible: ${productos[indice].stock}, solicitado: ${unidades}.`,
-        );
-      }
-
-      return { indice, restante };
-    });
-
-    // --- Paso 2: recién ahora sí, aplicar y guardar de una sola vez --------
-    const momento = new Date().toISOString();
-    cambios.forEach(({ indice, restante }) => {
-      productos[indice] = {
-        ...productos[indice],
-        stock: restante,
-        actualizadoEn: momento,
-      };
-    });
-
-    base._guardarColeccion(productos);
-    return productos;
-
-    /* 🔌 Al migrar a Spring Boot: esta lógica de validar-y-descontar se va al
-       backend (@Transactional en un @Service), y este método queda como:
-           await fetch(`${API}/productos/descontar-stock`, {
-             method: 'POST', body: JSON.stringify(items), ...
-           })
-       Los componentes siguen llamando `descontarStock(items)` igual que hoy. */
-  },
-
-  /**
-   * Devuelve stock al inventario (venta anulada, pedido cancelado).
-   * @param {{ productoId: string, cantidad: number }[]} items
-   */
-  async reponerStock(items) {
-    const productos = base._leerColeccion();
-    const momento = new Date().toISOString();
-
-    items.forEach(({ productoId, cantidad }) => {
-      const indice = productos.findIndex((p) => p.id === productoId);
-      if (indice === -1) return; // el producto ya no existe: lo ignoramos
-      productos[indice] = {
-        ...productos[indice],
-        stock: Number(productos[indice].stock) + Number(cantidad),
-        actualizadoEn: momento,
-      };
-    });
-
-    base._guardarColeccion(productos);
-    return productos;
-  },
 };
+

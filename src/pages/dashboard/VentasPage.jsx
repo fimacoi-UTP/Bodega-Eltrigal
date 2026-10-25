@@ -14,6 +14,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
 import { ventasApi } from "../../api/ventasApi";
+import { urlImagen } from "../../api/apiClient";
 import { BODEGA, METODOS_PAGO, ETIQUETAS_METODO_PAGO } from "../../constantes";
 import { formatearSoles, formatearFecha } from "../../utils/formato";
 import {
@@ -98,7 +99,7 @@ function TarjetaProductoPos({ producto, onAgregar }) {
 
         {producto.imagen && !errorImagen ? (
           <img
-            src={producto.imagen}
+            src={urlImagen(producto.imagen)}
             alt={producto.nombre}
             className="pos-card__imagen"
             loading="lazy"

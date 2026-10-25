@@ -174,3 +174,52 @@ export const COLORES_SUGERIDOS = [
   "#D5CCC0",
   "#F4F0EA",
 ];
+
+/**
+ * Genera el código corto en formato "P0001".
+ *
+ * @param {number|string} id
+ * @returns {string} Ej: "P0001"
+ */
+export function codigoCorto(id) {
+  const limpio = String(id ?? "").replace(/\D/g, "");
+  return `P${limpio.padStart(4, "0")}`;
+}
+
+/**
+ * Calcula el dígito de control estándar para un código de barras EAN-13
+ * a partir de sus primeros 12 dígitos.
+ *
+ * @param {string} doceDigitos
+ * @returns {string} Dígito verificador del 0 al 9
+ */
+export function calcularChecksumEan13(doceDigitos) {
+  const digitos = String(doceDigitos).replace(/\D/g, "").slice(0, 12).padStart(12, "0");
+  let suma = 0;
+  for (let i = 0; i < 12; i++) {
+    const num = parseInt(digitos[i], 10);
+    suma += (i % 2 === 0) ? num * 1 : num * 3;
+  }
+  const resto = suma % 10;
+  return String(resto === 0 ? 0 : 10 - resto);
+}
+
+/**
+ * Devuelve un código EAN-13 válido de 13 dígitos para el producto.
+ * Si el producto ya cuenta con un `codigoBarras` asignado, lo normaliza.
+ * Si no cuenta con uno, genera uno sintético con el prefijo GS1 de Perú (775)
+ * más el ID numérico y el dígito de control EAN-13 garantizado.
+ *
+ * @param {object} producto
+ * @returns {string} EAN-13 de 13 dígitos
+ */
+export function codigoEan13(producto) {
+  if (producto?.codigoBarras) {
+    const limpio = String(producto.codigoBarras).replace(/\D/g, "");
+    if (limpio.length === 13) return limpio;
+    if (limpio.length === 12) return limpio + calcularChecksumEan13(limpio);
+  }
+  const idNum = parseInt(producto?.id, 10) || 1;
+  const base12 = `775${String(idNum).padStart(9, "0")}`;
+  return base12 + calcularChecksumEan13(base12);
+}

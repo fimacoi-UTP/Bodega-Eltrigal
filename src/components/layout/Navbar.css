@@ -200,13 +200,30 @@
   place-items: center;
   width: 34px;
   height: 34px;
+  aspect-ratio: 1 / 1;
   flex-shrink: 0;
-  border-radius: var(--radio-pastilla);
+  border-radius: 50%;
+  border: 1.5px solid var(--color-borde);
   background-color: var(--color-primario-suave);
   color: var(--ladrillo-700);
   font-size: var(--texto-xs);
   font-weight: var(--peso-negrita);
   letter-spacing: 0.02em;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.navbar__avatar--foto {
+  width: 34px;
+  height: 34px;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-borde);
+  object-fit: cover;
+  padding: 0;
+  display: block;
+  box-sizing: border-box;
 }
 
 .navbar__usuario-datos {
@@ -227,7 +244,9 @@
 }
 
 .navbar__enlace-panel,
-.navbar__ingresar {
+.navbar__ingresar,
+.navbar__enlace-registro,
+.navbar__enlace-micuenta {
   display: inline-flex;
   align-items: center;
   height: 38px;
@@ -242,9 +261,40 @@
 }
 
 .navbar__enlace-panel:hover,
-.navbar__ingresar:hover {
+.navbar__ingresar:hover,
+.navbar__enlace-registro:hover,
+.navbar__enlace-micuenta:hover {
   background-color: var(--color-primario-hover);
   color: var(--color-sobre-primario);
+}
+
+.navbar__auth-links {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.navbar__enlace-login {
+  display: none;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto);
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--radio-md);
+  transition:
+    color var(--transicion-rapida),
+    background-color var(--transicion-rapida);
+}
+
+.navbar__enlace-login:hover {
+  color: var(--color-primario);
+  background-color: var(--color-primario-suave);
+}
+
+@media (min-width: 640px) {
+  .navbar__enlace-login {
+    display: inline-flex;
+  }
 }
 
 .navbar__enlace-panel {
@@ -258,6 +308,9 @@
   color: var(--color-texto-tenue);
   padding: var(--esp-2);
   border-radius: var(--radio-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .navbar__salir:hover {
@@ -433,7 +486,9 @@
 }
 
 .cajon__ingresar,
-.cajon__salir {
+.cajon__salir,
+.cajon__registrarse,
+.cajon__micuenta {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -443,14 +498,35 @@
   border-radius: var(--radio-md);
 }
 
-.cajon__ingresar {
+.cajon__auth-botones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.cajon__ingresar,
+.cajon__micuenta {
   background-color: var(--color-primario);
+  color: var(--color-sobre-primario);
+  text-decoration: none;
+  transition: background-color var(--transicion-rapida);
+}
+
+.cajon__ingresar:hover,
+.cajon__micuenta:hover {
+  background-color: var(--color-primario-hover);
   color: var(--color-sobre-primario);
 }
 
-.cajon__ingresar:hover {
-  background-color: var(--color-primario-hover);
-  color: var(--color-sobre-primario);
+.cajon__registrarse {
+  background-color: var(--color-superficie-suave);
+  color: var(--color-primario);
+  border: 1px solid var(--color-primario-borde);
+  transition: background-color var(--transicion-rapida);
+}
+
+.cajon__registrarse:hover {
+  background-color: var(--color-primario-suave);
 }
 
 .cajon__salir {
