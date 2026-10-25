@@ -1,0 +1,249 @@
+.mis-pedidos-seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+/* ============================================================================
+ * TIRA DE RESUMEN · 3 tiles estilo casero
+ * ==========================================================================*/
+.mis-pedidos-resumen {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-2);
+}
+
+@media (min-width: 640px) {
+  .mis-pedidos-resumen {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--esp-4);
+  }
+}
+
+.mis-pedidos-tile {
+  background: linear-gradient(135deg, var(--trigo-50, #fef9ec) 0%, rgba(254, 249, 236, 0.6) 100%);
+  border: 1px solid var(--trigo-200, #f9de8e);
+  border-radius: var(--radio-xl, 1rem);
+  padding: var(--esp-4) var(--esp-5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(194, 120, 3, 0.05);
+  transition: transform var(--transicion-rapida), box-shadow var(--transicion-rapida);
+}
+
+.mis-pedidos-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(194, 120, 3, 0.08);
+  border-color: var(--trigo-300, #f5c94f);
+}
+
+.mis-pedidos-tile__numero {
+  font-size: clamp(2rem, 1.8rem + 0.8vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--trigo-700, #9c5b07);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.mis-pedidos-tile__etiqueta-fila {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-top: var(--esp-2);
+}
+
+.mis-pedidos-tile__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radio-sm, 6px);
+  background: rgba(224, 154, 14, 0.14);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.mis-pedidos-tile__etiqueta {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.mis-pedidos-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mis-pedidos-titulo {
+  font-size: var(--texto-xl);
+  font-weight: 700;
+  color: var(--color-texto);
+  margin: 0;
+}
+
+.mis-pedidos-total-contador {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  background: var(--color-fondo-suave, #f1f5f9);
+  padding: 2px 10px;
+  border-radius: var(--radio-total, 9999px);
+  font-weight: 500;
+}
+
+.mis-pedidos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.mis-pedidos-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mis-pedidos-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+}
+
+.mis-pedidos-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  flex-wrap: wrap;
+}
+
+.mis-pedidos-bloque-izq {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  min-width: 0;
+  flex: 1;
+}
+
+/* ============================================================================
+ * MINIATURA DE PEDIDO · Foto cuadrada con fallback tintado en trigo
+ * ==========================================================================*/
+.mis-pedidos-miniatura-caja {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: var(--radio-md, 8px);
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+  background: var(--color-superficie);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.mis-pedidos-miniatura-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mis-pedidos-miniatura-placeholder {
+  background: linear-gradient(135deg, var(--trigo-100, #fcefc7) 0%, var(--trigo-50, #fef9ec) 100%);
+  border-color: var(--trigo-200, #f9de8e);
+  color: var(--trigo-800, #78450f);
+}
+
+.mis-pedidos-miniatura-icono {
+  font-size: 1.6rem;
+  line-height: 1;
+  user-select: none;
+}
+
+.mis-pedidos-info-principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  min-width: 0;
+}
+
+.mis-pedidos-codigo-linea {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  flex-wrap: wrap;
+}
+
+.mis-pedidos-codigo {
+  font-size: var(--texto-base);
+  color: var(--color-texto);
+}
+
+.mis-pedidos-fecha {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+  margin: 0;
+}
+
+.mis-pedidos-entrega {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+
+.mis-pedidos-acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+}
+
+.mis-pedidos-monto-bloque {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.mis-pedidos-monto-label {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+  text-transform: uppercase;
+}
+
+.mis-pedidos-monto {
+  font-size: var(--texto-lg);
+  color: var(--color-marca, #c2410c);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .mis-pedidos-fila {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--esp-3);
+  }
+
+  .mis-pedidos-bloque-izq {
+    width: 100%;
+    gap: var(--esp-3);
+  }
+
+  .mis-pedidos-miniatura-caja {
+    width: 56px;
+    height: 56px;
+  }
+
+  .mis-pedidos-acciones {
+    width: 100%;
+    justify-content: space-between;
+    border-top: 1px solid var(--color-borde);
+    padding-top: var(--esp-3);
+    margin-top: var(--esp-1);
+  }
+
+  .mis-pedidos-monto-bloque {
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,349 @@
+/* ============================================================================
+ * ModalMiPerfil · Estilos Premium 2.0 Bodega El Trigal
+ * ============================================================================
+ * Jerarquía visual, cards con bordes hairline (#ece3d8), avatar grande (~104px)
+ * vertical y centrado con anillo por rol, inputs full-width en columna única,
+ * respiro de 16px entre cards, y botones con hover interactivo.
+ * ========================================================================== */
+
+.modal-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Respiro consistente de 16px entre secciones */
+  padding-bottom: var(--esp-3, 0.75rem);
+}
+
+/* Firma de marca: acento terracota→oro trigo */
+.modal-perfil__marca-acento {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2, 0.5rem);
+}
+
+.modal-perfil__marca-linea {
+  width: 48px;
+  height: 2.5px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #8b4513 0%, #d97706 65%, #fde68a 100%);
+}
+
+.modal-perfil__marca-trigo {
+  font-size: 0.95rem;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.modal-perfil__subtitulo {
+  margin: 0;
+  font-size: var(--texto-xs, 0.8125rem);
+  color: var(--color-texto-tenue, #6b5d52);
+  line-height: 1.45;
+}
+
+.modal-perfil__alerta {
+  margin-top: var(--esp-1, 0.25rem);
+}
+
+/* ────────────────────────────────── CARDS / SECCIONES ────────────────── */
+.modal-perfil__seccion {
+  border: 1px solid #ece3d8;
+  border-radius: var(--radio-xl, 1rem);
+  background-color: var(--color-superficie, #ffffff);
+  padding: 18px 20px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 4px 12px -2px rgba(139, 69, 19, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-perfil__seccion:hover {
+  border-color: rgba(217, 119, 6, 0.4);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    0 8px 20px -2px rgba(139, 69, 19, 0.08);
+}
+
+.modal-perfil__seccion-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2, 0.5rem);
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(236, 227, 216, 0.7);
+}
+
+.modal-perfil__seccion-titulo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-perfil__seccion-icono {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.modal-perfil__seccion-titulo {
+  margin: 0;
+  font-size: 0.925rem;
+  font-weight: var(--peso-semi, 600);
+  color: var(--color-texto, #261f1a);
+  letter-spacing: -0.01em;
+}
+
+/* Badge / Pill de rol en la cabecera */
+.modal-perfil__rol-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+  background-color: rgba(139, 69, 19, 0.08);
+  color: #7c2d12;
+  border: 1px solid rgba(139, 69, 19, 0.22);
+}
+
+.modal-perfil__rol-pill--admin {
+  background-color: rgba(139, 69, 19, 0.08);
+  color: #7c2d12;
+  border-color: rgba(139, 69, 19, 0.25);
+}
+
+.modal-perfil__rol-pill--admin .modal-perfil__rol-punto {
+  background-color: #8b4513;
+}
+
+.modal-perfil__rol-pill--cajero {
+  background-color: rgba(217, 119, 6, 0.1);
+  color: #92400e;
+  border-color: rgba(217, 119, 6, 0.28);
+}
+
+.modal-perfil__rol-pill--cajero .modal-perfil__rol-punto {
+  background-color: #d97706;
+}
+
+.modal-perfil__rol-punto {
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background-color: currentColor;
+}
+
+/* ──────────────────── SECCIÓN A: FOTOGRAFÍA DE PERFIL ───────────────── */
+.modal-perfil__avatar-bloque-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  width: 100%;
+  padding: 6px 0 2px;
+}
+
+.modal-perfil__avatar-preview {
+  width: 104px;
+  height: 104px;
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  box-shadow:
+    0 0 0 2.5px #ffffff,
+    0 0 0 4.5px rgba(217, 119, 6, 0.45),
+    0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modal-perfil__avatar--admin {
+  box-shadow:
+    0 0 0 2.5px #ffffff,
+    0 0 0 5px #8b4513,
+    0 8px 22px rgba(139, 69, 19, 0.24);
+}
+
+.modal-perfil__avatar--admin .modal-perfil__avatar-iniciales {
+  background: linear-gradient(135deg, #fbe7d5 0%, #f4cca9 100%);
+  color: #7c2d12;
+}
+
+.modal-perfil__avatar--cajero {
+  box-shadow:
+    0 0 0 2.5px #ffffff,
+    0 0 0 5px #d97706,
+    0 8px 22px rgba(217, 119, 6, 0.24);
+}
+
+.modal-perfil__avatar--cajero .modal-perfil__avatar-iniciales {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+}
+
+.modal-perfil__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-perfil__avatar-iniciales {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 2.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.modal-perfil__avatar-botones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.modal-perfil__avatar-ayuda {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-texto-tenue, #786b61);
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.45;
+}
+
+/* ───────────────────── FORMULARIOS Y CAMPOS ─────────────────────────── */
+.modal-perfil__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px; /* Espaciado vertical 12–16px entre campos */
+  width: 100%;
+}
+
+/* Campos siempre full-width dentro del drawer */
+.modal-perfil .ui-campo {
+  width: 100%;
+  margin: 0;
+}
+
+.modal-perfil .ui-campo__caja {
+  width: 100%;
+}
+
+.modal-perfil .ui-campo__control {
+  width: 100%;
+}
+
+.modal-perfil .ui-campo__etiqueta {
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-texto, #261f1a);
+}
+
+.modal-perfil__grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 480px) {
+  .modal-perfil__grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.modal-perfil__campo-readonly {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.modal-perfil__input-bloqueado {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2, 0.5rem);
+  height: 42px;
+  padding: 0 var(--esp-3, 0.75rem);
+  border-radius: var(--radio-md, 0.5rem);
+  background-color: var(--color-fondo-suave, #fbf7f0);
+  border: 1px solid #e4d8c9;
+  font-size: var(--texto-sm, 0.875rem);
+  color: var(--color-texto, #261f1a);
+  font-weight: var(--peso-medio, 500);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-perfil__input-bloqueado-icono {
+  opacity: 0.65;
+  font-size: 0.95rem;
+}
+
+.modal-perfil__input-bloqueado-badge {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background-color: rgba(107, 93, 82, 0.1);
+  color: var(--color-texto-tenue, #6b5d52);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.modal-perfil__acciones-seccion {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+  padding-top: 8px;
+}
+
+/* ───────────────────── BOTONES PREMIUM (HOVER / REALCE) ─────────────── */
+.modal-perfil .ui-boton {
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.modal-perfil .ui-boton:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
+}
+
+.modal-perfil .ui-boton:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+/* ───────────────────── DRAWER ESPECÍFICO DE PERFIL ──────────────────── */
+@media (min-width: 640px) {
+  .modal-perfil-drawer.ui-drawer {
+    max-width: 440px; /* Ancho consistente ~440px */
+  }
+}
+
+.modal-perfil__pie-drawer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}

@@ -9,15 +9,17 @@
  * Este layout SÍ está terminado. Las páginas de adentro son cascarones.
  * ==========================================================================*/
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import SidebarDashboard from "./SidebarDashboard";
 import { Toast } from "../ui";
+import { ModalMiPerfil } from "../dashboard/ModalMiPerfil";
 import { useAuth } from "../../hooks/useAuth";
 import { usePedidosEnVivo } from "../../hooks/usePedidosEnVivo";
 import { RUTAS } from "../../routes/rutas";
-import { ETIQUETAS_ROL } from "../../constantes";
-import { formatearSoles, obtenerIniciales } from "../../utils/formato";
+import { ETIQUETAS_ROL, ROLES } from "../../constantes";
+import { formatearSoles, obtenerIniciales, clases } from "../../utils/formato";
+import { urlImagen } from "../../api/apiClient";
 import "./LayoutDashboard.css";
 
 /** Título de la barra superior según la URL. */
@@ -29,10 +31,16 @@ const TITULOS = {
   [RUTAS.DASHBOARD_PROMOCIONES]: "Promociones",
   [RUTAS.DASHBOARD_VENTAS]: "Ventas en tienda",
   [RUTAS.DASHBOARD_PEDIDOS]: "Pedidos web",
+  [RUTAS.DASHBOARD_USUARIOS]: "Gestión de usuarios",
 };
 
 export function LayoutDashboard() {
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
+  const [modalPerfilAbierto, setModalPerfilAbierto] = useState(false);
+  const [avatarFallidoTopbar, setAvatarFallidoTopbar] = useState(null);
+  const dropdownRef = useRef(null);
+
   const { usuario, cerrarSesion } = useAuth();
   const {
     pedidosPendientesCount,
@@ -45,13 +53,33 @@ export function LayoutDashboard() {
   const ubicacion = useLocation();
   const navegar = useNavigate();
 
+  const esCatalogo = ubicacion.pathname === RUTAS.DASHBOARD_CATALOGO;
   const titulo = TITULOS[ubicacion.pathname] ?? "Panel de gestión";
 
-  // Nota: el cajón se cierra desde el propio enlace que se toca. SidebarDashboard
-  // recibe `alCerrar` y lo llama en el onClick de cada <NavLink>. Hacerlo así, en
-  // el evento, es mejor que un useEffect que vigile la URL: el efecto provocaría
-  // un render extra en CADA cambio de ruta, incluso en escritorio donde el cajón
-  // ni siquiera existe.
+  // Cerrar dropdown al hacer click fuera o presionar Esc
+  useEffect(() => {
+    if (!menuPerfilAbierto) return;
+
+    const manejarClickFuera = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setMenuPerfilAbierto(false);
+      }
+    };
+
+    const manejarTecla = (e) => {
+      if (e.key === "Escape") {
+        setMenuPerfilAbierto(false);
+      }
+    };
+
+    document.addEventListener("mousedown", manejarClickFuera);
+    document.addEventListener("keydown", manejarTecla);
+
+    return () => {
+      document.removeEventListener("mousedown", manejarClickFuera);
+      document.removeEventListener("keydown", manejarTecla);
+    };
+  }, [menuPerfilAbierto]);
 
   const alCerrarSesion = async () => {
     await cerrarSesion();
@@ -62,6 +90,16 @@ export function LayoutDashboard() {
     cerrarToast();
     navegar(RUTAS.DASHBOARD_PEDIDOS);
   };
+
+  const avatarSrc =
+    usuario?.avatarUrl &&
+    usuario.avatarUrl !== "null" &&
+    usuario.avatarUrl !== "undefined"
+      ? urlImagen(usuario.avatarUrl)
+      : null;
+
+  const rolUsuario = usuario?.rol || ROLES.CLIENTE;
+  const rolClase = `panel-barra__avatar-wrap--${String(rolUsuario).toLowerCase()}`;
 
   return (
     <div className="layout-panel">
@@ -78,6 +116,7 @@ export function LayoutDashboard() {
         abierto={menuAbierto}
         alCerrar={() => setMenuAbierto(false)}
         pedidosPendientes={pedidosPendientesCount}
+        onAbrirPerfil={() => setModalPerfilAbierto(true)}
       />
 
       <div className="layout-panel__principal">
@@ -117,28 +156,163 @@ export function LayoutDashboard() {
               <span aria-hidden="true">{sonidoHabilitado ? "🔔" : "🔕"}</span>
             </button>
 
+            {/* Menú de usuario con Dropdown Premium */}
             {usuario && (
-              <div className="panel-barra__usuario">
-                <span className="panel-barra__avatar" aria-hidden="true">
-                  {obtenerIniciales(usuario.nombre)}
-                </span>
-                <div className="panel-barra__usuario-datos">
-                  <span className="panel-barra__usuario-nombre">{usuario.nombre}</span>
-                  <span className="panel-barra__usuario-rol">
-                    {ETIQUETAS_ROL[usuario.rol]}
+              <div className="panel-barra__usuario-contenedor" ref={dropdownRef}>
+                <button
+                  type="button"
+                  className={clases(
+                    "panel-barra__usuario-btn",
+                    menuPerfilAbierto && "panel-barra__usuario-btn--activo",
+                  )}
+                  onClick={() => setMenuPerfilAbierto((prev) => !prev)}
+                  aria-expanded={menuPerfilAbierto}
+                  aria-haspopup="true"
+                  aria-label="Menú de perfil"
+                  title="Opciones de perfil y cuenta"
+                >
+                  <div className={clases("panel-barra__avatar-wrap", rolClase)}>
+                    {avatarSrc && avatarFallidoTopbar !== avatarSrc ? (
+                      <img
+                        src={avatarSrc}
+                        alt={usuario.nombre || "Usuario"}
+                        className="panel-barra__avatar-img"
+                        onError={() => setAvatarFallidoTopbar(avatarSrc)}
+                      />
+                    ) : (
+                      <span className="panel-barra__avatar-iniciales" aria-hidden="true">
+                        {obtenerIniciales(usuario.nombre || usuario.email)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="panel-barra__usuario-datos">
+                    <span className="panel-barra__usuario-nombre">
+                      {usuario.nombre || usuario.email}
+                    </span>
+                    <span className="panel-barra__usuario-rol">
+                      {ETIQUETAS_ROL[usuario.rol] || usuario.rol}
+                    </span>
+                  </div>
+
+                  <span
+                    className={clases(
+                      "panel-barra__chevron",
+                      menuPerfilAbierto && "panel-barra__chevron--abierto",
+                    )}
+                    aria-hidden="true"
+                  >
+                    ▾
                   </span>
-                </div>
+                </button>
+
+                {/* Dropdown Premium 2.0 */}
+                {menuPerfilAbierto && (
+                  <div
+                    className="panel-dropdown-perfil"
+                    role="menu"
+                    aria-label="Opciones de usuario"
+                  >
+                    {/* Cabecera mini con avatar, nombre y email */}
+                    <div className="panel-dropdown-perfil__cabecera">
+                      <div className={clases("panel-dropdown-perfil__avatar", rolClase)}>
+                        {avatarSrc && avatarFallidoTopbar !== avatarSrc ? (
+                          <img
+                            src={avatarSrc}
+                            alt={usuario.nombre || "Usuario"}
+                            className="panel-dropdown-perfil__avatar-img"
+                          />
+                        ) : (
+                          <span aria-hidden="true">
+                            {obtenerIniciales(usuario.nombre || usuario.email)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="panel-dropdown-perfil__info">
+                        <span className="panel-dropdown-perfil__nombre">
+                          {usuario.nombre || "Usuario"}
+                        </span>
+                        <span className="panel-dropdown-perfil__email">
+                          {usuario.email || usuario.correo}
+                        </span>
+                        <span
+                          className={clases(
+                            "panel-dropdown-perfil__rol-pill",
+                            `panel-dropdown-perfil__rol-pill--${String(rolUsuario).toLowerCase()}`,
+                          )}
+                        >
+                          <span
+                            className="panel-dropdown-perfil__rol-punto"
+                            aria-hidden="true"
+                          />
+                          {ETIQUETAS_ROL[usuario.rol] || usuario.rol}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="panel-dropdown-perfil__separador" role="separator" />
+
+                    {/* Opción "Mi perfil" */}
+                    <button
+                      type="button"
+                      className="panel-dropdown-perfil__item"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuPerfilAbierto(false);
+                        setModalPerfilAbierto(true);
+                      }}
+                    >
+                      <span className="panel-dropdown-perfil__item-icono" aria-hidden="true">
+                        👤
+                      </span>
+                      <div className="panel-dropdown-perfil__item-textos">
+                        <span className="panel-dropdown-perfil__item-titulo">
+                          Mi perfil
+                        </span>
+                        <span className="panel-dropdown-perfil__item-subtitulo">
+                          Foto, datos personales y clave
+                        </span>
+                      </div>
+                    </button>
+
+                    <div className="panel-dropdown-perfil__separador" role="separator" />
+
+                    {/* Opción "Cerrar sesión" en rojo suave */}
+                    <button
+                      type="button"
+                      className="panel-dropdown-perfil__item panel-dropdown-perfil__item--cerrar"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuPerfilAbierto(false);
+                        alCerrarSesion();
+                      }}
+                    >
+                      <span className="panel-dropdown-perfil__item-icono" aria-hidden="true">
+                        ⏻
+                      </span>
+                      <div className="panel-dropdown-perfil__item-textos">
+                        <span className="panel-dropdown-perfil__item-titulo">
+                          Cerrar sesión
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
-
-            <button type="button" className="panel-barra__salir" onClick={alCerrarSesion}>
-              Salir
-            </button>
           </div>
         </header>
 
+        {/* --- Modal Mi Perfil (Staff) --- */}
+        {modalPerfilAbierto && (
+          <ModalMiPerfil
+            abierto={modalPerfilAbierto}
+            alCerrar={() => setModalPerfilAbierto(false)}
+          />
+        )}
+
         {/* --- Contenido de cada sección --- */}
-        <main className="panel-contenido">
+        <main className={clases("panel-contenido", esCatalogo && "panel-contenido--catalogo")}>
           <Outlet />
         </main>
       </div>

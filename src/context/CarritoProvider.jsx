@@ -1,13 +1,90 @@
-import { useState, useMemo } from 'react';
-import { CarritoContext } from './CarritoContext';
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { CarritoContext } from "./CarritoContext";
+import { useAuth } from "../hooks/useAuth";
+import {
+  leerCarritoStorage,
+  guardarCarritoStorage,
+  limpiarCarritoStorage,
+  obtenerDuenoCarritoStorage,
+  guardarDuenoCarritoStorage,
+  EVENTO_LIMPIAR_CARRITO,
+} from "./carritoStorage";
 
 /**
- * Proveedor del estado del carrito. Sigue el estándar de la arquitectura
- * utilizada por AuthProvider e InventarioProvider en el proyecto.
- */
+ * ============================================================================
+ * CarritoProvider / CartProvider · Estado global y persistencia del Carrito
+ * ============================================================================
+ * Maneja los productos del carrito con persistencia segura en localStorage.
+ *
+ * Reglas de sesión:
+ *   · Al CERRAR SESIÓN: vacía el estado y limpia las claves de localStorage.
+ *   · Al INICIAR SESIÓN con una cuenta DISTINTA al dueño previo del carrito:
+ *     vacía el carrito para no mezclar productos entre usuarios.
+ *   · En uso como INVITADO: preserva el carrito normalmente en recargas.
+ *   · Todos los accesos a localStorage están protegidos con try/catch.
+ * ==========================================================================*/
 export const CarritoProvider = ({ children }) => {
-  // Estado local para los productos añadidos al carrito
-  const [items, setItems] = useState([]);
+  const { usuario } = useAuth();
+  const idUsuarioActual = usuario ? String(usuario.id ?? usuario.email ?? "") : null;
+
+  // Estado local para los productos añadidos al carrito (restaurado de localStorage)
+  const [items, setItems] = useState(() => leerCarritoStorage());
+
+  /**
+   * Remueve todos los elementos del carrito de compras (en memoria y storage).
+   */
+  const vaciar = useCallback(() => {
+    setItems([]);
+    limpiarCarritoStorage();
+  }, []);
+
+  // 1. Escuchar eventos de limpieza (evento de app o evento storage entre pestañas)
+  useEffect(() => {
+    const handleLimpiarEvento = () => {
+      setItems([]);
+    };
+
+    const handleStorage = (e) => {
+      if (
+        (e.key === "trigal:carrito" || e.key === "carrito" || e.key === "cart") &&
+        !e.newValue
+      ) {
+        setItems([]);
+      }
+    };
+
+    window.addEventListener(EVENTO_LIMPIAR_CARRITO, handleLimpiarEvento);
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener(EVENTO_LIMPIAR_CARRITO, handleLimpiarEvento);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
+
+  // 2. Sincronizar dueño del carrito en storage cuando un usuario se autentica
+  useEffect(() => {
+    if (idUsuarioActual) {
+      const duenoStorage = obtenerDuenoCarritoStorage();
+      if (!duenoStorage || duenoStorage === "invitado") {
+        guardarDuenoCarritoStorage(idUsuarioActual);
+      }
+    }
+  }, [idUsuarioActual]);
+
+  // 3. Persistir en localStorage cada vez que los items cambien
+  useEffect(() => {
+    if (items.length > 0) {
+      guardarCarritoStorage(items, idUsuarioActual || "invitado");
+    } else {
+      try {
+        localStorage.removeItem("trigal:carrito");
+        localStorage.removeItem("carrito");
+        localStorage.removeItem("cart");
+      } catch (err) {
+        console.warn("[El Trigal] Error al limpiar items de carrito en storage:", err);
+      }
+    }
+  }, [items, idUsuarioActual]);
 
   /**
    * Agrega un producto al carrito o incrementa su cantidad si ya existe.
@@ -54,13 +131,6 @@ export const CarritoProvider = ({ children }) => {
   };
 
   /**
-   * Remueve todos los elementos del carrito de compras.
-   */
-  const vaciar = () => {
-    setItems([]);
-  };
-
-  /**
    * Recalcula el total gastado memorizando el valor para optimizar renderizados.
    */
   const total = useMemo(() => {
@@ -74,7 +144,7 @@ export const CarritoProvider = ({ children }) => {
     quitar,
     cambiarCantidad,
     vaciar,
-    total
+    total,
   };
 
   return (
@@ -83,3 +153,6 @@ export const CarritoProvider = ({ children }) => {
     </CarritoContext.Provider>
   );
 };
+
+export const CartProvider = CarritoProvider;
+export default CarritoProvider;

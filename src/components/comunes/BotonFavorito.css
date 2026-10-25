@@ -1,0 +1,95 @@
+/* ============================================================================
+ * BotonFavorito.css · Botón flotante e interactivo de corazón
+ * ==========================================================================*/
+
+.boton-favorito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radio-circulo, 9999px);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--color-texto-suave, #64748b);
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--transicion-rapida),
+              background var(--transicion-rapida),
+              color var(--transicion-rapida),
+              border-color var(--transicion-rapida),
+              box-shadow var(--transicion-rapida);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.boton-favorito:hover {
+  transform: scale(1.12);
+  background: #ffffff;
+  color: var(--color-marca, #b0441f);
+  box-shadow: 0 4px 12px rgba(90, 40, 20, 0.15);
+}
+
+.boton-favorito:active {
+  transform: scale(0.92);
+}
+
+/* Tamaños */
+.boton-favorito--sm {
+  width: 32px;
+  height: 32px;
+}
+.boton-favorito--sm .boton-favorito__icono {
+  width: 17px;
+  height: 17px;
+}
+
+.boton-favorito--md {
+  width: 38px;
+  height: 38px;
+}
+.boton-favorito--md .boton-favorito__icono {
+  width: 21px;
+  height: 21px;
+}
+
+.boton-favorito--lg {
+  width: 44px;
+  height: 44px;
+}
+.boton-favorito--lg .boton-favorito__icono {
+  width: 25px;
+  height: 25px;
+}
+
+/* Estado Activo (Favorito) */
+.boton-favorito--activo {
+  color: #e11d48; /* Rojo vivo / cereza */
+  background: #ffffff;
+  border-color: rgba(225, 29, 72, 0.25);
+  box-shadow: 0 3px 10px rgba(225, 29, 72, 0.18);
+}
+
+.boton-favorito--activo:hover {
+  color: #be123c;
+  border-color: rgba(225, 29, 72, 0.4);
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.26);
+}
+
+/* Micro-animación de pulso al alternar */
+.boton-favorito--animando {
+  animation: botonFavoritoPop 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes botonFavoritoPop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

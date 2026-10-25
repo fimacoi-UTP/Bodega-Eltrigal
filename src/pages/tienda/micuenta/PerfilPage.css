@@ -1,0 +1,149 @@
+/* ============================================================================
+ * PerfilPage.css · Estilos para Datos y Seguridad en Mi Cuenta
+ * ==========================================================================*/
+
+.perfil-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+}
+
+/* --- Avatar Centrado a 120px --- */
+.perfil-avatar-seccion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--esp-3);
+  padding: var(--esp-6) var(--esp-4);
+  background-color: var(--color-superficie-suave);
+  border-radius: var(--radio-lg);
+  border: 1px dashed var(--color-borde-fuerte);
+  margin-bottom: var(--esp-4);
+}
+
+.perfil-avatar-circulo {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-marca, #c2410c), #ea580c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 4px var(--color-fondo, #fff),
+    0 0 0 6px var(--color-marca, #c2410c),
+    0 6px 16px rgba(0, 0, 0, 0.1);
+  transition: transform var(--transicion-rapida), box-shadow var(--transicion-rapida);
+}
+
+.perfil-avatar-circulo:hover {
+  transform: scale(1.02);
+}
+
+.perfil-avatar-img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.perfil-avatar-iniciales {
+  color: #fff;
+  font-size: 2.75rem;
+  font-weight: 700;
+  user-select: none;
+  line-height: 1;
+}
+
+.perfil-avatar-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-top: var(--esp-1);
+}
+
+.perfil-avatar-botones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-3);
+  flex-wrap: wrap;
+}
+
+.perfil-avatar-btn-quitar {
+  background: transparent;
+  border: none;
+  color: var(--color-texto-tenue);
+  font-size: var(--texto-xs);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: var(--esp-1) var(--esp-2);
+  transition: color var(--transicion-rapida);
+}
+
+.perfil-avatar-btn-quitar:hover:not(:disabled) {
+  color: var(--color-peligro);
+}
+
+.perfil-avatar-btn-quitar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.perfil-avatar-ayuda {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+  margin: 0;
+}
+
+/* --- Formulario y campos --- */
+.perfil-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  margin-top: var(--esp-2);
+}
+
+.perfil-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 640px) {
+  .perfil-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.perfil-form-pie {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--esp-2);
+}
+
+.perfil-toggle-clave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: var(--esp-1);
+  color: var(--color-texto-tenue);
+  cursor: pointer;
+  border-radius: var(--radio-sm);
+  transition: color var(--transicion-rapida);
+}
+
+.perfil-toggle-clave:hover {
+  color: var(--color-primario);
+}

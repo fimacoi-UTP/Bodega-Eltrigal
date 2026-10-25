@@ -33,17 +33,9 @@ export class EstadoCancelado extends EstadoPedidoBase {
   }
 
   /**
-   * Hook de transición: devuelve el stock de los items al inventario
+   * Hook de transición: la reposición de stock es manejada por el backend Spring Boot
    */
-  async alTransicionar(pedido, _nuevoEstado, contexto) {
-    if (contexto?.reponerStock && Array.isArray(pedido?.items)) {
-      const itemsParaReponer = pedido.items.map((it) => ({
-        productoId: it.productoId,
-        cantidad: it.cantidad,
-      }));
-      await contexto.reponerStock(itemsParaReponer);
-    }
-  }
+  async alTransicionar() {}
 }
 
 export const estadoCancelado = new EstadoCancelado();

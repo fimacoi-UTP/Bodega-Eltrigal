@@ -19,6 +19,7 @@ import Logo from "./Logo";
 import { RUTAS, aRuta } from "../../routes/rutas";
 import { BODEGA, ETIQUETAS_ROL } from "../../constantes";
 import { clases, obtenerIniciales } from "../../utils/formato";
+import { urlImagen } from "../../api/apiClient";
 import "./Navbar.css";
 
 /** Enlaces fijos de la tienda. */
@@ -144,20 +145,34 @@ export function Navbar() {
             {/* Sesión */}
             {estaAutenticado ? (
               <div className="navbar__usuario">
-                <span className="navbar__avatar" aria-hidden="true">
-                  {obtenerIniciales(usuario.nombre)}
-                </span>
+                {usuario.avatarUrl ? (
+                  <img
+                    src={urlImagen(usuario.avatarUrl)}
+                    alt={usuario.nombre}
+                    className="navbar__avatar navbar__avatar--foto"
+                  />
+                ) : (
+                  <span className="navbar__avatar" aria-hidden="true">
+                    {obtenerIniciales(usuario.nombre)}
+                  </span>
+                )}
 
                 <div className="navbar__usuario-datos">
                   <span className="navbar__usuario-nombre">
-                    {usuario.nombre.split(" ")[0]}
+                    {usuario.nombres ? usuario.nombres.split(" ")[0] : usuario.nombre.split(" ")[0]}
                   </span>
-                  <span className="navbar__usuario-rol">{ETIQUETAS_ROL[usuario.rol]}</span>
+                  {esPersonal && (
+                    <span className="navbar__usuario-rol">{ETIQUETAS_ROL[usuario.rol]}</span>
+                  )}
                 </div>
 
-                {/* El acceso al dashboard solo se muestra si el rol lo permite.
-                    Ojo: esto es cosmética. Quien realmente bloquea el acceso es
-                    <RutaProtegida>. */}
+                {!esPersonal && (
+                  <Link to={RUTAS.MI_CUENTA} className="navbar__enlace-registro">
+                    Mi cuenta
+                  </Link>
+                )}
+
+                {/* El acceso al dashboard solo se muestra si el rol es personal */}
                 {esPersonal && (
                   <Link to={RUTAS.DASHBOARD} className="navbar__enlace-panel">
                     Panel
@@ -170,13 +185,18 @@ export function Navbar() {
                   onClick={alCerrarSesion}
                   aria-label="Cerrar sesión"
                 >
-                  Salir
+                  Cerrar sesión
                 </button>
               </div>
             ) : (
-              <Link to={RUTAS.LOGIN} className="navbar__ingresar">
-                Ingresar
-              </Link>
+              <div className="navbar__auth-links">
+                <Link to={RUTAS.LOGIN} className="navbar__enlace-login">
+                  Iniciar sesión
+                </Link>
+                <Link to={RUTAS.REGISTRO} className="navbar__enlace-registro">
+                  Registrarse
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -255,9 +275,17 @@ export function Navbar() {
           {estaAutenticado ? (
             <>
               <div className="cajon__usuario">
-                <span className="navbar__avatar" aria-hidden="true">
-                  {obtenerIniciales(usuario.nombre)}
-                </span>
+                {usuario.avatarUrl ? (
+                  <img
+                    src={urlImagen(usuario.avatarUrl)}
+                    alt={usuario.nombre}
+                    className="navbar__avatar navbar__avatar--foto"
+                  />
+                ) : (
+                  <span className="navbar__avatar" aria-hidden="true">
+                    {obtenerIniciales(usuario.nombre)}
+                  </span>
+                )}
                 <div>
                   <p className="cajon__usuario-nombre">{usuario.nombre}</p>
                   <Badge variante="marca" tamano="sm">
@@ -265,6 +293,12 @@ export function Navbar() {
                   </Badge>
                 </div>
               </div>
+
+              {!esPersonal && (
+                <Link to={RUTAS.MI_CUENTA} className="cajon__micuenta" onClick={cerrarMenu}>
+                  Mi cuenta
+                </Link>
+              )}
 
               {esPersonal && (
                 <Link to={RUTAS.DASHBOARD} className="cajon__enlace" onClick={cerrarMenu}>
@@ -277,9 +311,14 @@ export function Navbar() {
               </button>
             </>
           ) : (
-            <Link to={RUTAS.LOGIN} className="cajon__ingresar" onClick={cerrarMenu}>
-              Iniciar sesión
-            </Link>
+            <div className="cajon__auth-botones">
+              <Link to={RUTAS.LOGIN} className="cajon__ingresar" onClick={cerrarMenu}>
+                Iniciar sesión
+              </Link>
+              <Link to={RUTAS.REGISTRO} className="cajon__registrarse" onClick={cerrarMenu}>
+                Registrarse
+              </Link>
+            </div>
           )}
         </div>
       </aside>

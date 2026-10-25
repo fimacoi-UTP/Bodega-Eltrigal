@@ -33,6 +33,7 @@ import {
   Select,
 } from "../../components/ui";
 import { formatearSoles } from "../../utils/formato";
+import { reproducirAlertaStock } from "../../utils/sonido";
 import { RUTAS } from "../../routes/rutas";
 import ModalAjusteStock from "./gestion/ModalAjusteStock";
 import {
@@ -99,19 +100,32 @@ export function InventarioPage() {
     async (delta, motivo) => {
       const producto = productoAjuste;
 
-      await ajustarStock(producto.id, delta);
+      const r = await ajustarStock(producto.id, delta, motivo);
+      const stockNuevo = r?.stockNuevo ?? (Number(producto.stock) + delta);
+      const minimo = umbralDe(producto);
 
       const entra = delta > 0;
       const unidades = Math.abs(delta);
 
       setProductoAjuste(null);
-      setAviso({
-        variante: "exito",
-        texto:
-          `${entra ? "Ingresaron" : "Salieron"} ${unidades} ` +
-          `${pluralizar(unidades, producto.unidad ?? "unidad")} de "${producto.nombre}"` +
-          `${motivo ? ` · ${motivo}` : ""}.`,
-      });
+
+      const textoMovimiento =
+        `${entra ? "Ingresaron" : "Salieron"} ${unidades} ` +
+        `${pluralizar(unidades, producto.unidad ?? "unidad")} de "${producto.nombre}"` +
+        `${motivo ? ` · ${motivo}` : ""}.`;
+
+      if (stockNuevo <= minimo) {
+        reproducirAlertaStock();
+        setAviso({
+          variante: "advertencia",
+          texto: `${textoMovimiento} ⚠️ "${producto.nombre}" llegó a su stock mínimo (${minimo}). Considera reponer.`,
+        });
+      } else {
+        setAviso({
+          variante: "exito",
+          texto: textoMovimiento,
+        });
+      }
     },
     [productoAjuste, ajustarStock],
   );

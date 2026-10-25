@@ -2,139 +2,73 @@
  * ============================================================================
  * REPOSITORIO DE PROMOCIONES
  * ----------------------------------------------------------------------------
- * Descuentos y ofertas que el ADMIN crea desde el dashboard y que la tienda
- * web aplica en el catálogo y en el checkout.
- *
- * Forma sugerida de una promoción (el módulo puede ampliarla):
- * {
- *   id, nombre, descripcion, tipo,
- *   valor,                 // 15 (%) o 5.00 (soles), según el tipo
- *   aplicaA,               // 'PRODUCTO' | 'CATEGORIA' | 'TODO'
- *   objetivo,              // id del producto o nombre de la categoría
- *   desde, hasta,          // fechas ISO de vigencia
- *   activa                 // boolean
- * }
+ * Conecta las promociones y descuentos con el backend Spring Boot vía
+ * promocionesApi.
  * ==========================================================================*/
 
-import { crearRepositorioBase } from "./repositorioBase";
-import { CLAVES } from "./claves";
-
-const base = crearRepositorioBase({
-  clave: CLAVES.PROMOCIONES,
-  prefijoId: "promo",
-  nombre: "promociones",
-});
-
-/**
- * Parsea el final del día en hora local para evitar expiraciones prematuras por UTC.
- */
-function obtenerFinDia(fecha) {
-  if (!fecha) return Infinity;
-  const fechaStr = typeof fecha === "string" ? fecha.split("T")[0] : fecha;
-  const partes = String(fechaStr).split("-").map(Number);
-  if (partes.length === 3 && !partes.some(isNaN)) {
-    const [anio, mes, dia] = partes;
-    return new Date(anio, mes - 1, dia, 23, 59, 59, 999).getTime();
-  }
-  const d = new Date(fecha);
-  d.setHours(23, 59, 59, 999);
-  return d.getTime();
-}
-
-/**
- * Parsea el inicio del día en hora local.
- */
-function obtenerInicioDia(fecha) {
-  if (!fecha) return -Infinity;
-  const fechaStr = typeof fecha === "string" ? fecha.split("T")[0] : fecha;
-  const partes = String(fechaStr).split("-").map(Number);
-  if (partes.length === 3 && !partes.some(isNaN)) {
-    const [anio, mes, dia] = partes;
-    return new Date(anio, mes - 1, dia, 0, 0, 0, 0).getTime();
-  }
-  const d = new Date(fecha);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
-}
+import { promocionesApi } from "../api/promocionesApi";
 
 export const promocionRepository = {
-  ...base,
-
   /**
-   * Promociones activas y dentro de su rango de fechas EN ESTE MOMENTO.
-   * Es la que debe usar la tienda web y el POS: que una promo esté marcada como activa
-   * no significa que ya haya empezado o que no haya vencido.
+   * Obtiene todas las promociones registradas en el backend.
    */
-  async obtenerVigentes() {
-    const ahora = Date.now();
-
-    return base.obtenerDonde((promocion) => {
-      if (promocion.activa === false) return false;
-
-      const inicio = obtenerInicioDia(promocion.desde);
-      const fin = obtenerFinDia(promocion.hasta);
-
-      return ahora >= inicio && ahora <= fin;
-    });
+  async obtenerTodos() {
+    return promocionesApi.listar();
   },
 
-  /** Promociones vigentes que afectan a un producto concreto. */
+  /** Alias para obtenerTodos() */
+  async listar() {
+    return promocionesApi.listar();
+  },
+
+  /**
+   * Promociones activas y vigentes por fecha en este momento.
+   */
+  async obtenerVigentes() {
+    return promocionesApi.obtenerVigentes();
+  },
+
+  /**
+   * Registra una nueva promoción en el backend.
+   */
+  async crear(datos) {
+    return promocionesApi.crear(datos);
+  },
+
+  /**
+   * Actualiza una promoción existente en el backend.
+   */
+  async actualizar(id, datos) {
+    return promocionesApi.actualizar(id, datos);
+  },
+
+  /**
+   * Elimina una promoción por su identificador.
+   */
+  async eliminar(id) {
+    return promocionesApi.eliminar(id);
+  },
+
+  /**
+   * Promociones vigentes que afectan a un producto concreto:
+   * promo.aplicaTodos, O producto.id ∈ promo.productoIds, O producto.categoriaId ∈ promo.categoriaIds.
+   */
   async obtenerParaProducto(producto) {
     if (!producto) return [];
     const vigentes = await this.obtenerVigentes();
 
-    return vigentes.filter((promocion) => {
-      if (promocion.aplicaA === "TODO") return true;
-      if (promocion.aplicaA === "PRODUCTO") return promocion.objetivo === producto.id;
-      if (promocion.aplicaA === "CATEGORIA") return promocion.objetivo === producto.categoria;
-      return false;
+    const prodId = String(producto.id);
+    const catId = producto.categoriaId != null ? Number(producto.categoriaId) : null;
+
+    return vigentes.filter((promo) => {
+      if (promo.activa === false) return false;
+      return (
+        Boolean(promo.aplicaTodos) ||
+        (Array.isArray(promo.productoIds) && promo.productoIds.map(String).includes(prodId)) ||
+        (catId != null && Array.isArray(promo.categoriaIds) && promo.categoriaIds.map(Number).includes(catId))
+      );
     });
   },
-
-  /* ==========================================================================
-   * 🪝 GANCHO — PATRÓN DECORATOR (rama: promociones)
-   * --------------------------------------------------------------------------
-   * Este es EL punto de extensión del módulo de promociones.
-   *
-   * El problema real: sobre un mismo producto pueden caer varias promos a la
-   * vez (10% por categoría + S/ 2 de descuento por producto + 5% por ser
-   * cliente frecuente). Si eso se resuelve con `if`s dentro del cálculo del
-   * precio, cada promo nueva obliga a abrir y modificar esa función, y se
-   * vuelve inmantenible.
-   *
-   * Con Decorator, cada promoción ENVUELVE al precio anterior y le agrega su
-   * efecto, sin que ninguna sepa de la existencia de las otras:
-   *
-   *   // src/pages/dashboard/promociones/decoradores.js
-   *
-   *   // El "componente base": el precio pelado del producto.
-   *   const precioBase = (producto) => ({
-   *     monto: producto.precio,
-   *     detalle: [],
-   *   })
-   *
-   *   // Un decorador: recibe el cálculo anterior y devuelve uno nuevo.
-   *   const conPorcentaje = (calculo, promocion) => ({
-   *     monto: calculo.monto * (1 - promocion.valor / 100),
-   *     detalle: [...calculo.detalle, `${promocion.nombre} (-${promocion.valor}%)`],
-   *   })
-   *
-   *   const conMontoFijo = (calculo, promocion) => ({
-   *     monto: Math.max(0, calculo.monto - promocion.valor),
-   *     detalle: [...calculo.detalle, `${promocion.nombre} (-S/ ${promocion.valor})`],
-   *   })
-   *
-   *   // Y se apilan todas las promos vigentes, una sobre otra:
-   *   export function calcularPrecioFinal(producto, promociones) {
-   *     return promociones.reduce(
-   *       (calculo, promo) => DECORADORES[promo.tipo](calculo, promo),
-   *       precioBase(producto),
-   *     )
-   *   }
-   *
-   * Agregar un tipo de promoción nuevo = agregar una función al mapa
-   * DECORADORES. Cero cambios en el código existente (principio abierto/cerrado).
-   *
-   * NO lo implementen aquí: esto es la base. Va en el módulo de promociones.
-   * ========================================================================*/
 };
+
+export default promocionRepository;

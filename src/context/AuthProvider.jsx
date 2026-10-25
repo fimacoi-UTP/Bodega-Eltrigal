@@ -18,8 +18,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "./AuthContext";
-import { usuarioRepository } from "../repositories";
-import { ROLES_DASHBOARD } from "../constantes";
+import { authApi, guardarUsuarioSesion } from "../api/authApi";
+import { esAdmin, esCajero, esCliente, esPersonal } from "../auth/permisos";
+import {
+  limpiarCarritoStorage,
+  obtenerDuenoCarritoStorage,
+  guardarDuenoCarritoStorage,
+} from "./carritoStorage";
 
 export function AuthProvider({ children }) {
   /** Usuario logueado, o null si nadie inició sesión. */
@@ -44,7 +49,7 @@ export function AuthProvider({ children }) {
 
     async function restaurarSesion() {
       try {
-        const guardado = await usuarioRepository.obtenerSesion();
+        const guardado = authApi.obtenerUsuarioSesion();
         if (!cancelado) setUsuario(guardado);
       } catch (fallo) {
         console.error("[El Trigal] No se pudo restaurar la sesión:", fallo);
@@ -67,18 +72,33 @@ export function AuthProvider({ children }) {
    * --------------------------------------------------------------------- */
 
   /**
-   * Inicia sesión.
+   * Inicia sesión llamando a la API de autenticación del backend Spring Boot.
+   * Si había un carrito de otro usuario previo, se limpia para no mezclar cuentas.
+   *
    * @param {string} correo
    * @param {string} clave
-   * @returns {Promise<object>} el usuario autenticado (útil para redirigir
-   *                            según su rol justo después del login).
+   * @returns {Promise<object>} el usuario autenticado
    * @throws {Error} si las credenciales no son válidas.
    */
   const iniciarSesion = useCallback(async (correo, clave) => {
     try {
-      const autenticado = await usuarioRepository.autenticar(correo, clave);
-      await usuarioRepository.guardarSesion(autenticado);
+      const autenticado = await authApi.login(correo, clave);
       setError(null);
+
+      // Si el carrito tenía un dueño asignado y no coincide con el nuevo usuario,
+      // se limpia para no mezclar carritos entre cuentas distintas.
+      // Si era de un invitado (dueno == null o "invitado"), se conserva.
+      const nuevoId = String(autenticado.id ?? autenticado.email ?? "");
+      const duenoAnterior = obtenerDuenoCarritoStorage();
+
+      if (duenoAnterior && duenoAnterior !== "invitado" && duenoAnterior !== nuevoId) {
+        limpiarCarritoStorage();
+      }
+
+      if (nuevoId) {
+        guardarDuenoCarritoStorage(nuevoId);
+      }
+
       setUsuario(autenticado); // ← aquí se dispara el re-render global (Observer)
       return autenticado;
     } catch (fallo) {
@@ -87,15 +107,75 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  /** Cierra la sesión y limpia el estado. */
+  /**
+   * Registra un nuevo cliente llamando a la API y autologueándolo con su token JWT.
+   * @param {object} datos - { nombres, apellidos, email, telefono, password }
+   * @returns {Promise<object>} el usuario autenticado.
+   * @throws {Error} si el registro falla (ej: correo ya registrado).
+   */
+  const registrarse = useCallback(async (datos) => {
+    try {
+      const autenticado = await authApi.registro(datos);
+      setError(null);
+
+      const nuevoId = String(autenticado.id ?? autenticado.email ?? "");
+      const duenoAnterior = obtenerDuenoCarritoStorage();
+
+      if (duenoAnterior && duenoAnterior !== "invitado" && duenoAnterior !== nuevoId) {
+        limpiarCarritoStorage();
+      }
+
+      if (nuevoId) {
+        guardarDuenoCarritoStorage(nuevoId);
+      }
+
+      setUsuario(autenticado);
+      return autenticado;
+    } catch (fallo) {
+      setError(fallo.message);
+      throw fallo;
+    }
+  }, []);
+
+  /** Cierra la sesión, limpia token, usuario y vacía el carrito de compras. */
   const cerrarSesion = useCallback(async () => {
-    await usuarioRepository.cerrarSesion();
+    try {
+      authApi.logout();
+    } catch (fallo) {
+      console.warn("[El Trigal] Error en authApi.logout():", fallo);
+    }
+
+    // Vaciar y limpiar claves del carrito en localStorage + emitir evento
+    limpiarCarritoStorage();
+
     setUsuario(null);
     setError(null);
   }, []);
 
   /** Limpia el mensaje de error (por ejemplo, al empezar a escribir de nuevo). */
   const limpiarError = useCallback(() => setError(null), []);
+
+  /**
+   * Actualiza los datos de la sesión del usuario actual de manera estable,
+   * recalcula el nombre completo cuando se actualizan nombres/apellidos,
+   * y persiste en localStorage.
+   * @param {object} datos
+   */
+  const actualizarSesion = useCallback((datos) => {
+    setUsuario((prev) => {
+      if (!prev) return prev;
+      const fusion = { ...prev, ...datos };
+      if (datos.nombres != null || datos.apellidos != null) {
+        fusion.nombre = `${fusion.nombres ?? ""} ${fusion.apellidos ?? ""}`.trim();
+      }
+      try {
+        guardarUsuarioSesion(fusion);
+      } catch {
+        /* noop */
+      }
+      return fusion;
+    });
+  }, []);
 
   /**
    * ¿El usuario actual tiene alguno de estos roles?
@@ -129,16 +209,31 @@ export function AuthProvider({ children }) {
       error,
       estaAutenticado: usuario !== null,
       rol: usuario?.rol ?? null,
-      /** Atajo: ¿este usuario pertenece al personal de la tienda? */
-      esPersonal: usuario ? ROLES_DASHBOARD.includes(usuario.rol) : false,
+      /** Atajos de permisos derivados de la sesión */
+      esAdmin: esAdmin(usuario),
+      esCajero: esCajero(usuario),
+      esCliente: esCliente(usuario),
+      esPersonal: esPersonal(usuario),
 
       // Acciones
       iniciarSesion,
+      registrarse,
       cerrarSesion,
       limpiarError,
       tieneRol,
+      actualizarSesion,
     }),
-    [usuario, cargando, error, iniciarSesion, cerrarSesion, limpiarError, tieneRol],
+    [
+      usuario,
+      cargando,
+      error,
+      iniciarSesion,
+      registrarse,
+      cerrarSesion,
+      limpiarError,
+      tieneRol,
+      actualizarSesion,
+    ],
   );
 
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;

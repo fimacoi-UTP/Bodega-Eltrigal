@@ -53,6 +53,13 @@
   align-items: center;
 }
 
+.ui-campo__sufijo {
+  padding-inline: var(--esp-2);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
 .ui-campo__input {
   flex: 1;
   width: 100%;

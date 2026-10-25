@@ -53,10 +53,14 @@ export function LoginPage() {
 
   /** Decide a dónde mandar al usuario según su rol. */
   const destinoSegunRol = (usuarioAutenticado) => {
-    if (destinoPrevio) return destinoPrevio;
-    return ROLES_DASHBOARD.includes(usuarioAutenticado.rol)
-      ? RUTAS.DASHBOARD
-      : RUTAS.INICIO;
+    const esPersonal = ROLES_DASHBOARD.includes(usuarioAutenticado?.rol);
+    if (destinoPrevio) {
+      if (!esPersonal && String(destinoPrevio).startsWith(RUTAS.DASHBOARD)) {
+        return RUTAS.INICIO;
+      }
+      return destinoPrevio;
+    }
+    return esPersonal ? RUTAS.DASHBOARD : RUTAS.INICIO;
   };
 
   // Si ya hay sesión abierta, no tiene sentido mostrar el login.
@@ -103,14 +107,37 @@ export function LoginPage() {
           </p>
         </header>
 
-        <form className="login__formulario" onSubmit={alEnviar} noValidate>
+        <form
+          className="login__formulario"
+          onSubmit={alEnviar}
+          noValidate
+          autoComplete="off"
+        >
+          {/* Inputs señuelo para absorber el autofill agresivo de Chrome */}
+          <input
+            type="text"
+            name="chrome_prevent_autofill_text_login"
+            tabIndex={-1}
+            aria-hidden="true"
+            style={{ display: "none" }}
+            autoComplete="off"
+          />
+          <input
+            type="password"
+            name="chrome_prevent_autofill_password_login"
+            tabIndex={-1}
+            aria-hidden="true"
+            style={{ display: "none" }}
+            autoComplete="new-password"
+          />
+
           {errorLocal && <Alerta variante="peligro">{errorLocal}</Alerta>}
 
           <Input
             etiqueta="Correo electrónico"
             type="email"
             name="correo"
-            autoComplete="email"
+            autoComplete="off"
             placeholder="tucorreo@trigal.pe"
             value={correo}
             onChange={(evento) => setCorreo(evento.target.value)}
@@ -121,7 +148,7 @@ export function LoginPage() {
             etiqueta="Contraseña"
             type="password"
             name="clave"
-            autoComplete="current-password"
+            autoComplete="new-password"
             placeholder="••••••••"
             value={clave}
             onChange={(evento) => setClave(evento.target.value)}
@@ -132,6 +159,13 @@ export function LoginPage() {
             {enviando ? "Verificando…" : "Ingresar"}
           </Boton>
         </form>
+
+        <p style={{ textAlign: "center", fontSize: "var(--texto-sm)", color: "var(--color-texto-suave)" }}>
+          ¿No tienes una cuenta?{" "}
+          <Link to={RUTAS.REGISTRO} style={{ fontWeight: "var(--peso-semi)", color: "var(--color-primario)" }}>
+            Regístrate aquí
+          </Link>
+        </p>
 
         {/* ------------------------------------------------------------------
          * 🔴 BLOQUE DE DEMOSTRACIÓN — borrar en un despliegue real.

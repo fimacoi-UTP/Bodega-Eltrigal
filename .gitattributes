@@ -1,0 +1,38 @@
+* text=auto eol=lf
+
+# Scripts
+*.sh      text eol=lf
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+mvnw      text eol=lf
+mvnw.cmd  text eol=crlf
+
+# Código
+*.js   text
+*.jsx  text
+*.ts   text
+*.tsx  text
+*.json text
+*.css  text
+*.scss text
+*.html text
+*.md   text
+*.java text
+*.xml  text
+*.yml  text
+*.yaml text
+*.properties text
+
+# Binarios (no tocar line endings)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.jar  binary
+*.woff  binary
+*.woff2 binary
+*.ttf  binary
+*.eot  binary

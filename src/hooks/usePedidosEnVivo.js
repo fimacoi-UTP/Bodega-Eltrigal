@@ -3,18 +3,12 @@
  * usePedidosEnVivo · Monitoreo y alertas en vivo de pedidos web
  * ----------------------------------------------------------------------------
  * Detecta la llegada de nuevos pedidos web de forma reactiva y ligera para el
- * personal del dashboard (ADMIN / CAJERO).
- *
- * Estrategia de detección híbrida y confiable:
- *  1. CustomEvent ('trigal:pedido-nuevo'): Detección a 0ms en la misma pestaña.
- *  2. Evento 'storage' en window: Detección instantánea entre diferentes pestañas.
- *  3. Polling periódico ligero (cada 3.5s): Mecanismo de seguridad en caso de
- *     operaciones asíncronas no interceptadas.
+ * personal del dashboard (ADMIN / CAJERO) mediante polling periódico (cada 3.5s)
+ * contra la API del backend Spring Boot (/api/pedidos).
  * ==========================================================================*/
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { pedidoRepository } from "../repositories";
-import { CLAVES } from "../repositories/claves";
+import { pedidosApi } from "../api/pedidosApi";
 import { ESTADOS_PEDIDO } from "../constantes";
 import { reproducirChimeNotificacion } from "../utils/sonido";
 
@@ -58,7 +52,7 @@ export function usePedidosEnVivo() {
 
   const verificarPedidos = useCallback(async () => {
     try {
-      const todos = await pedidoRepository.obtenerTodos();
+      const todos = await pedidosApi.listar();
       if (!Array.isArray(todos)) return;
 
       const pendientes = todos.filter(
@@ -84,7 +78,9 @@ export function usePedidosEnVivo() {
 
         // Ordenar por fecha descendente y tomar el más reciente
         pedidosNuevos.sort(
-          (a, b) => new Date(b.fecha || 0).getTime() - new Date(a.fecha || 0).getTime()
+          (a, b) =>
+            new Date(b.fechaCreacion ?? b.fecha ?? 0).getTime() -
+            new Date(a.fechaCreacion ?? a.fecha ?? 0).getTime()
         );
         const masReciente = pedidosNuevos[0];
 
@@ -92,7 +88,7 @@ export function usePedidosEnVivo() {
           id: masReciente.id,
           clienteNombre: masReciente.clienteNombre,
           total: masReciente.total,
-          fecha: masReciente.fecha,
+          fecha: masReciente.fechaCreacion ?? masReciente.fecha,
           itemsCount: masReciente.items?.length || 1,
         });
 
@@ -111,7 +107,7 @@ export function usePedidosEnVivo() {
     // 1. Carga inicial asíncrona
     async function inicializar() {
       try {
-        const todos = await pedidoRepository.obtenerTodos();
+        const todos = await pedidosApi.listar();
         if (cancelado || !Array.isArray(todos)) return;
 
         const pendientes = todos.filter(
@@ -128,52 +124,13 @@ export function usePedidosEnVivo() {
 
     inicializar();
 
-    // 2. Escuchar evento de nuevo pedido en la misma ventana
-    const handlePedidoNuevo = (e) => {
-      const nuevo = e.detail;
-      if (nuevo && !pedidosConocidosRef.current.has(nuevo.id)) {
-        pedidosConocidosRef.current.add(nuevo.id);
-        setUltimoPedidoNuevo({
-          id: nuevo.id,
-          clienteNombre: nuevo.clienteNombre,
-          total: nuevo.total,
-          fecha: nuevo.fecha,
-          itemsCount: nuevo.items?.length || 1,
-        });
-
-        if (sonidoHabilitadoRef.current) {
-          reproducirChimeNotificacion();
-        }
-      }
-      verificarPedidos();
-    };
-
-    // 3. Escuchar evento de cambio de estado / actualización en la misma ventana
-    const handlePedidoActualizado = () => {
-      verificarPedidos();
-    };
-
-    // 4. Escuchar evento storage (entre pestañas)
-    const handleStorage = (e) => {
-      if (e.key === CLAVES.PEDIDOS || !e.key) {
-        verificarPedidos();
-      }
-    };
-
-    window.addEventListener("trigal:pedido-nuevo", handlePedidoNuevo);
-    window.addEventListener("trigal:pedido-actualizado", handlePedidoActualizado);
-    window.addEventListener("storage", handleStorage);
-
-    // 5. Polling de respaldo cada 3.5 segundos
+    // 2. Polling periódico cada 3.5 segundos contra el backend
     const intervalo = setInterval(() => {
       verificarPedidos();
     }, 3500);
 
     return () => {
       cancelado = true;
-      window.removeEventListener("trigal:pedido-nuevo", handlePedidoNuevo);
-      window.removeEventListener("trigal:pedido-actualizado", handlePedidoActualizado);
-      window.removeEventListener("storage", handleStorage);
       clearInterval(intervalo);
     };
   }, [verificarPedidos]);

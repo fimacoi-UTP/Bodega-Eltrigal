@@ -20,6 +20,8 @@ import { useState } from "react";
 import { Alerta, Boton, Input, Modal, Select } from "../../../components/ui";
 import { UMBRAL_STOCK_BAJO } from "../../../constantes";
 import { COLORES_SUGERIDOS, UNIDADES } from "./utilesInventario";
+import { imagenesApi } from "../../../api/imagenesApi";
+import { urlImagen } from "../../../api/apiClient";
 
 /** Valor especial del <select> para escribir una categoría que aún no existe. */
 const CATEGORIA_NUEVA = "__NUEVA__";
@@ -49,6 +51,7 @@ export function ModalProducto({
       producto?.stockMinimo != null ? String(producto.stockMinimo) : String(UMBRAL_STOCK_BAJO),
     unidad: producto?.unidad ?? "unidad",
     color: producto?.color || COLORES_SUGERIDOS[0],
+    imagen: producto?.imagen ?? null,
     activo: producto?.activo !== false,
   }));
 
@@ -63,6 +66,30 @@ export function ModalProducto({
   const [errores, setErrores] = useState({});
   const [errorEnvio, setErrorEnvio] = useState(null);
   const [guardando, setGuardando] = useState(false);
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
+  const [errorImagen, setErrorImagen] = useState(null);
+
+  const handleArchivoImagen = async (e) => {
+    const archivo = e.target.files?.[0];
+    if (!archivo) return;
+
+    setErrorImagen(null);
+    setSubiendoImagen(true);
+    try {
+      const urlRelativa = await imagenesApi.subir(archivo);
+      cambiar("imagen", urlRelativa);
+    } catch (err) {
+      setErrorImagen(err.message || "Error al subir la imagen.");
+    } finally {
+      setSubiendoImagen(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleQuitarFoto = () => {
+    cambiar("imagen", null);
+    setErrorImagen(null);
+  };
 
   /** Quita el error de un campo (al corregirlo, el mensaje debe desaparecer). */
   const limpiarError = (campo) => {
@@ -144,6 +171,7 @@ export function ModalProducto({
         stockMinimo: Number(form.stockMinimo),
         unidad: form.unidad,
         color: form.color,
+        imagen: form.imagen ?? null,
         activo: form.activo,
       });
       // Si todo salió bien, ProductosPage cierra el modal.
@@ -161,16 +189,22 @@ export function ModalProducto({
       tamano="lg"
       pie={
         <>
-          <Boton variante="contorno" onClick={alCerrar} disabled={guardando}>
+          <Boton variante="contorno" onClick={alCerrar} disabled={guardando || subiendoImagen}>
             Cancelar
           </Boton>
-          <Boton type="submit" form="form-producto" cargando={guardando}>
+          <Boton type="submit" form="form-producto" cargando={guardando} disabled={subiendoImagen}>
             {editando ? "Guardar cambios" : "Crear producto"}
           </Boton>
         </>
       }
     >
-      <form id="form-producto" className="gestion__formulario" onSubmit={enviar} noValidate>
+      <form
+        id="form-producto"
+        className="gestion__formulario"
+        onSubmit={enviar}
+        noValidate
+        autoComplete="off"
+      >
         {errorEnvio && <Alerta variante="peligro">{errorEnvio}</Alerta>}
 
         {/* ─────────────────────────────────── Identificación ────── */}
@@ -317,8 +351,61 @@ export function ModalProducto({
         {/* ────────────────────────────────── Presentación ────────── */}
         <p className="gestion__leyenda">Presentación en la tienda</p>
 
+        {/* ── Campo Foto del Producto ── */}
         <div className="gestion__campo">
-          <span className="gestion__campo-etiqueta">Color de la tarjeta</span>
+          <label className="gestion__campo-etiqueta" htmlFor="modal-prod-foto">
+            Foto del producto (opcional)
+          </label>
+          {errorImagen && (
+            <Alerta variante="peligro" style={{ marginBottom: "var(--esp-2)" }}>
+              {errorImagen}
+            </Alerta>
+          )}
+
+          {form.imagen ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--esp-3)", marginBottom: "var(--esp-2)" }}>
+              <img
+                src={urlImagen(form.imagen)}
+                alt="Vista previa"
+                style={{
+                  width: "64px",
+                  height: "64px",
+                  objectFit: "cover",
+                  borderRadius: "var(--radio-md)",
+                  border: "1px solid var(--color-borde)",
+                }}
+              />
+              <Boton
+                type="button"
+                variante="contorno"
+                tamano="sm"
+                onClick={handleQuitarFoto}
+                disabled={subiendoImagen || guardando}
+              >
+                Quitar foto
+              </Boton>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--esp-2)" }}>
+              <input
+                id="modal-prod-foto"
+                type="file"
+                accept="image/*"
+                onChange={handleArchivoImagen}
+                disabled={subiendoImagen || guardando}
+                style={{ fontSize: "var(--texto-sm)" }}
+              />
+              {subiendoImagen && (
+                <small style={{ color: "var(--color-marca, #c2410c)" }}>
+                  Subiendo imagen…
+                </small>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="gestion__campo">
+          <span className="gestion__campo-etiqueta">Color de la tarjeta (fallback si no hay foto)</span>
           <div className="gestion__colores">
             {COLORES_SUGERIDOS.map((color) => (
               <button

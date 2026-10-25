@@ -109,7 +109,12 @@ export function ModalAjusteStock({ producto, alCerrar, alConfirmar }) {
         </>
       }
     >
-      <form id="form-ajuste-stock" className="gestion__formulario" onSubmit={enviar}>
+      <form
+        id="form-ajuste-stock"
+        className="gestion__formulario"
+        onSubmit={enviar}
+        autoComplete="off"
+      >
         {errorEnvio && <Alerta variante="peligro">{errorEnvio}</Alerta>}
 
         {/* ---------------------------------------------- Producto ------ */}

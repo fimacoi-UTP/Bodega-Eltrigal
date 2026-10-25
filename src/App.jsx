@@ -14,17 +14,26 @@
  * dashboard consumen exactamente los mismos datos.
  * ==========================================================================*/
 
+import { useEffect } from "react";
 import { AuthProvider } from "./context/AuthProvider";
 import { InventarioProvider } from "./context/InventarioProvider";
 import { CarritoProvider } from "./context/CarritoProvider";
+import { FavoritosProvider } from "./context/FavoritosProvider";
+import { ejecutarLimpiezaStorage } from "./utils/limpiezaStorage";
 import AppRouter from "./routes/AppRouter";
 
 export function App() {
+  useEffect(() => {
+    ejecutarLimpiezaStorage();
+  }, []);
+
   return (
     <AuthProvider>
       <InventarioProvider>
         <CarritoProvider>
-          <AppRouter />
+          <FavoritosProvider>
+            <AppRouter />
+          </FavoritosProvider>
         </CarritoProvider>
       </InventarioProvider>
     </AuthProvider>

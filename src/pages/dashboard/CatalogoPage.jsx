@@ -18,6 +18,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useInventario } from "../../hooks/useInventario";
+import { useAuth } from "../../hooks/useAuth";
 import {
   Alerta,
   Badge,
@@ -30,11 +31,17 @@ import {
   Modal,
   Select,
 } from "../../components/ui";
-import { formatearSoles } from "../../utils/formato";
+import { formatearSoles, clases } from "../../utils/formato";
+import { reproducirAlertaStock } from "../../utils/sonido";
+import { urlImagen } from "../../api/apiClient";
 import DrawerProducto from "./gestion/DrawerProducto";
 import ModalAjusteStock from "./gestion/ModalAjusteStock";
+import ModalEtiquetaGondola from "./gestion/ModalEtiquetaGondola";
+import PanelComboInventario from "./gestion/PanelComboInventario";
 import {
   ESTADO_STOCK,
+  codigoCorto,
+  codigoEan13,
   estadoStock,
   filtrarProductos,
   pluralizar,
@@ -44,6 +51,7 @@ import {
 import "./gestion/gestion.css";
 
 export function CatalogoPage() {
+  const { esAdmin } = useAuth();
   const {
     productos,
     categorias,
@@ -66,8 +74,19 @@ export function CatalogoPage() {
   const [drawerAbierto, setDrawerAbierto] = useState(false);
   const [productoEditando, setProductoEditando] = useState(null);
 
+  // ── Selección para Panel Combo ───────────────────────────────────────────
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+
+  const productoActivo = useMemo(() => {
+    if (!productoSeleccionado) return null;
+    return productos.find((p) => p.id === productoSeleccionado.id) || productoSeleccionado;
+  }, [productos, productoSeleccionado]);
+
   // ── Modal de ajuste rápido de stock ──────────────────────────────────────
   const [productoAjuste, setProductoAjuste] = useState(null);
+
+  // ── Modal de etiqueta de góndola / barcode ───────────────────────────────
+  const [productoEtiqueta, setProductoEtiqueta] = useState(null);
 
   // ── Modal de confirmación de eliminación ─────────────────────────────────
   const [productoAEliminar, setProductoAEliminar] = useState(null);
@@ -103,14 +122,16 @@ export function CatalogoPage() {
 
   // ── Handlers estables con useCallback ────────────────────────────────────
   const abrirCrear = useCallback(() => {
+    if (!esAdmin) return;
     setProductoEditando(null);
     setDrawerAbierto(true);
-  }, []);
+  }, [esAdmin]);
 
   const abrirEditar = useCallback((producto) => {
+    if (!esAdmin) return;
     setProductoEditando(producto);
     setDrawerAbierto(true);
-  }, []);
+  }, [esAdmin]);
 
   const cerrarDrawer = useCallback(() => {
     setDrawerAbierto(false);
@@ -162,19 +183,32 @@ export function CatalogoPage() {
   const confirmarAjusteStock = useCallback(
     async (delta, motivo) => {
       const producto = productoAjuste;
-      await ajustarStock(producto.id, delta);
+      const r = await ajustarStock(producto.id, delta, motivo);
+      const stockNuevo = r?.stockNuevo ?? (Number(producto.stock) + delta);
+      const minimo = umbralDe(producto);
 
       const entra = delta > 0;
       const unidades = Math.abs(delta);
 
       setProductoAjuste(null);
-      setAviso({
-        variante: "exito",
-        texto:
-          `${entra ? "Ingresaron" : "Salieron"} ${unidades} ` +
-          `${pluralizar(unidades, producto.unidad ?? "unidad")} de "${producto.nombre}"` +
-          `${motivo ? ` · ${motivo}` : ""}.`,
-      });
+
+      const textoMovimiento =
+        `${entra ? "Ingresaron" : "Salieron"} ${unidades} ` +
+        `${pluralizar(unidades, producto.unidad ?? "unidad")} de "${producto.nombre}"` +
+        `${motivo ? ` · ${motivo}` : ""}.`;
+
+      if (stockNuevo <= minimo) {
+        reproducirAlertaStock();
+        setAviso({
+          variante: "advertencia",
+          texto: `${textoMovimiento} ⚠️ "${producto.nombre}" llegó a su stock mínimo (${minimo}). Considera reponer.`,
+        });
+      } else {
+        setAviso({
+          variante: "exito",
+          texto: textoMovimiento,
+        });
+      }
     },
     [productoAjuste, ajustarStock],
   );
@@ -222,7 +256,7 @@ export function CatalogoPage() {
   }
 
   return (
-    <div className="gestion">
+    <div className="gestion gestion--catalogo-full">
       {/* ─────────────────────────────────────────────── Cabecera ────── */}
       <header className="gestion__cabecera">
         <div className="gestion__cabecera-textos">
@@ -238,7 +272,7 @@ export function CatalogoPage() {
           <Boton variante="contorno" onClick={refrescar}>
             Actualizar
           </Boton>
-          <Boton onClick={abrirCrear}>Nuevo producto</Boton>
+          {esAdmin && <Boton onClick={abrirCrear}>Nuevo producto</Boton>}
         </div>
       </header>
 
@@ -262,7 +296,7 @@ export function CatalogoPage() {
             icono="📦"
             titulo="El catálogo está vacío"
             descripcion="Registra el primer producto de la bodega para gestionar su stock, precio y visibilidad online."
-            accion={<Boton onClick={abrirCrear}>Crear el primer producto</Boton>}
+            accion={esAdmin ? <Boton onClick={abrirCrear}>Crear el primer producto</Boton> : null}
           />
         </Card>
       ) : (
@@ -334,9 +368,12 @@ export function CatalogoPage() {
             </Card>
           </section>
 
-          {/* ──────────────────────────────────────────── Filtros ────── */}
-          <Card>
-            <div className="gestion__filtros">
+          {/* ──────────────────────────────────────────── Cuerpo Combo (Tabla + Panel Derecho) ────── */}
+          <div className="gestion__cuerpo-combo">
+            <div className="gestion__columna-principal">
+              {/* Filtros */}
+              <Card>
+                <div className="gestion__filtros">
               <Input
                 className="gestion__filtro-busqueda"
                 etiqueta="Buscar"
@@ -411,6 +448,9 @@ export function CatalogoPage() {
                   </caption>
                   <thead>
                     <tr>
+                      <th scope="col" className="gestion__col-codigo">
+                        Código / Barcode
+                      </th>
                       <th scope="col">Producto</th>
                       <th scope="col" className="gestion__col-md">
                         Categoría
@@ -426,7 +466,7 @@ export function CatalogoPage() {
                       </th>
                       <th scope="col">Stock</th>
                       <th scope="col">Tienda</th>
-                      <th scope="col" style={{ width: "48px", textAlign: "center" }}>
+                      <th scope="col" style={{ width: "90px", textAlign: "center" }}>
                         <span className="visualmente-oculto">Acciones</span>
                       </th>
                     </tr>
@@ -437,36 +477,73 @@ export function CatalogoPage() {
                       const oculto = producto.activo === false;
                       const estado = estadoStock(producto);
                       const stock = Number(producto.stock) || 0;
+                      const esSeleccionado = productoActivo?.id === producto.id;
 
                       return (
                         <tr
                           key={producto.id}
-                          className={
-                            (estado.clave === ESTADO_STOCK.AGOTADO
-                              ? "gestion__fila--agotado "
-                              : estado.clave === ESTADO_STOCK.BAJO
-                                ? "gestion__fila--alerta "
-                                : "") +
-                            (oculto ? "gestion__fila--inactivo" : "")
-                          }
+                          className={clases(
+                            estado.clave === ESTADO_STOCK.AGOTADO && "gestion__fila--agotado",
+                            estado.clave === ESTADO_STOCK.BAJO && "gestion__fila--alerta",
+                            oculto && "gestion__fila--inactivo",
+                            esSeleccionado && "gestion__fila--seleccionada",
+                          )}
+                          onClick={() => {
+                            setProductoSeleccionado((actual) =>
+                              actual?.id === producto.id ? null : producto,
+                            );
+                          }}
+                          style={{ cursor: "pointer" }}
                         >
+                          {/* Código / Barcode */}
+                          <td className="gestion__celda-codigo">
+                            <div className="gestion__codigo-bloque">
+                              <span className="gestion__codigo-id">
+                                {codigoCorto(producto.id)}
+                              </span>
+                              <span className="gestion__codigo-ean" title={`EAN-13: ${codigoEan13(producto)}`}>
+                                <svg
+                                  className="gestion__mini-barcode"
+                                  width="13"
+                                  height="11"
+                                  viewBox="0 0 16 14"
+                                  fill="currentColor"
+                                  aria-hidden="true"
+                                >
+                                  <path d="M1 1h2v12H1V1zm3 0h1v12H4V1zm2 0h2v12H6V1zm3 0h1v12H9V1zm2 0h2v12h-2V1zm3 0h1v12h-1V1z" />
+                                </svg>
+                                {codigoEan13(producto)}
+                              </span>
+                            </div>
+                          </td>
+
                           {/* Celda Producto */}
                           <td className="gestion__celda-nombre">
                             <div
                               className="gestion__producto"
                               style={{ cursor: "pointer" }}
-                              onClick={() => abrirEditar(producto)}
-                              title="Clic para editar producto"
+                              onClick={() => (esAdmin ? abrirEditar(producto) : abrirAjusteStock(producto))}
+                              title={esAdmin ? "Clic para editar producto" : "Clic para ajustar existencias"}
                             >
-                              <span
-                                className="gestion__swatch"
-                                style={{
-                                  backgroundColor: producto.color || "var(--neutro-300)",
-                                }}
-                                aria-hidden="true"
-                              />
+                              {producto.imagen ? (
+                                <img
+                                  src={urlImagen(producto.imagen)}
+                                  alt=""
+                                  className="gestion__swatch"
+                                  style={{ objectFit: "cover" }}
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <span
+                                  className="gestion__swatch"
+                                  style={{
+                                    backgroundColor: producto.color || "var(--neutro-300)",
+                                  }}
+                                  aria-hidden="true"
+                                />
+                              )}
                               <div className="gestion__producto-datos">
-                                <span className="gestion__producto-nombre">
+                                <span className="gestion__producto-nombre" title={producto.nombre}>
                                   {producto.nombre}
                                 </span>
                                 <span className="gestion__producto-meta">
@@ -489,6 +566,17 @@ export function CatalogoPage() {
                                 <del style={{ fontSize: "var(--texto-2xs)", color: "var(--color-texto-tenue)" }}>
                                   {formatearSoles(producto.precioOriginal)}
                                 </del>
+                              )}
+                              {producto.costo != null && (
+                                <span
+                                  style={{
+                                    fontSize: "var(--texto-2xs, 0.6875rem)",
+                                    color: "var(--color-texto-tenue)",
+                                  }}
+                                  title={`Costo: ${formatearSoles(producto.costo)}`}
+                                >
+                                  Costo: {formatearSoles(producto.costo)}
+                                </span>
                               )}
                             </div>
                           </td>
@@ -520,38 +608,68 @@ export function CatalogoPage() {
                             </Badge>
                           </td>
 
-                          {/* Acciones con MenuKebab */}
+                          {/* Acciones */}
                           <td>
-                            <div style={{ display: "flex", justifyContent: "center" }}>
-                              <MenuKebab
-                                ariaLabel={`Opciones para ${producto.nombre}`}
-                                acciones={[
-                                  {
-                                    label: "Editar producto",
-                                    icono: "✏️",
-                                    onClick: () => abrirEditar(producto),
-                                  },
-                                  {
-                                    label: "Ajustar existencias",
-                                    icono: "📦",
-                                    onClick: () => abrirAjusteStock(producto),
-                                  },
-                                  {
-                                    label: oculto ? "Mostrar en tienda" : "Ocultar en tienda",
-                                    icono: oculto ? "👁️" : "🙈",
-                                    onClick: () => alternarVisibilidad(producto),
-                                  },
-                                  {
-                                    separador: true,
-                                  },
-                                  {
-                                    label: "Eliminar producto",
-                                    icono: "🗑️",
-                                    peligro: true,
-                                    onClick: () => setProductoAEliminar(producto),
-                                  },
-                                ]}
-                              />
+                            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "6px" }}>
+                              <button
+                                type="button"
+                                className="gestion__btn-barcode"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setProductoEtiqueta(producto);
+                                }}
+                                title="Etiqueta / código"
+                                aria-label={`Ver etiqueta de góndola para ${producto.nombre}`}
+                              >
+                                <span className="gestion__icono-barcode" aria-hidden="true">
+                                  ▌▌▌
+                                </span>
+                              </button>
+
+                              {esAdmin ? (
+                                <MenuKebab
+                                  ariaLabel={`Opciones para ${producto.nombre}`}
+                                  acciones={[
+                                    {
+                                      label: "Editar producto",
+                                      icono: "✏️",
+                                      onClick: () => abrirEditar(producto),
+                                    },
+                                    {
+                                      label: "Ajustar existencias",
+                                      icono: "📦",
+                                      onClick: () => abrirAjusteStock(producto),
+                                    },
+                                    {
+                                      label: oculto ? "Mostrar en tienda" : "Ocultar en tienda",
+                                      icono: oculto ? "👁️" : "🙈",
+                                      onClick: () => alternarVisibilidad(producto),
+                                    },
+                                    {
+                                      separador: true,
+                                    },
+                                    {
+                                      label: "Eliminar producto",
+                                      icono: "🗑️",
+                                      peligro: true,
+                                      onClick: () => setProductoAEliminar(producto),
+                                    },
+                                  ]}
+                                />
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="gestion__btn-accion-directa"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    abrirAjusteStock(producto);
+                                  }}
+                                  title="Ajustar existencias"
+                                  aria-label={`Ajustar existencias de ${producto.nombre}`}
+                                >
+                                  <span aria-hidden="true">📦</span>
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -563,25 +681,43 @@ export function CatalogoPage() {
             </Card>
           )}
 
-          {hayFiltros && visibles.length > 0 && (
-            <div>
-              <Boton variante="fantasma" tamano="sm" onClick={limpiarFiltros}>
-                Limpiar filtros
-              </Boton>
+              {hayFiltros && visibles.length > 0 && (
+                <div>
+                  <Boton variante="fantasma" tamano="sm" onClick={limpiarFiltros}>
+                    Limpiar filtros
+                  </Boton>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Panel Combo Sticky */}
+            <div className="gestion__panel-combo">
+              <PanelComboInventario
+                productoSeleccionado={productoActivo}
+                alDeseleccionar={() => setProductoSeleccionado(null)}
+                alSeleccionarProducto={(p) => setProductoSeleccionado(p)}
+                productos={productos}
+                onEditar={abrirEditar}
+                onAjustarStock={abrirAjusteStock}
+                onImprimirEtiqueta={(p) => setProductoEtiqueta(p)}
+                esAdmin={esAdmin}
+              />
+            </div>
+          </div>
         </>
       )}
 
       {/* ────────────────── Drawer de Creación / Edición de Producto ───── */}
-      <DrawerProducto
-        key={productoEditando?.id ?? (drawerAbierto ? "nuevo" : "cerrado")}
-        abierto={drawerAbierto}
-        producto={productoEditando}
-        categorias={categorias}
-        alCerrar={cerrarDrawer}
-        alGuardar={guardarProducto}
-      />
+      {esAdmin && (
+        <DrawerProducto
+          key={productoEditando?.id ?? (drawerAbierto ? "nuevo" : "cerrado")}
+          abierto={drawerAbierto}
+          producto={productoEditando}
+          categorias={categorias}
+          alCerrar={cerrarDrawer}
+          alGuardar={guardarProducto}
+        />
+      )}
 
       {/* ────────────────── Modal de Ajuste de Stock ─────────────────── */}
       {productoAjuste && (
@@ -594,7 +730,7 @@ export function CatalogoPage() {
       )}
 
       {/* ────────────────── Modal de Confirmación de Eliminación ─────── */}
-      {productoAEliminar && (
+      {esAdmin && productoAEliminar && (
         <Modal
           abierto
           alCerrar={cerrarEliminar}
@@ -623,6 +759,15 @@ export function CatalogoPage() {
             </Alerta>
           </div>
         </Modal>
+      )}
+
+      {/* ────────────────── Modal Etiqueta de Góndola / Código ──────────── */}
+      {productoEtiqueta && (
+        <ModalEtiquetaGondola
+          abierto={Boolean(productoEtiqueta)}
+          alCerrar={() => setProductoEtiqueta(null)}
+          producto={productoEtiqueta}
+        />
       )}
     </div>
   );

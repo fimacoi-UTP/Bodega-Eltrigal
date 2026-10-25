@@ -1,0 +1,382 @@
+/* ============================================================================
+ * MiDespensaPage.css · Estilos de la pestaña "Mi Despensa"
+ * ==========================================================================*/
+
+.mi-despensa-seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+}
+
+.mi-despensa-cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.mi-despensa-titulo {
+  font-size: var(--texto-xl);
+  font-weight: 800;
+  color: var(--color-texto);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.mi-despensa-subtitulo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- Contenedor de las dos secciones (Favoritos y Recurrentes) ----------- */
+.mi-despensa-secciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-8);
+}
+
+.mi-despensa-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.mi-despensa-bloque__cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mi-despensa-bloque__titulo-grupo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.mi-despensa-bloque__icono {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.mi-despensa-bloque__titulo {
+  font-size: var(--texto-lg, 1.2rem);
+  font-weight: 800;
+  color: var(--color-texto);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.mi-despensa-bloque__conteo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(194, 120, 3, 0.14);
+  color: var(--trigo-700, #965c02);
+  padding: 2px 9px;
+  border-radius: var(--radio-pastilla, 9999px);
+  font-variant-numeric: tabular-nums;
+  border: 1px solid rgba(194, 120, 3, 0.22);
+}
+
+.mi-despensa-bloque__descripcion {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- Empty state compacto dentro de una sección específica -------------- */
+.mi-despensa-aviso-vacio {
+  background: #fdfbf7;
+  border: 1px dashed rgba(194, 120, 3, 0.3);
+  border-radius: var(--radio-lg, 14px);
+  padding: var(--esp-5) var(--esp-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--esp-2);
+}
+
+.mi-despensa-aviso-vacio__icono {
+  font-size: 1.8rem;
+  opacity: 0.8;
+}
+
+.mi-despensa-aviso-vacio__texto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  margin: 0;
+  max-width: 440px;
+  line-height: 1.4;
+}
+
+.mi-despensa-aviso-vacio__enlace {
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  color: var(--color-marca, #b0441f);
+  text-decoration: none;
+  transition: color var(--transicion-rapida), transform var(--transicion-rapida);
+  margin-top: 2px;
+}
+
+.mi-despensa-aviso-vacio__enlace:hover {
+  text-decoration: underline;
+  transform: translateX(2px);
+}
+
+/* --- Rejilla responsive de tarjetas de despensa ------------------------- */
+.mi-despensa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--esp-5, 1.25rem);
+  align-items: stretch;
+}
+
+@media (max-width: 640px) {
+  .mi-despensa-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--esp-3);
+  }
+}
+
+/* --- Tarjeta individual de despensa ------------------------------------- */
+.despensa-tarjeta {
+  background: #ffffff;
+  border: 1px solid rgba(194, 120, 3, 0.22);
+  border-radius: var(--radio-lg, 14px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--transicion-rapida), box-shadow var(--transicion-rapida), border-color var(--transicion-rapida);
+  box-shadow: 0 4px 14px rgba(90, 40, 20, 0.06);
+  position: relative;
+}
+
+.despensa-tarjeta:hover {
+  transform: translateY(-2px);
+  border-color: rgba(194, 120, 3, 0.45);
+  box-shadow: 0 12px 26px rgba(90, 40, 20, 0.12);
+}
+
+.despensa-tarjeta--no-disponible {
+  background: #faf7f2;
+  border-color: rgba(0, 0, 0, 0.08);
+  opacity: 0.85;
+}
+
+.despensa-tarjeta--no-disponible:hover {
+  transform: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+/* --- Contenedor visual de imagen ---------------------------------------- */
+.despensa-tarjeta__visual {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: linear-gradient(180deg, #fdfbf7 0%, #f6efe2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--esp-3);
+  border-bottom: 1px solid rgba(194, 120, 3, 0.1);
+}
+
+.despensa-tarjeta__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform var(--transicion-normal);
+}
+
+.despensa-tarjeta:hover:not(.despensa-tarjeta--no-disponible) .despensa-tarjeta__img {
+  transform: scale(1.05);
+}
+
+.despensa-tarjeta--no-disponible .despensa-tarjeta__img {
+  filter: grayscale(0.85);
+  opacity: 0.6;
+}
+
+.despensa-tarjeta__fallback {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radio-circulo, 9999px);
+  background: rgba(194, 120, 3, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.despensa-tarjeta__fallback-icono {
+  font-size: 1.8rem;
+}
+
+/* Badges sobre la esquina superior izquierda */
+.despensa-tarjeta__badge-pos {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 44px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Botón flotante de favoritos arriba a la derecha */
+.despensa-tarjeta__favorito-pos {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+}
+
+/* --- Cuerpo de la tarjeta ----------------------------------------------- */
+.despensa-tarjeta__cuerpo {
+  padding: var(--esp-4);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--esp-2);
+}
+
+.despensa-tarjeta__stat {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-marca, #b0441f);
+  background: rgba(176, 68, 31, 0.08);
+  padding: 3px 8px;
+  border-radius: var(--radio-sm, 6px);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+  align-self: flex-start;
+  letter-spacing: 0.01em;
+}
+
+.despensa-tarjeta__stat--favorito {
+  color: #e11d48;
+  background: rgba(225, 29, 72, 0.08);
+}
+
+.despensa-tarjeta__nombre {
+  font-size: var(--texto-base);
+  font-weight: 700;
+  color: var(--color-texto);
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.despensa-tarjeta__enlace {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transicion-rapida);
+}
+
+.despensa-tarjeta__enlace:hover {
+  color: var(--color-marca, #b0441f);
+}
+
+.despensa-tarjeta__precio-fila {
+  margin-top: auto;
+  padding-top: var(--esp-2);
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-2);
+}
+
+.despensa-tarjeta__precio {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Pie de la tarjeta: stepper y botón --------------------------------- */
+.despensa-tarjeta__pie {
+  padding: 0 var(--esp-4) var(--esp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.despensa-tarjeta__stepper-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+}
+
+.despensa-tarjeta__stepper-label {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+  font-weight: 600;
+}
+
+.despensa-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: #f4ecdc;
+  border: 1px solid rgba(194, 120, 3, 0.25);
+  border-radius: var(--radio-md, 8px);
+  overflow: hidden;
+}
+
+.despensa-stepper__btn {
+  background: transparent;
+  border: none;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-texto);
+  cursor: pointer;
+  transition: background var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+.despensa-stepper__btn:hover:not(:disabled) {
+  background: rgba(194, 120, 3, 0.2);
+  color: var(--color-marca);
+}
+
+.despensa-stepper__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.despensa-stepper__valor {
+  min-width: 28px;
+  text-align: center;
+  font-size: var(--texto-sm);
+  font-weight: 800;
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.despensa-tarjeta__btn-agregar {
+  font-weight: 700;
+}
+
+.despensa-tarjeta__no-disponible-aviso {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-align: center;
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--radio-md, 8px);
+}

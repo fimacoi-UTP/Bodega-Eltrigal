@@ -1,0 +1,156 @@
+/* ============================================================================
+ * ETIQUETA DE GÓNDOLA / PRECIO · TEMA CLARO PREMIUM 2.0
+ * ============================================================================
+ * Estilo de ticket/etiqueta física para góndola de tienda.
+ * Borde punteado, tipografía bold, precio verde grande y código de barras.
+ * ==========================================================================*/
+
+.etiqueta-gondola {
+  position: relative;
+  background-color: #ffffff;
+  color: #1c1917;
+  border: 2px dashed #b8afa4;
+  border-radius: 12px;
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  box-shadow: 0 4px 16px rgba(44, 30, 20, 0.06);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+/* Cabecera de la etiqueta */
+.etiqueta-gondola__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0eae1;
+  padding-bottom: 6px;
+}
+
+.etiqueta-gondola__marca-tienda {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8b4513; /* Terracota de marca */
+}
+
+.etiqueta-gondola__codigo-corto {
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-family: var(--fuente-mono, monospace);
+  color: #44403c;
+  background-color: #f5efe6;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* Nombre del producto */
+.etiqueta-gondola__nombre {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #18181b;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* Cuerpo de precio y unidad */
+.etiqueta-gondola__cuerpo-precio {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  padding: 4px 0;
+  border-top: 1px dashed #ede5db;
+  border-bottom: 1px dashed #ede5db;
+}
+
+.etiqueta-gondola__precio-bloque {
+  display: flex;
+  align-items: baseline;
+}
+
+.etiqueta-gondola__precio-monto {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #15803d; /* Verde grande y llamativo */
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.etiqueta-gondola__unidad-bloque {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 0.8125rem;
+  color: #57534e;
+}
+
+.etiqueta-gondola__unidad-etiqueta {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #78716c;
+}
+
+.etiqueta-gondola__unidad-valor {
+  font-weight: 700;
+  color: #292524;
+}
+
+/* Contenedor del código de barras */
+.etiqueta-gondola__barcode-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 4px 0 2px;
+  overflow: hidden;
+}
+
+.etiqueta-gondola__barcode-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Pie de góndola */
+.etiqueta-gondola__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.625rem;
+  color: #a8a29e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-top: 1px solid #f5efe6;
+  padding-top: 6px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * BARCODE COMPACTO (Para la ficha del Panel Combo)
+ * ──────────────────────────────────────────────────────────────────────── */
+.barcode-compacto {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 4px 0 2px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.barcode-compacto__svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}

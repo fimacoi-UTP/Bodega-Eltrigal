@@ -13,15 +13,18 @@
  *   · Sección de productos relacionados de la misma categoría.
  * ==========================================================================*/
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useInventario } from "../../hooks/useInventario";
 import { formatearSoles } from "../../utils/formato";
 import { RUTAS } from "../../routes/rutas";
+import { urlImagen } from "../../api/apiClient";
+import { BODEGA } from "../../constantes";
 import {
   Alerta,
   Badge,
   Boton,
+  BotonFavorito,
   Cargando,
   EstadoVacio,
 } from "../../components/ui";
@@ -45,10 +48,36 @@ export function ProductoDetallePage() {
   const [cantidad, setCantidad] = useState(1);
   const [errorImagen, setErrorImagen] = useState(false);
   const [agregadoExitoso, setAgregadoExitoso] = useState(false);
+  const imgRef = useRef(null);
 
   const { agregarAlCarrito, agregandoId } = useAgregarAlCarrito();
 
   const producto = obtenerProducto(id);
+
+  // Zoom de la imagen principal siguiendo el cursor
+  const handleMouseMove = (e) => {
+    if (e.nativeEvent?.pointerType === "touch") return;
+    if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
+    const img = imgRef.current;
+    if (!img) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    img.style.transformOrigin = `${x}% ${y}%`;
+    img.style.transform = "scale(2)";
+  };
+
+  const handleMouseLeave = () => {
+    const img = imgRef.current;
+    if (!img) return;
+
+    img.style.transform = "scale(1)";
+    img.style.transformOrigin = "center";
+  };
 
   // Productos relacionados de la misma categoría (excluyendo el actual)
   const productosRelacionados = useMemo(() => {
@@ -90,6 +119,17 @@ export function ProductoDetallePage() {
 
   const iconoCategoria = ICONO_POR_CATEGORIA[producto.categoria] || "🌾";
   const estaAgregando = agregandoId === producto.id;
+
+  // Parámetros de contacto para WhatsApp
+  const digitosTelefono = (BODEGA.telefono || "").replace(/\D/g, "");
+  const numeroWhatsApp = digitosTelefono.startsWith("51") ? digitosTelefono : `51${digitosTelefono}`;
+  const mensajeWhatsApp =
+    "Hola Bodega El Trigal, quiero pedir: " +
+    producto.nombre +
+    " - " +
+    formatearSoles(producto.precio) +
+    ". ¿Está disponible?";
+  const hrefWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensajeWhatsApp)}`;
 
   const incrementarCantidad = () => {
     if (cantidad < stockDisponible) {
@@ -145,16 +185,19 @@ export function ProductoDetallePage() {
 
       {/* Estructura Principal: Visual + Datos */}
       <section className="detalle-producto__principal" aria-label={`Detalles de ${producto.nombre}`}>
-        {/* Columna Izquierda: Imagen / Ilustración */}
+        {/* Columna Izquierda: Imagen / Ilustración con Zoom en hover */}
         <div
           className="detalle-producto__visual-caja"
           style={{
             backgroundColor: producto.color || "var(--color-superficie-suave)",
           }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
           {producto.imagen && !errorImagen ? (
             <img
-              src={producto.imagen}
+              ref={imgRef}
+              src={urlImagen(producto.imagen)}
               alt={producto.nombre}
               className="detalle-producto__imagen"
               onError={() => setErrorImagen(true)}
@@ -199,7 +242,10 @@ export function ProductoDetallePage() {
             </Badge>
           </div>
 
-          <h1 className="detalle-producto__titulo">{producto.nombre}</h1>
+          <div className="detalle-producto__titulo-fila">
+            <h1 className="detalle-producto__titulo">{producto.nombre}</h1>
+            <BotonFavorito productoId={producto.id} tamano="lg" />
+          </div>
 
           {/* Precio y unidad */}
           <div className="detalle-producto__precio-bloque">
@@ -211,6 +257,11 @@ export function ProductoDetallePage() {
                 <del style={{ color: "var(--color-texto-apagado)", fontSize: "var(--texto-base)" }}>
                   {formatearSoles(producto.precioOriginal)}
                 </del>
+              )}
+              {producto.tieneDescuento && (
+                <Badge variante="exito" tamano="sm">
+                  Ahorras {formatearSoles(producto.precioOriginal - producto.precio)}
+                </Badge>
               )}
             </div>
             {producto.unidad && (
@@ -289,6 +340,18 @@ export function ProductoDetallePage() {
                     : agregadoExitoso
                       ? "✓ ¡Agregado al carrito!"
                       : `🛒 Agregar al carrito (${cantidad})`}
+                </Boton>
+
+                <Boton
+                  como="a"
+                  href={hrefWhatsApp}
+                  target="_blank"
+                  rel="noopener"
+                  variante="secundario"
+                  tamano="lg"
+                  bloque
+                >
+                  Pedir por WhatsApp
                 </Boton>
               </div>
             </div>

@@ -9,9 +9,10 @@
  * qué otras promociones existen.
  * ==========================================================================*/
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useInventario } from "../../hooks/useInventario";
 import { promocionRepository } from "../../repositories";
+import { categoriasApi } from "../../api/categoriasApi";
 import { TIPOS_PROMOCION, ETIQUETAS_TIPO_PROMOCION } from "../../constantes";
 import { formatearSoles, formatearFecha } from "../../utils/formato";
 import {
@@ -78,17 +79,36 @@ function ModalPromocion({
   const editando = promocion !== null;
   const [error, setError] = useState(null);
   const [guardando, setGuardando] = useState(false);
+  const [filtroProducto, setFiltroProducto] = useState("");
 
   const [formulario, setFormulario] = useState(() => ({
     nombre: promocion?.nombre ?? "",
+    descripcion: promocion?.descripcion ?? "",
     tipo: promocion?.tipo ?? TIPOS_PROMOCION.PORCENTAJE,
     valor: promocion?.valor != null ? String(promocion.valor) : "",
-    aplicaA: promocion?.aplicaA ?? "TODO",
-    objetivo: promocion?.objetivo ?? "",
-    desde: promocion?.desde?.split("T")[0] ?? "",
-    hasta: promocion?.hasta?.split("T")[0] ?? "",
+    aplicaTodos: Boolean(promocion?.aplicaTodos),
+    prioridad: promocion?.prioridad != null ? Number(promocion.prioridad) : 0,
+    esAcumulable: promocion?.esAcumulable !== false,
+    desde: promocion?.desde ? String(promocion.desde).split("T")[0] : "",
+    hasta: promocion?.hasta ? String(promocion.hasta).split("T")[0] : "",
     activa: promocion?.activa !== false,
+    productoIds: (promocion?.productoIds || []).map(Number),
+    categoriaIds: (promocion?.categoriaIds || []).map(Number),
   }));
+
+  const requiereValor =
+    formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ||
+    formulario.tipo === TIPOS_PROMOCION.MONTO_FIJO;
+
+  const productosFiltrados = useMemo(() => {
+    if (!filtroProducto.trim()) return productos;
+    const q = filtroProducto.toLowerCase();
+    return productos.filter(
+      (p) =>
+        p.nombre?.toLowerCase().includes(q) ||
+        p.codigo?.toLowerCase().includes(q)
+    );
+  }, [productos, filtroProducto]);
 
   if (!abierto) return null;
 
@@ -96,31 +116,42 @@ function ModalPromocion({
     e?.preventDefault();
     setError(null);
 
-    // Validaciones
     if (!formulario.nombre.trim()) {
       setError("El nombre es obligatorio");
       return;
     }
-    if (!formulario.valor || Number(formulario.valor) <= 0) {
+    if (requiereValor && (!formulario.valor || Number(formulario.valor) <= 0)) {
       setError("El valor debe ser mayor a 0");
       return;
     }
-    if (formulario.aplicaA !== "TODO" && !formulario.objetivo) {
-      setError("Debes seleccionar un producto o categoría");
+    if (
+      !formulario.aplicaTodos &&
+      formulario.productoIds.length === 0 &&
+      formulario.categoriaIds.length === 0
+    ) {
+      setError("Debes seleccionar al menos un producto o categoría si no aplica a todos");
       return;
     }
-    if (formulario.desde && formulario.hasta && new Date(formulario.hasta) <= new Date(formulario.desde)) {
-      setError("La fecha 'hasta' debe ser posterior a la fecha 'desde'");
+    if (formulario.desde && formulario.hasta && formulario.hasta < formulario.desde) {
+      setError("La fecha 'hasta' debe ser posterior o igual a la fecha 'desde'");
       return;
     }
 
     setGuardando(true);
     try {
       const datos = {
-        ...formulario,
-        valor: Number(formulario.valor),
-        desde: formulario.desde ? new Date(formulario.desde).toISOString() : null,
-        hasta: formulario.hasta ? new Date(formulario.hasta).toISOString() : null,
+        nombre: formulario.nombre.trim(),
+        descripcion: formulario.descripcion?.trim() || null,
+        tipo: formulario.tipo,
+        valor: requiereValor ? Number(formulario.valor) : null,
+        aplicaTodos: Boolean(formulario.aplicaTodos),
+        prioridad: Number(formulario.prioridad) || 0,
+        esAcumulable: Boolean(formulario.esAcumulable),
+        desde: formulario.desde || null,
+        hasta: formulario.hasta || null,
+        activa: Boolean(formulario.activa),
+        productoIds: formulario.aplicaTodos ? [] : formulario.productoIds,
+        categoriaIds: formulario.aplicaTodos ? [] : formulario.categoriaIds,
       };
       await alGuardar(datos);
       alCerrar();
@@ -143,12 +174,24 @@ function ModalPromocion({
         </Alerta>
       )}
 
-      <form onSubmit={handleSubmit} className="promociones-page__form">
+      <form
+        onSubmit={handleSubmit}
+        className="promociones-page__form"
+        autoComplete="off"
+      >
         <Input
           etiqueta="Nombre"
           value={formulario.nombre}
           onChange={(e) => setFormulario((prev) => ({ ...prev, nombre: e.target.value }))}
           placeholder="Ej: Descuento de verano"
+          requerido
+        />
+
+        <Input
+          etiqueta="Descripción (opcional)"
+          value={formulario.descripcion}
+          onChange={(e) => setFormulario((prev) => ({ ...prev, descripcion: e.target.value }))}
+          placeholder="Ej: Aplica para compras en tienda o web"
         />
 
         <Select
@@ -163,69 +206,161 @@ function ModalPromocion({
           ))}
         </Select>
 
-        <Input
-          etiqueta={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "Porcentaje" : "Monto"}
-          type="number"
-          value={formulario.valor}
-          onChange={(e) => setFormulario((prev) => ({ ...prev, valor: e.target.value }))}
-          prefijo={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "%" : "S/"}
-        />
-
-        <Select
-          etiqueta="Aplica a"
-          value={formulario.aplicaA}
-          onChange={(e) =>
-            setFormulario((prev) => ({ ...prev, aplicaA: e.target.value, objetivo: "" }))
-          }
-        >
-          <option value="TODO">Todos los productos</option>
-          <option value="PRODUCTO">Producto específico</option>
-          <option value="CATEGORIA">Categoría</option>
-        </Select>
-
-        {formulario.aplicaA === "PRODUCTO" && (
-          <Select
-            etiqueta="Producto"
-            value={formulario.objetivo}
-            onChange={(e) => setFormulario((prev) => ({ ...prev, objetivo: e.target.value }))}
-          >
-            <option value="">Selecciona un producto</option>
-            {productos.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nombre}
-              </option>
-            ))}
-          </Select>
+        {requiereValor && (
+          <Input
+            etiqueta={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "Porcentaje de descuento" : "Monto de descuento"}
+            type="number"
+            min="0"
+            step="any"
+            value={formulario.valor}
+            onChange={(e) => setFormulario((prev) => ({ ...prev, valor: e.target.value }))}
+            prefijo={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "%" : "S/"}
+            requerido
+          />
         )}
 
-        {formulario.aplicaA === "CATEGORIA" && (
-          <Select
-            etiqueta="Categoría"
-            value={formulario.objetivo}
-            onChange={(e) => setFormulario((prev) => ({ ...prev, objetivo: e.target.value }))}
-          >
-            <option value="">Selecciona una categoría</option>
-            {categorias.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </Select>
+        <label className="promociones-page__checkbox-label">
+          <input
+            type="checkbox"
+            checked={formulario.aplicaTodos}
+            onChange={(e) =>
+              setFormulario((prev) => ({ ...prev, aplicaTodos: e.target.checked }))
+            }
+          />
+          <strong>Aplica a todos los productos</strong>
+        </label>
+
+        {!formulario.aplicaTodos && (
+          <>
+            <div className="promociones-page__seccion-multiselect">
+              <div className="promociones-page__multiselect-header">
+                <span>Categorías ({formulario.categoriaIds.length} seleccionadas)</span>
+              </div>
+              <div className="promociones-page__multiselect-caja">
+                {categorias.length === 0 ? (
+                  <span style={{ fontSize: "var(--texto-xs)", color: "var(--color-texto-tenue)" }}>
+                    No hay categorías registradas
+                  </span>
+                ) : (
+                  categorias.map((c) => {
+                    const idNum = Number(c.id);
+                    const seleccionado = formulario.categoriaIds.includes(idNum);
+                    return (
+                      <label key={idNum} className="promociones-page__multiselect-item">
+                        <input
+                          type="checkbox"
+                          checked={seleccionado}
+                          onChange={() => {
+                            setFormulario((prev) => ({
+                              ...prev,
+                              categoriaIds: seleccionado
+                                ? prev.categoriaIds.filter((id) => id !== idNum)
+                                : [...prev.categoriaIds, idNum],
+                            }));
+                          }}
+                        />
+                        <span>{c.nombre}</span>
+                      </label>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <div className="promociones-page__seccion-multiselect">
+              <div className="promociones-page__multiselect-header">
+                <span>Productos ({formulario.productoIds.length} seleccionados)</span>
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar producto por nombre o código..."
+                value={filtroProducto}
+                onChange={(e) => setFiltroProducto(e.target.value)}
+                className="ui-campo__input"
+                style={{ padding: "var(--esp-1) var(--esp-2)", fontSize: "var(--texto-xs)" }}
+              />
+              <div className="promociones-page__multiselect-caja">
+                {productosFiltrados.length === 0 ? (
+                  <span style={{ fontSize: "var(--texto-xs)", color: "var(--color-texto-tenue)" }}>
+                    No se encontraron productos
+                  </span>
+                ) : (
+                  productosFiltrados.map((p) => {
+                    const idNum = Number(p.id);
+                    const seleccionado = formulario.productoIds.includes(idNum);
+                    return (
+                      <label key={idNum} className="promociones-page__multiselect-item">
+                        <input
+                          type="checkbox"
+                          checked={seleccionado}
+                          onChange={() => {
+                            setFormulario((prev) => ({
+                              ...prev,
+                              productoIds: seleccionado
+                                ? prev.productoIds.filter((id) => id !== idNum)
+                                : [...prev.productoIds, idNum],
+                            }));
+                          }}
+                        />
+                        <span>
+                          {p.nombre} {p.codigo ? `(${p.codigo})` : ""}
+                        </span>
+                      </label>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </>
         )}
 
-        <Input
-          etiqueta="Fecha desde (opcional)"
-          type="date"
-          value={formulario.desde}
-          onChange={(e) => setFormulario((prev) => ({ ...prev, desde: e.target.value }))}
-        />
+        <div className="promociones-page__fila-doble">
+          <Input
+            etiqueta="Prioridad"
+            type="number"
+            min="0"
+            value={formulario.prioridad}
+            onChange={(e) => setFormulario((prev) => ({ ...prev, prioridad: e.target.value }))}
+            ayuda="Menor = mayor prioridad (0 por defecto)"
+          />
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: "var(--esp-2)" }}>
+            <label className="promociones-page__checkbox-label">
+              <input
+                type="checkbox"
+                checked={formulario.esAcumulable}
+                onChange={(e) =>
+                  setFormulario((prev) => ({ ...prev, esAcumulable: e.target.checked }))
+                }
+              />
+              <span>Es acumulable</span>
+            </label>
+            <label className="promociones-page__checkbox-label">
+              <input
+                type="checkbox"
+                checked={formulario.activa}
+                onChange={(e) =>
+                  setFormulario((prev) => ({ ...prev, activa: e.target.checked }))
+                }
+              />
+              <span>Activa</span>
+            </label>
+          </div>
+        </div>
 
-        <Input
-          etiqueta="Fecha hasta (opcional)"
-          type="date"
-          value={formulario.hasta}
-          onChange={(e) => setFormulario((prev) => ({ ...prev, hasta: e.target.value }))}
-        />
+        <div className="promociones-page__fila-doble">
+          <Input
+            etiqueta="Fecha desde (opcional)"
+            type="date"
+            value={formulario.desde}
+            onChange={(e) => setFormulario((prev) => ({ ...prev, desde: e.target.value }))}
+          />
+          <Input
+            etiqueta="Fecha hasta (opcional)"
+            type="date"
+            value={formulario.hasta}
+            onChange={(e) => setFormulario((prev) => ({ ...prev, hasta: e.target.value }))}
+          />
+        </div>
 
         <div className="promociones-page__form-botones">
           <Boton variante="contorno" onClick={alCerrar} type="button">
@@ -241,9 +376,10 @@ function ModalPromocion({
 }
 
 export function PromocionesPage() {
-  const { productos, categorias, refrescar } = useInventario();
+  const { productos, refrescar } = useInventario();
 
   const [promociones, setPromociones] = useState([]);
+  const [categoriasConId, setCategoriasConId] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -261,13 +397,26 @@ export function PromocionesPage() {
     }
   }, []);
 
+  const cargarCategorias = useCallback(async () => {
+    try {
+      const cats = await categoriasApi.listar();
+      setCategoriasConId(cats);
+    } catch {
+      // No bloquea la vista si falla listar categorias
+    }
+  }, []);
+
   useEffect(() => {
     let cancelado = false;
     async function inicializar() {
       try {
-        const todas = await promocionRepository.obtenerTodos();
+        const [todas, cats] = await Promise.all([
+          promocionRepository.obtenerTodos(),
+          categoriasApi.listar().catch(() => []),
+        ]);
         if (cancelado) return;
         setPromociones(todas);
+        setCategoriasConId(cats);
       } catch {
         if (!cancelado) setError("Error al cargar promociones");
       } finally {
@@ -299,6 +448,7 @@ export function PromocionesPage() {
       }
 
       await cargarPromociones();
+      await cargarCategorias();
       if (typeof refrescar === "function") {
         await refrescar();
       }
@@ -323,7 +473,20 @@ export function PromocionesPage() {
 
   const probarPromocion = async (promo) => {
     try {
-      const producto = productos.find((p) => p.id === promo.objetivo) || productos[0];
+      let producto = null;
+      if (promo.aplicaTodos) {
+        producto = productos[0];
+      } else if (promo.productoIds && promo.productoIds.length > 0) {
+        const pid = String(promo.productoIds[0]);
+        producto = productos.find((p) => String(p.id) === pid);
+      } else if (promo.categoriaIds && promo.categoriaIds.length > 0) {
+        producto = productos.find((p) =>
+          promo.categoriaIds.includes(Number(p.categoriaId))
+        );
+      }
+      if (!producto) {
+        producto = productos[0];
+      }
       if (!producto) {
         setError("No hay productos disponibles para probar");
         return;
@@ -331,7 +494,7 @@ export function PromocionesPage() {
 
       const promosDelProducto = await promocionRepository.obtenerParaProducto(producto);
       if (promosDelProducto.length === 0) {
-        setError("No hay promociones vigentes para este producto");
+        setError(`No hay promociones vigentes para este producto (${producto.nombre})`);
         return;
       }
 
@@ -369,7 +532,11 @@ export function PromocionesPage() {
       {cargando ? (
         <Cargando texto="Cargando promociones..." />
       ) : promociones.length === 0 ? (
-        <EstadoVacio icono="🏷️" titulo="Sin promociones activas" descripcion="Crea tu primera promoción para ofrecer descuentos en productos o categorías" />
+        <EstadoVacio
+          icono="🏷️"
+          titulo="Sin promociones activas"
+          descripcion="Crea tu primera promoción para ofrecer descuentos en productos o categorías"
+        />
       ) : (
         <div className="promociones-page__lista">
           {promociones.map((promo) => {
@@ -379,7 +546,9 @@ export function PromocionesPage() {
                 <CardCabecera>
                   <div className="promociones-page__card-header">
                     <h3 className="promociones-page__card-titulo">{promo.nombre}</h3>
-                    <Badge variante={estado.variante} tamano="sm" punto>{estado.texto}</Badge>
+                    <Badge variante={estado.variante} tamano="sm" punto>
+                      {estado.texto}
+                    </Badge>
                   </div>
                 </CardCabecera>
                 <CardCuerpo>
@@ -387,7 +556,9 @@ export function PromocionesPage() {
                     <span className="promociones-page__descuento-valor">
                       {promo.tipo === TIPOS_PROMOCION.PORCENTAJE
                         ? `${promo.valor}% DCTO`
-                        : `${formatearSoles(promo.valor)} DCTO`}
+                        : promo.tipo === TIPOS_PROMOCION.MONTO_FIJO
+                        ? `${formatearSoles(promo.valor)} DCTO`
+                        : ETIQUETAS_TIPO_PROMOCION[promo.tipo] || promo.tipo}
                     </span>
                     <span className="promociones-page__descuento-tipo">
                       {ETIQUETAS_TIPO_PROMOCION[promo.tipo]}
@@ -398,39 +569,55 @@ export function PromocionesPage() {
                     <div className="promociones-page__detalle">
                       <span className="promociones-page__detalle-etiqueta">Aplica a:</span>
                       <span className="promociones-page__detalle-valor">
-                        {promo.aplicaA === "TODO"
+                        {promo.aplicaTodos
                           ? "Todos los productos"
-                          : promo.aplicaA === "PRODUCTO"
-                          ? `Producto: ${promo.objetivo}`
-                          : `Categoría: ${promo.objetivo}`}
+                          : [
+                              promo.categorias?.length
+                                ? `${promo.categorias.length} categoría(s)`
+                                : null,
+                              promo.productos?.length
+                                ? `${promo.productos.length} producto(s)`
+                                : null,
+                            ]
+                              .filter(Boolean)
+                              .join(", ") || "Sin alcance específico"}
+                      </span>
+                    </div>
+                    <div className="promociones-page__detalle">
+                      <span className="promociones-page__detalle-etiqueta">Prioridad / Regla:</span>
+                      <span className="promociones-page__detalle-valor">
+                        Prioridad {promo.prioridad ?? 0} ·{" "}
+                        {promo.esAcumulable ? "Acumulable" : "No acumulable"}
                       </span>
                     </div>
                     {promo.desde && (
                       <div className="promociones-page__detalle">
                         <span className="promociones-page__detalle-etiqueta">Desde:</span>
-                        <span className="promociones-page__detalle-valor">{formatearFecha(promo.desde)}</span>
+                        <span className="promociones-page__detalle-valor">
+                          {formatearFecha(promo.desde)}
+                        </span>
                       </div>
                     )}
                     {promo.hasta && (
                       <div className="promociones-page__detalle">
                         <span className="promociones-page__detalle-etiqueta">Hasta:</span>
-                        <span className="promociones-page__detalle-valor">{formatearFecha(promo.hasta)}</span>
+                        <span className="promociones-page__detalle-valor">
+                          {formatearFecha(promo.hasta)}
+                        </span>
                       </div>
                     )}
                   </div>
 
                   {/* 🪝 PATRÓN DECORATOR: vista previa del cálculo */}
-                  {promo.aplicaA === "PRODUCTO" && promo.objetivo && (
-                    <div className="promociones-page__preview">
-                      <Boton
-                        variante="contorno"
-                        tamano="sm"
-                        onClick={() => probarPromocion(promo)}
-                      >
-                        Probar cálculo de precio
-                      </Boton>
-                    </div>
-                  )}
+                  <div className="promociones-page__preview">
+                    <Boton
+                      variante="contorno"
+                      tamano="sm"
+                      onClick={() => probarPromocion(promo)}
+                    >
+                      Probar cálculo de precio
+                    </Boton>
+                  </div>
 
                   <div className="promociones-page__acciones">
                     <Boton variante="fantasma" tamano="sm" onClick={() => abrirModal(promo)}>
@@ -453,7 +640,7 @@ export function PromocionesPage() {
         abierto={modalAbierto}
         promocion={editando}
         productos={productos}
-        categorias={categorias}
+        categorias={categoriasConId}
         alCerrar={cerrarModal}
         alGuardar={guardar}
       />
@@ -493,3 +680,4 @@ export function PromocionesPage() {
 }
 
 export default PromocionesPage;
+
