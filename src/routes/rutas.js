@@ -23,6 +23,7 @@ export const RUTAS = {
   REGISTRO: "/registro",
   NOSOTROS: "/nosotros",
   UBICACION: "/ubicacion",
+  LIBRO_RECLAMACIONES: "/libro-de-reclamaciones",
 
   /* ------------------------- MI CUENTA (cliente autenticado) ------------- */
   MI_CUENTA: "/mi-cuenta",
@@ -41,6 +42,7 @@ export const RUTAS = {
   DASHBOARD_PROMOCIONES: "/dashboard/promociones",
   DASHBOARD_VENTAS: "/dashboard/ventas",
   DASHBOARD_USUARIOS: "/dashboard/usuarios",
+  DASHBOARD_RECLAMOS: "/dashboard/reclamos",
 
   /* --------------------------------- SISTEMA ---------------------------- */
   SIN_ACCESO: "/sin-acceso",
@@ -53,7 +55,15 @@ export const RUTAS = {
 export const aRuta = {
   productoDetalle: (id) => `/producto/${id}`,
   seguimiento: (codigo) => `/seguimiento/${codigo}`,
+  /** Vista de resultados con todo el catálogo activo (sin filtro de categoría). */
+  inicioCatalogoCompleto: () => "/?categoria=todos",
   /** Catálogo filtrado por categoría. Lo usa el Navbar. */
   inicioPorCategoria: (categoria) =>
     `/?categoria=${encodeURIComponent(categoria)}`,
+  /** Catálogo filtrado por búsqueda textual. */
+  inicioPorBusqueda: (q) =>
+    `/?q=${encodeURIComponent(q)}`,
+  /** Catálogo filtrado por categoría y subcategoría/búsqueda. */
+  inicioPorSubcategoria: (categoria, subcategoria) =>
+    `/?categoria=${encodeURIComponent(categoria)}&q=${encodeURIComponent(subcategoria)}`,
 };

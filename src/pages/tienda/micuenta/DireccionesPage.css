@@ -65,14 +65,14 @@
 
 /* Tarjeta predeterminada con halo dorado trigo */
 .direccion-tarjeta--predeterminada {
-  border-color: var(--trigo-300, #f5c94f);
-  background: linear-gradient(180deg, rgba(254, 249, 236, 0.55) 0%, var(--color-superficie) 35%);
-  box-shadow: 0 2px 10px rgba(224, 170, 34, 0.12);
+  border-color: var(--oro);
+  background: linear-gradient(180deg, var(--oro-50) 0%, var(--panel) 38%);
+  box-shadow: var(--shadow-sm);
 }
 
 .direccion-tarjeta--predeterminada:hover {
-  border-color: var(--trigo-400, #e0aa22);
-  box-shadow: 0 4px 14px rgba(224, 170, 34, 0.18);
+  border-color: var(--oro);
+  box-shadow: var(--shadow-md);
 }
 
 /* --- Cabecera de la tarjeta (chip y badge) ------------------------------ */
@@ -90,11 +90,11 @@
   gap: 6px;
   padding: 4px 12px;
   border-radius: var(--radio-pastilla);
-  background: var(--trigo-100, #fcefc7);
-  color: var(--trigo-900, #6b3b0e);
+  background-color: var(--oro-50);
+  color: var(--tinta);
   font-size: var(--texto-xs);
   font-weight: 700;
-  border: 1px solid var(--trigo-200, #f9de8e);
+  border: 1px solid var(--oro);
   line-height: 1.2;
 }
 
@@ -108,14 +108,13 @@
   gap: 4px;
   padding: 3px 9px;
   border-radius: var(--radio-pastilla);
-  background: linear-gradient(135deg, var(--trigo-200, #f9de8e) 0%, var(--trigo-100, #fcefc7) 100%);
-  color: var(--trigo-900, #6b3b0e);
+  background-color: var(--oro-50);
+  color: var(--tinta);
   font-size: var(--texto-2xs);
   font-weight: 800;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  border: 1px solid var(--trigo-300, #f5c94f);
-  box-shadow: 0 1px 3px rgba(224, 170, 34, 0.16);
+  border: 1px solid var(--oro);
 }
 
 /* --- Cuerpo de la tarjeta ----------------------------------------------- */

@@ -1,246 +1,698 @@
-/**
+/* ============================================================================
+ * RESUMEN · Panel Principal del Dashboard (Bodega El Trigal)
  * ============================================================================
- * ESTILOS · ResumenPage
- * ============================================================================
- */
+ * KPIs animados con Count-Up, micro-interacciones, gráficos Recharts,
+ * diseño responsivo y compatibilidad completa con modo oscuro en 3 capas.
+ * ==========================================================================*/
 
 .resumen-page {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-5);
+  gap: var(--esp-4, 1rem);
+  width: 100%;
+  animation: aparecerResumen 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes aparecerResumen {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ────────────────────────────────────────────────── Cabecera ────────── */
 .resumen-page__cabecera {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-1);
+  gap: var(--esp-3, 0.75rem);
+}
+
+.resumen-page__cabecera-textos {
+  min-width: 0;
+}
+
+/* Firma premium de marca: acento terracota→oro 2px con espiga de trigo */
+.resumen-page__marca-acento {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2, 0.5rem);
+  margin-bottom: var(--esp-1, 0.25rem);
+}
+
+.resumen-page__marca-linea {
+  width: 44px;
+  height: 2px;
+  border-radius: var(--radio-pastilla, 999px);
+  background: linear-gradient(90deg, #8B4513 0%, #D97706 65%, #FDE68A 100%);
+}
+
+.resumen-page__marca-trigo {
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0.85;
 }
 
 .resumen-page__titulo {
-  font-size: var(--texto-2xl);
-  font-weight: var(--peso-negrita);
-  letter-spacing: -0.015em;
-  color: var(--color-texto);
+  font-size: var(--texto-xl, 1.5rem);
+  font-weight: var(--peso-negrita, 700);
+  letter-spacing: -0.02em;
+  color: var(--tinta);
   margin: 0;
 }
 
 .resumen-page__subtitulo {
-  font-size: var(--texto-sm);
-  color: var(--color-texto-tenue);
-  margin: 0;
+  margin-top: var(--esp-1, 0.25rem);
+  font-size: var(--texto-sm, 0.875rem);
+  color: var(--tinta-soft);
+  margin-bottom: 0;
+  line-height: 1.4;
 }
 
-/* ---------------------------------------------------------------------------
- * TARJETAS KPI / INDICADORES
- * ------------------------------------------------------------------------ */
-.resumen-page__indicadores {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--esp-3);
-}
-
-@media (min-width: 640px) {
-  .resumen-page__indicadores {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--esp-4);
-  }
-}
-
-.resumen-page__indicador {
-  position: relative;
-  border-top: 3px solid var(--color-borde);
-  transition:
-    transform var(--transicion),
-    box-shadow var(--transicion),
-    border-color var(--transicion);
-}
-
-.resumen-page__indicador:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sombra-md);
-}
-
-.resumen-page__indicador--exito {
-  border-top-color: var(--color-exito);
-}
-
-.resumen-page__indicador--marca {
-  border-top-color: var(--color-primario);
-}
-
-.resumen-page__indicador--total {
-  border-top-color: var(--color-exito);
-  background: linear-gradient(180deg, var(--campo-50) 0%, var(--color-superficie) 40%);
-}
-
-.resumen-page__indicador--alerta {
-  border-top-color: var(--color-advertencia);
-}
-
-.resumen-page__indicador--peligro {
-  border-top-color: var(--color-peligro);
-}
-
-.resumen-page__indicador-top {
+.resumen-page__cabecera-acciones {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--esp-2);
-  margin-bottom: var(--esp-2);
-}
-
-.resumen-page__indicador-etiqueta {
-  font-size: var(--texto-2xs);
-  font-weight: var(--peso-semi);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-texto-tenue);
-}
-
-.resumen-page__indicador-badge {
-  font-size: 0.625rem;
-  font-weight: var(--peso-semi);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px 6px;
-  border-radius: var(--radio-pastilla);
-}
-
-.resumen-page__indicador-badge--exito {
-  background-color: var(--campo-100);
-  color: var(--campo-700);
-}
-
-.resumen-page__indicador-badge--marca {
-  background-color: var(--ladrillo-100);
-  color: var(--ladrillo-700);
-}
-
-.resumen-page__indicador-badge--total {
-  background-color: var(--campo-200);
-  color: var(--campo-700);
-}
-
-.resumen-page__indicador-badge--alerta {
-  background-color: var(--ambar-100);
-  color: var(--ambar-600);
-}
-
-.resumen-page__indicador-badge--peligro {
-  background-color: var(--rojo-100);
-  color: var(--rojo-600);
-}
-
-.resumen-page__indicador-valor {
-  font-size: var(--texto-3xl);
-  font-weight: var(--peso-extra);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  color: var(--color-texto);
-  margin-bottom: var(--esp-1);
-}
-
-.resumen-page__indicador-valor--total {
-  color: var(--campo-700);
-  font-size: var(--texto-2xl);
-}
-
-.resumen-page__indicador-valor--alerta {
-  color: var(--color-advertencia);
-}
-
-.resumen-page__indicador-valor--peligro {
-  color: var(--color-peligro);
-}
-
-.resumen-page__indicador-monto {
-  color: var(--color-texto-suave);
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-medio);
-}
-
-/* ---------------------------------------------------------------------------
- * GRID DE SECCIONES INFERIORES
- * ------------------------------------------------------------------------ */
-.resumen-page__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--esp-4);
+  gap: var(--esp-2, 0.5rem);
+  flex-wrap: wrap;
 }
 
 @media (min-width: 768px) {
-  .resumen-page__grid {
-    grid-template-columns: repeat(2, 1fr);
+  .resumen-page__cabecera {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--esp-4, 1rem);
   }
 }
 
-@media (min-width: 1024px) {
-  .resumen-page__grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.resumen-page__lista {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-  max-height: 380px;
-  overflow-y: auto;
-  padding-right: var(--esp-1);
-}
-
-.resumen-page__item {
+.resumen-alerta-contenido {
   display: flex;
   align-items: center;
-  gap: var(--esp-3);
-  padding: var(--esp-3);
-  background-color: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-md);
+  justify-content: space-between;
+  gap: var(--esp-3, 0.75rem);
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* ────────────────────────────────── 1. FILA DE KPIS ANIMADOS ────────── */
+.resumen-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3, 0.75rem);
+}
+
+@media (min-width: 640px) {
+  .resumen-kpis {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--esp-3, 0.75rem);
+  }
+}
+
+@media (min-width: 1100px) {
+  .resumen-kpis {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--esp-4, 1rem);
+  }
+}
+
+.resumen-kpi-card {
+  position: relative;
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  padding: var(--esp-4, 1rem);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2, 0.5rem);
   transition:
     transform var(--transicion-rapida),
-    background-color var(--transicion-rapida),
+    box-shadow var(--transicion-rapida),
     border-color var(--transicion-rapida);
+  overflow: hidden;
 }
 
-.resumen-page__item:hover {
-  background-color: var(--color-superficie-hover);
-  border-color: var(--color-borde-fuerte);
-  transform: translateX(2px);
+/* Micro hover-lift */
+.resumen-kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--hairline-2);
 }
 
-.resumen-page__item-rank {
+.resumen-kpi-card__top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-  border-radius: var(--radio-md);
-  background-color: var(--trigo-100);
-  color: var(--trigo-800);
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-negrita);
+  justify-content: space-between;
+  gap: var(--esp-2, 0.5rem);
 }
 
-.resumen-page__item-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.resumen-page__item-nombre {
-  color: var(--color-texto);
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-semi);
+.resumen-kpi-card__label {
+  font-size: var(--texto-xs, 0.75rem);
+  font-weight: var(--peso-semi, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tinta-soft);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.resumen-page__item-sub {
-  color: var(--color-texto-tenue);
-  font-size: var(--texto-xs);
+/* Chips de ícono semánticos */
+.resumen-kpi-card__chip {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  border: 1px solid var(--hairline-2);
+  transition: transform var(--transicion-rapida);
+}
+
+.resumen-kpi-card:hover .resumen-kpi-card__chip {
+  transform: scale(1.08);
+}
+
+.resumen-kpi-card__chip--verde {
+  background: var(--verde-50);
+  color: var(--verde);
+}
+
+.resumen-kpi-card__chip--terracota {
+  background: var(--terracota-50);
+  color: var(--terracota);
+}
+
+.resumen-kpi-card__chip--oro {
+  background: var(--oro-50);
+  color: var(--oro);
+}
+
+.resumen-kpi-card__chip--rojo {
+  background: var(--rojo-50);
+  color: var(--rojo);
+}
+
+/* Número grande en .serif con tipografía tabular */
+.resumen-kpi-card__valor {
+  font-size: clamp(1.6rem, 2.2vw, 2.1rem);
+  font-weight: var(--peso-negrita, 700);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.resumen-kpi-card__valor--verde {
+  color: var(--verde);
+}
+
+.resumen-kpi-card__valor--terracota {
+  color: var(--terracota);
+}
+
+.resumen-kpi-card__valor--oro {
+  color: var(--oro);
+}
+
+.resumen-kpi-card__valor--rojo {
+  color: var(--rojo);
+}
+
+.resumen-kpi-card__pie {
+  margin-top: auto;
+  padding-top: 2px;
+}
+
+/* Mini-contexto en pill suave */
+.resumen-kpi-card__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35ch;
+  font-size: 0.75rem;
+  font-weight: var(--peso-medio, 500);
+  padding: 3px 8px;
+  border-radius: var(--radio-pastilla, 999px);
+  line-height: 1.25;
+  background: var(--crema);
+  color: var(--tinta-soft);
+  border: 1px solid var(--hairline);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.resumen-kpi-card__pill--verde {
+  color: var(--verde);
+  border-color: rgba(46, 158, 91, 0.25);
+  background: var(--verde-50);
+}
+
+.resumen-kpi-card__pill--rojo {
+  color: var(--rojo);
+  border-color: rgba(214, 72, 47, 0.25);
+  background: var(--rojo-50);
+}
+
+/* ────────────────────────────────── 2. GRID DE GRÁFICOS RECHARTS ──── */
+.resumen-graficos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4, 1rem);
+}
+
+@media (min-width: 900px) {
+  .resumen-graficos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.resumen-chart-card {
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.resumen-chart-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--hairline-2);
+}
+
+.resumen-chart-card__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--esp-3, 0.75rem);
+  padding: var(--esp-4, 1rem) var(--esp-4, 1rem) var(--esp-2, 0.5rem);
+  flex-wrap: wrap;
+}
+
+.resumen-chart-card__titulo {
+  font-size: var(--texto-base, 1rem);
+  font-weight: var(--peso-negrita, 700);
+  color: var(--tinta);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.resumen-chart-card__subtitulo {
+  font-size: var(--texto-xs, 0.75rem);
+  color: var(--tinta-soft);
+  margin: 3px 0 0 0;
+  line-height: 1.35;
+}
+
+.resumen-chart-card__badge-total {
+  font-family: var(--fuente-mono);
+  font-size: var(--texto-xs, 0.75rem);
+  font-weight: var(--peso-semi, 600);
+  background: var(--crema);
+  border: 1px solid var(--hairline);
+  padding: 3px 8px;
+  border-radius: var(--radio-pastilla);
+  color: var(--terracota);
+}
+
+/* Toggle de períodos 7/30 días */
+.resumen-chart-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: var(--crema);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radio-pastilla, 999px);
+  padding: 2px;
+  gap: 2px;
+}
+
+.resumen-chart-toggle__btn {
+  border: none;
+  background: transparent;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: var(--peso-medio, 500);
+  color: var(--tinta-soft);
+  border-radius: var(--radio-pastilla, 999px);
+  cursor: pointer;
+  transition: all var(--transicion-rapida);
+  line-height: 1;
+}
+
+.resumen-chart-toggle__btn:hover {
+  color: var(--tinta);
+}
+
+.resumen-chart-toggle__btn--activo {
+  background: var(--terracota);
+  color: #ffffff !important;
+  font-weight: var(--peso-semi, 600);
+  box-shadow: 0 1px 3px rgba(192, 83, 43, 0.28);
+}
+
+.resumen-chart-card__cuerpo {
+  padding: var(--esp-2, 0.5rem) var(--esp-3, 0.75rem) var(--esp-4, 1rem);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.resumen-chart-card__contenedor {
+  width: 100%;
+  height: 290px;
+  min-width: 0;
+  position: relative;
+}
+
+/* ────────────────────────────────── TOOLTIPS DE RECHARTS ────────────── */
+.resumen-chart-tooltip {
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--esp-2, 0.5rem) var(--esp-3, 0.75rem);
+  font-size: var(--texto-xs, 0.75rem);
+  color: var(--tinta);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+  min-width: 130px;
+}
+
+.resumen-chart-tooltip__titulo {
+  font-weight: var(--peso-semi, 600);
+  color: var(--tinta);
+  margin: 0 0 2px 0;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 3px;
+}
+
+.resumen-chart-tooltip__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2, 0.5rem);
+}
+
+.resumen-chart-tooltip__punto {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radio-pastilla, 999px);
+  flex-shrink: 0;
+}
+
+.resumen-chart-tooltip__label {
+  color: var(--tinta-soft);
+  margin-right: auto;
+}
+
+.resumen-chart-tooltip__valor {
+  font-family: var(--fuente-mono);
+  font-weight: var(--peso-semi, 600);
+  color: var(--tinta);
+}
+
+/* ────────────────────────────────── 3. SALUD OPERATIVA (DESPACHOS) ─── */
+.resumen-operaciones {
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xl);
+  padding: var(--esp-4, 1rem) var(--esp-5, 1.25rem);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3, 0.75rem);
+}
+
+.resumen-operaciones__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3, 0.75rem);
+}
+
+.resumen-operaciones__icono {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-md);
+  background: var(--oro-50);
+  border: 1px solid rgba(217, 164, 65, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.resumen-operaciones__titulo {
+  font-size: var(--texto-sm, 0.875rem);
+  font-weight: var(--peso-negrita, 700);
+  color: var(--tinta);
+  margin: 0;
+}
+
+.resumen-operaciones__subtitulo {
+  font-size: var(--texto-xs, 0.75rem);
+  color: var(--tinta-soft);
+  margin: 1px 0 0 0;
+}
+
+.resumen-operaciones__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-2, 0.5rem);
+}
+
+@media (min-width: 640px) {
+  .resumen-operaciones__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .resumen-operaciones__grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--esp-3, 0.75rem);
+  }
+}
+
+.resumen-operacion-pill {
+  background: var(--crema);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: var(--esp-2, 0.5rem) var(--esp-3, 0.75rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2, 0.5rem);
+  transition: transform var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.resumen-operacion-pill:hover {
+  transform: translateY(-1px);
+  border-color: var(--hairline-2);
+}
+
+.resumen-operacion-pill__etiqueta {
+  font-size: var(--texto-xs, 0.75rem);
+  color: var(--tinta-soft);
+  font-weight: var(--peso-medio, 500);
+}
+
+.resumen-operacion-pill__valor {
+  font-family: var(--fuente-mono);
+  font-size: var(--texto-sm, 0.875rem);
+  font-weight: var(--peso-negrita, 700);
+  color: var(--tinta);
+}
+
+.resumen-operacion-pill--pendiente .resumen-operacion-pill__valor {
+  color: var(--oro);
+}
+
+.resumen-operacion-pill--confirmado .resumen-operacion-pill__valor {
+  color: #0284C7;
+}
+
+.resumen-operacion-pill--preparacion .resumen-operacion-pill__valor {
+  color: #8B5CF6;
+}
+
+.resumen-operacion-pill--camino .resumen-operacion-pill__valor {
+  color: var(--terracota);
+}
+
+.resumen-operacion-pill--entregado .resumen-operacion-pill__valor {
+  color: var(--verde);
+}
+
+/* ────────────────────────────────── SKELETON LOADERS (SHIMMER) ──────── */
+@keyframes shimmerResumen {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.resumen-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4, 1rem);
+  width: 100%;
+}
+
+.resumen-skeleton__kpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3, 0.75rem);
+}
+
+@media (min-width: 640px) {
+  .resumen-skeleton__kpis {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .resumen-skeleton__kpis {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--esp-4, 1rem);
+  }
+}
+
+.resumen-skeleton__kpi-card {
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  padding: var(--esp-4, 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2, 0.5rem);
+}
+
+.resumen-skeleton__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4, 1rem);
+}
+
+@media (min-width: 900px) {
+  .resumen-skeleton__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.resumen-skeleton__chart-card {
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  padding: var(--esp-4, 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3, 0.75rem);
+}
+
+.resumen-skeleton__linea,
+.resumen-skeleton__numero,
+.resumen-skeleton__chart-box {
+  background: linear-gradient(
+    90deg,
+    rgba(228, 216, 201, 0.4) 0%,
+    rgba(251, 247, 240, 0.9) 50%,
+    rgba(228, 216, 201, 0.4) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerResumen 1.6s infinite ease-in-out;
+  border-radius: var(--r-sm);
+}
+
+.resumen-skeleton__linea--corta {
+  width: 80px;
+  height: 12px;
+}
+
+.resumen-skeleton__linea--media {
+  width: 140px;
+  height: 14px;
+}
+
+.resumen-skeleton__numero {
+  width: 110px;
+  height: 32px;
+}
+
+.resumen-skeleton__chart-box {
+  width: 100%;
+  height: 240px;
+}
+
+/* ────────────────────────────────── MODO OSCURO (3 CAPAS) ────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .resumen-kpi-card,
+  :root:not([data-theme="light"]) .resumen-chart-card,
+  :root:not([data-theme="light"]) .resumen-operaciones,
+  :root:not([data-theme="light"]) .resumen-skeleton__kpi-card,
+  :root:not([data-theme="light"]) .resumen-skeleton__chart-card {
+    background-color: var(--panel);
+    border-color: var(--hairline);
+  }
+
+  :root:not([data-theme="light"]) .resumen-kpi-card__pill,
+  :root:not([data-theme="light"]) .resumen-chart-toggle,
+  :root:not([data-theme="light"]) .resumen-chart-card__badge-total,
+  :root:not([data-theme="light"]) .resumen-operacion-pill {
+    background-color: var(--crema);
+    border-color: var(--hairline);
+  }
+
+  :root:not([data-theme="light"]) .resumen-skeleton__linea,
+  :root:not([data-theme="light"]) .resumen-skeleton__numero,
+  :root:not([data-theme="light"]) .resumen-skeleton__chart-box {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+  }
+}
+
+:root[data-theme="dark"] .resumen-kpi-card,
+:root[data-theme="dark"] .resumen-chart-card,
+:root[data-theme="dark"] .resumen-operaciones,
+:root[data-theme="dark"] .resumen-skeleton__kpi-card,
+:root[data-theme="dark"] .resumen-skeleton__chart-card {
+  background-color: var(--panel);
+  border-color: var(--hairline);
+}
+
+:root[data-theme="dark"] .resumen-kpi-card__pill,
+:root[data-theme="dark"] .resumen-chart-toggle,
+:root[data-theme="dark"] .resumen-chart-card__badge-total,
+:root[data-theme="dark"] .resumen-operacion-pill {
+  background-color: var(--crema);
+  border-color: var(--hairline);
+}
+
+:root[data-theme="dark"] .resumen-skeleton__linea,
+:root[data-theme="dark"] .resumen-skeleton__numero,
+:root[data-theme="dark"] .resumen-skeleton__chart-box {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
 }

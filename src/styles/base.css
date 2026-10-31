@@ -22,18 +22,25 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   min-height: 100dvh;
+  overflow-x: clip;
   font-family: var(--fuente-base);
   font-size: var(--texto-base);
   line-height: var(--interlineado-base);
-  color: var(--color-texto);
-  background-color: var(--color-fondo);
+  color: var(--tinta);
+  background: var(--crema);
+  background-color: var(--crema);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease;
 }
 
 img,
@@ -78,8 +85,17 @@ ol {
 
 /* ---------------------------------------------------------------------------
  * 2. TIPOGRAFÍA
+ * Headings y .serif usan Fraunces; el cuerpo usa Inter.
  * Los títulos usan clamp() para crecer solos entre móvil y desktop.
  * ------------------------------------------------------------------------ */
+h1,
+h2,
+h3,
+h4,
+.serif {
+  font-family: var(--fuente-serif);
+}
+
 h1,
 h2,
 h3,
@@ -87,19 +103,21 @@ h4 {
   line-height: var(--interlineado-ajustado);
   font-weight: var(--peso-negrita);
   letter-spacing: -0.015em;
-  color: var(--color-texto);
+  color: var(--tinta);
   text-wrap: balance;
 }
 
 h1 {
   font-size: clamp(1.625rem, 1.25rem + 1.9vw, var(--texto-4xl));
-  font-weight: var(--peso-extra);
+  font-weight: var(--peso-negrita);
 }
 h2 {
   font-size: clamp(1.375rem, 1.15rem + 1.1vw, var(--texto-3xl));
+  font-weight: var(--peso-semi);
 }
 h3 {
   font-size: clamp(1.125rem, 1.03rem + 0.47vw, var(--texto-xl));
+  font-weight: var(--peso-semi);
 }
 h4 {
   font-size: var(--texto-lg);
@@ -128,8 +146,8 @@ a:hover {
 }
 
 ::selection {
-  background-color: var(--ladrillo-100);
-  color: var(--ladrillo-900);
+  background-color: var(--terracota-50);
+  color: var(--terracota);
 }
 
 /* Texto para lectores de pantalla (invisible pero anunciado) */
@@ -166,8 +184,16 @@ a:hover {
 }
 
 /* ---------------------------------------------------------------------------
- * 4. UTILIDADES DE LAYOUT
+ * 4. UTILIDADES DE LAYOUT (.wrap y .contenedor)
  * ------------------------------------------------------------------------ */
+
+/* Clase utilitaria .wrap: max-width 1240px, centrado, padding 20px */
+.wrap {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding: 20px;
+}
 
 /* Centra el contenido y le da el margen lateral estándar del proyecto. */
 .contenedor {
@@ -277,12 +303,89 @@ a:hover {
 }
 
 /* ---------------------------------------------------------------------------
- * 6. DETALLES
+ * 6. DETALLES Y PRECIOS (tabular-nums)
  * ------------------------------------------------------------------------ */
 
 /* Precios y cantidades: números de ancho fijo para que las columnas cuadren. */
-.numero {
+.numero,
+.precio,
+.price,
+.tabular-nums,
+[data-precio],
+[class*="precio"],
+[class*="subtotal"],
+[class*="total"] {
   font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * 7. PRELOADER DE BIENVENIDA (🌾 El Trigal)
+ * ------------------------------------------------------------------------ */
+.preloader-trigal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: var(--crema);
+  color: var(--tinta);
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: all;
+}
+
+.preloader-trigal--oculto {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preloader-trigal__marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 26px;
+  border-radius: var(--r-xl);
+  background-color: var(--panel);
+  border: 1px solid var(--hairline-2);
+  box-shadow: var(--shadow-md);
+  animation: preloader-pulso 1.2s ease-in-out infinite alternate;
+}
+
+.preloader-trigal__icono {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.preloader-trigal__texto {
+  font-family: var(--fuente-serif);
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--tinta);
+}
+
+.preloader-trigal__subtitulo {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-soft);
+}
+
+@keyframes preloader-pulso {
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(-2px) scale(1.015);
+  }
 }
 
 /* Barra de desplazamiento discreta */
@@ -292,12 +395,12 @@ a:hover {
     height: 10px;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: var(--neutro-300);
+    background-color: var(--hairline-2);
     border-radius: var(--radio-pastilla);
     border: 3px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--neutro-400);
+    background-color: var(--tinta-faint);
   }
 }

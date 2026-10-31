@@ -31,10 +31,11 @@
 
 /* --- Contenedor Well de fondo para contraste cálido y profundo ---------- */
 .mis-promociones-well {
-  background: linear-gradient(180deg, #EADDC6 0%, #E4D5BB 100%);
-  border-radius: var(--radio-xl, 1.25rem);
+  background: linear-gradient(180deg, var(--kraft) 0%, var(--kraft-2) 100%);
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--r-xl);
   padding: var(--esp-6);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 0 0 1px rgba(122, 62, 18, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 /* --- Rejilla responsive de tickets -------------------------------------- */
@@ -67,10 +68,10 @@
   position: relative;
   display: flex;
   flex-direction: row;
-  background: #ffffff;
-  border-radius: var(--radio-lg, 14px);
+  background-color: var(--panel);
+  border-radius: var(--r);
   filter:
-    drop-shadow(1.5px 0 0 rgba(122, 62, 18, 0.9)) drop-shadow(-1.5px 0 0 rgba(122, 62, 18, 0.9)) drop-shadow(0 1.5px 0 rgba(122, 62, 18, 0.9)) drop-shadow(0 -1.5px 0 rgba(122, 62, 18, 0.9)) drop-shadow(0 16px 34px rgba(60, 30, 10, 0.28));
+    drop-shadow(1.5px 0 0 rgba(122, 62, 18, 0.55)) drop-shadow(-1.5px 0 0 rgba(122, 62, 18, 0.55)) drop-shadow(0 1.5px 0 rgba(122, 62, 18, 0.55)) drop-shadow(0 -1.5px 0 rgba(122, 62, 18, 0.55)) drop-shadow(0 14px 28px rgba(58, 46, 38, 0.22));
   transition: transform var(--transicion-rapida), filter var(--transicion-rapida);
   overflow: visible;
 
@@ -219,11 +220,11 @@
 }
 
 /* ============================================================================
- * CUERPO DEL CUPÓN · Blanco puro nítido (#ffffff) para contraste óptimo
+ * CUERPO DEL CUPÓN · Superficie --panel adaptable a modo claro y oscuro
  * ==========================================================================*/
 .cupon-cuerpo {
   flex: 1;
-  background: #ffffff;
+  background-color: var(--panel);
   padding: 7px;
   display: flex;
   flex-direction: column;
@@ -233,14 +234,14 @@
 /* Marco interior suave (hairline sólida sutil) para look de ticket impreso */
 .cupon-cuerpo-marco {
   flex: 1;
-  border: 1px solid rgba(194, 120, 3, 0.2);
-  border-radius: var(--radio-md, 8px);
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--r-sm);
   padding: var(--esp-4);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: var(--esp-3);
-  background: #ffffff;
+  background-color: var(--panel);
 }
 
 .cupon-cuerpo__cabecera {

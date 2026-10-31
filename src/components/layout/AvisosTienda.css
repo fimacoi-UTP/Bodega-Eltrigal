@@ -1,0 +1,368 @@
+/* ============================================================================
+ * AvisosTienda.css · Banner de Cookies y Popup de Notificaciones (FASE 8)
+ * ----------------------------------------------------------------------------
+ * Usa exclusivamente tokens de la Fase 0 (--panel, --crema, --kraft,
+ * --terracota, --oro, --verde, --tinta, --hairline, --r-*, --shadow-*).
+ * Coherencia total en modo claro y modo oscuro de 3 capas.
+ * ==========================================================================*/
+
+/* ---------------------------------------------------------------------------
+ * 1) BANNER DE COOKIES (inferior, sin chocar con WhatsApp ni barra móvil)
+ * ------------------------------------------------------------------------ */
+.banner-cookies {
+  position: fixed;
+  left: 16px;
+  right: 92px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: calc(var(--z-navegacion) + 7);
+  max-width: 760px;
+  margin-inline: auto;
+  animation: aviso-subir 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition:
+    bottom 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+@media (max-width: 767px) {
+  .banner-cookies {
+    left: 12px;
+    right: 84px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .banner-cookies--con-barra-movil {
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-cookies {
+    left: 12px;
+    right: 12px;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .banner-cookies--con-barra-movil {
+    bottom: calc(146px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.banner-cookies--oculto,
+.popup-notif--oculto {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+}
+
+.banner-cookies__interior {
+  padding: 15px 18px;
+  border-radius: var(--r-xl);
+  background-color: var(--panel);
+  border: 1px solid var(--hairline-2);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.banner-cookies__principal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 680px) {
+  .banner-cookies__principal {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+}
+
+.banner-cookies__mensaje {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  min-width: 0;
+}
+
+.banner-cookies__icono {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: var(--oro-50);
+  border: 1px solid rgba(217, 164, 65, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.banner-cookies__texto {
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--tinta);
+  line-height: 1.45;
+}
+
+.banner-cookies__acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.banner-cookies__btn {
+  height: 36px;
+  padding: 0 15px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.banner-cookies__btn--primario {
+  border: none;
+  background-color: var(--terracota);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-sm);
+}
+
+.banner-cookies__btn--primario:hover {
+  background-color: var(--terracota-600);
+  transform: translateY(-1px);
+}
+
+.banner-cookies__btn--secundario {
+  background-color: var(--crema);
+  border: 1px solid var(--hairline-2);
+  color: var(--tinta-soft);
+}
+
+.banner-cookies__btn--secundario:hover {
+  border-color: var(--terracota);
+  color: var(--terracota);
+  background-color: var(--terracota-50);
+}
+
+/* Panel de configuración desplegable */
+.banner-cookies__config {
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.banner-cookies__opcion {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 0.79rem;
+  color: var(--tinta-soft);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.banner-cookies__opcion input {
+  margin-top: 3px;
+  accent-color: var(--terracota);
+}
+
+.banner-cookies__config-pie {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2) POPUP "ACTIVAR NOTIFICACIONES" (abajo-izquierda, lejos del WhatsApp)
+ * ------------------------------------------------------------------------ */
+.popup-notif {
+  position: fixed;
+  left: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: calc(var(--z-navegacion) + 7);
+  width: 340px;
+  max-width: calc(100vw - 104px);
+  padding: 16px 18px;
+  border-radius: var(--r-xl);
+  background-color: var(--panel);
+  border: 1px solid var(--hairline-2);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: aviso-subir 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition:
+    bottom 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+@media (max-width: 767px) {
+  .popup-notif {
+    left: 14px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    max-width: calc(100vw - 96px);
+  }
+
+  .popup-notif--con-barra-movil {
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-notif {
+    left: 12px;
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .popup-notif--con-barra-movil {
+    bottom: calc(146px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.popup-notif__cerrar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--crema);
+  color: var(--tinta-faint);
+  font-size: 1.05rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.popup-notif__cerrar:hover {
+  background-color: var(--rojo-50);
+  color: var(--rojo);
+}
+
+.popup-notif__cuerpo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-right: 18px;
+}
+
+.popup-notif__icono {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--terracota-50);
+  border: 1px solid rgba(192, 83, 43, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.popup-notif__textos {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.popup-notif__titulo {
+  font-family: var(--fuente-titulo);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--tinta);
+  line-height: 1.2;
+}
+
+.popup-notif__descripcion {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--tinta-soft);
+  line-height: 1.4;
+}
+
+.popup-notif__acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.popup-notif__btn {
+  height: 35px;
+  padding: 0 15px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.popup-notif__btn--primario {
+  border: none;
+  background-color: var(--terracota);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-sm);
+}
+
+.popup-notif__btn--primario:hover {
+  background-color: var(--terracota-600);
+  transform: translateY(-1px);
+}
+
+.popup-notif__btn--secundario {
+  background-color: var(--crema);
+  border: 1px solid var(--hairline-2);
+  color: var(--tinta-soft);
+}
+
+.popup-notif__btn--secundario:hover {
+  border-color: var(--tinta-soft);
+  color: var(--tinta);
+}
+
+@keyframes aviso-subir {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner-cookies,
+  .popup-notif {
+    animation: none;
+  }
+}
+

@@ -1,37 +1,93 @@
 /* ============================================================================
- * TarjetaProducto.css · Estilos de la tarjeta de catálogo
+ * TarjetaProducto.css · Tarjeta de Catálogo Supermercado Premium (FASE 2)
  * ----------------------------------------------------------------------------
- * Diseño mobile-first con tokens CSS del proyecto.
+ * Usa exclusivamente los tokens de la Fase 0 (--panel, --crema, --kraft,
+ * --terracota, --oro, --verde, --tinta, --hairline, --r-lg, --shadow-lg).
  * ==========================================================================*/
 
 .catalogo-tarjeta {
+  --rx: 0deg;
+  --ry: 0deg;
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-radius: var(--radio-lg);
-  border: 1px solid var(--color-borde);
-  background-color: var(--color-superficie);
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
   overflow: hidden;
-  transition: transform var(--transicion), box-shadow var(--transicion), border-color var(--transicion);
-  position: relative;
+  transform: perspective(820px) translateY(0) rotateX(0deg) rotateY(0deg);
+  transform-style: preserve-3d;
+  transition:
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
+  will-change: transform;
+}
+
+.catalogo-tarjeta--inclinando {
+  transition:
+    transform 90ms ease-out,
+    box-shadow 280ms ease,
+    border-color 220ms ease;
 }
 
 .catalogo-tarjeta:hover {
-  transform: translateY(-2px);
-  border-color: var(--color-borde-fuerte);
-  box-shadow: var(--sombra-md);
+  transform: perspective(820px) translateY(-5px) rotateX(var(--rx)) rotateY(var(--ry));
+  box-shadow: var(--shadow-lg);
+  border-color: var(--hairline-2);
 }
 
-/* Área superior: Imagen o fondo ilustrado */
+.catalogo-tarjeta:focus-within {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--terracota);
+}
+
+/* ============================================================================
+ * 1. ZONA DE IMAGEN (aspect-ratio 1/1, fondo radial crema, destello sheen)
+ * ==========================================================================*/
 .catalogo-tarjeta__visual {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-superficie-suave);
+  background: radial-gradient(
+    circle at 50% 44%,
+    var(--panel) 0%,
+    var(--crema) 68%,
+    var(--kraft) 100%
+  );
+  border-bottom: 1px solid var(--hairline);
   overflow: hidden;
+}
+
+/* Destello (sheen) que barre la imagen al hover */
+.catalogo-tarjeta__visual::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -135%;
+  width: 65%;
+  height: 100%;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.38) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+  z-index: 2;
+  transition: none;
+}
+
+.catalogo-tarjeta:hover .catalogo-tarjeta__visual::after {
+  left: 145%;
+  transition: left 680ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .catalogo-tarjeta__enlace-visual {
@@ -41,175 +97,354 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  padding: 12px;
 }
 
 .catalogo-tarjeta__imagen {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform var(--transicion-lenta);
+  object-fit: contain;
+  border-radius: var(--r-sm);
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .catalogo-tarjeta:hover .catalogo-tarjeta__imagen {
-  transform: scale(1.04);
+  transform: scale(1.06);
 }
 
-/* Fallback visual cuando no hay imagen o falla la carga */
+.catalogo-tarjeta--agotado .catalogo-tarjeta__imagen {
+  filter: grayscale(0.45) opacity(0.75);
+}
+
+/* Fallback elegante cuando no hay imagen o falla la carga */
 .catalogo-tarjeta__placeholder {
+  --color-fallback: var(--terracota-50);
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--esp-2);
-  padding: var(--esp-4);
+  gap: 10px;
+  padding: 16px;
   text-align: center;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.25) 0%, rgba(0, 0, 0, 0.05) 100%);
+  border-radius: var(--r);
+  background: radial-gradient(
+    circle at 50% 40%,
+    var(--panel) 0%,
+    color-mix(in srgb, var(--color-fallback) 28%, var(--crema)) 100%
+  );
+}
+
+.catalogo-tarjeta__fallback-circulo {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background-color: var(--panel);
+  border: 1.5px solid var(--hairline-2);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.catalogo-tarjeta:hover .catalogo-tarjeta__fallback-circulo {
+  transform: scale(1.06);
 }
 
 .catalogo-tarjeta__icono-categoria {
-  font-size: 2.25rem;
+  font-size: 1.85rem;
   line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.catalogo-tarjeta__iniciales {
+  font-family: var(--fuente-serif);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--tinta-soft);
 }
 
 .catalogo-tarjeta__categoria-texto {
-  font-size: var(--texto-2xs);
-  font-weight: var(--peso-semi);
+  font-size: 0.66rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-texto-suave);
-  background-color: rgba(255, 255, 255, 0.85);
-  padding: var(--esp-1) var(--esp-2);
-  border-radius: var(--radio-pastilla);
-  backdrop-filter: blur(4px);
+  letter-spacing: 0.07em;
+  color: var(--tinta-soft);
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  padding: 3px 10px;
+  border-radius: 999px;
 }
 
-/* Badges flotantes sobre el visual */
+/* --- Pills superiores (OFERTA / Stock) --- */
 .catalogo-tarjeta__insignias {
   position: absolute;
-  top: var(--esp-2);
-  left: var(--esp-2);
-  right: 44px;
+  top: 10px;
+  left: 10px;
+  right: 48px;
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  pointer-events: none;
-  gap: var(--esp-1);
   flex-wrap: wrap;
-  z-index: 2;
-}
-
-/* Botón flotante de favoritos arriba a la derecha */
-.catalogo-tarjeta__favorito-envoltorio {
-  position: absolute;
-  top: var(--esp-2);
-  right: var(--esp-2);
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
   z-index: 3;
 }
 
-/* Cuerpo de la tarjeta */
+.catalogo-tarjeta__pill-oferta {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: #f6c500;
+  color: #201a15;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(32, 26, 21, 0.16);
+}
+
+.catalogo-tarjeta__pill-stock {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.catalogo-tarjeta__pill-stock--bajo {
+  background-color: var(--oro-50);
+  color: var(--tinta);
+  border: 1px solid var(--oro);
+}
+
+.catalogo-tarjeta__pill-stock--agotado {
+  background-color: var(--rojo-50);
+  color: var(--rojo);
+  border: 1px solid var(--rojo);
+}
+
+/* --- BotonFavorito arriba-derecha en círculo blanco --- */
+.catalogo-tarjeta__favorito-envoltorio {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+}
+
+.catalogo-tarjeta__favorito-envoltorio .boton-favorito {
+  background-color: var(--panel);
+  color: var(--tinta);
+  border: 1px solid var(--hairline-2);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================================================
+ * 2. CUERPO DE LA TARJETA
+ * ==========================================================================*/
 .catalogo-tarjeta__cuerpo {
   display: flex;
   flex-direction: column;
-  padding: var(--esp-4);
   flex: 1;
-  gap: var(--esp-1);
+  padding: 14px 16px 12px;
+  gap: 4px;
 }
 
 .catalogo-tarjeta__marca {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-medio);
-  color: var(--color-texto-tenue);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--terracota);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.07em;
+  line-height: 1.2;
+}
+
+.catalogo-tarjeta__titulo {
+  font-family: var(--fuente-base);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.32;
+  margin: 0;
 }
 
 .catalogo-tarjeta__nombre {
-  font-size: var(--texto-base);
-  font-weight: var(--peso-negrita);
-  line-height: var(--interlineado-ajustado);
-  color: var(--color-texto);
+  color: var(--tinta);
   text-decoration: none;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-top: var(--esp-1);
+  min-height: 2.64em; /* alinea las filas de tarjetas de 1 o 2 líneas */
   transition: color var(--transicion-rapida);
 }
 
 .catalogo-tarjeta__nombre:hover {
-  color: var(--color-primario);
+  color: var(--terracota);
 }
 
-.catalogo-tarjeta__precio-fila {
+/* --- Bloque de precio --- */
+.catalogo-tarjeta__precio-bloque {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--esp-2);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   margin-top: auto;
-  padding-top: var(--esp-3);
+  padding-top: 8px;
 }
 
 .catalogo-tarjeta__precios-contenedor {
   display: flex;
   align-items: baseline;
-  gap: var(--esp-2);
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .catalogo-tarjeta__precio {
-  font-size: var(--texto-xl);
-  font-weight: var(--peso-extra);
-  color: var(--color-primario);
-  line-height: 1;
+  font-family: var(--fuente-serif);
+  font-size: 1.38rem;
+  font-weight: 700;
+  color: var(--tinta);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 .catalogo-tarjeta__precio-original {
-  font-size: var(--texto-xs);
-  color: var(--color-texto-tenue);
+  font-family: var(--fuente-base);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--tinta-faint);
   text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
 }
 
+.catalogo-tarjeta__chip-ahorro {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: var(--verde-50);
+  color: var(--verde);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.catalogo-tarjeta__precio-medida,
 .catalogo-tarjeta__unidad {
-  font-size: var(--texto-xs);
-  color: var(--color-texto-tenue);
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--tinta-soft);
 }
 
-/* Pie de la tarjeta con acciones */
+/* ============================================================================
+ * 3. ACCIÓN AL PIE (Botón "+ Agregar" con shine / Stepper [ − N + ])
+ * ==========================================================================*/
 .catalogo-tarjeta__pie {
-  padding: 0 var(--esp-4) var(--esp-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
+  margin-top: auto;
+  padding: 0 16px 16px;
 }
 
-.catalogo-tarjeta__boton-agregado {
-  background-color: var(--color-exito) !important;
-  border-color: var(--color-exito) !important;
+.catalogo-tarjeta__btn-agregar {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--r-sm);
+  background-color: var(--terracota);
+  color: #ffffff;
+  font-family: var(--fuente-base);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(192, 83, 43, 0.24);
+  transition:
+    background-color var(--transicion-rapida),
+    transform var(--transicion-rapida),
+    box-shadow var(--transicion-rapida);
 }
 
-/* Stepper interactivo de cantidad en la tarjeta */
+.catalogo-tarjeta__btn-agregar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+
+.catalogo-tarjeta__btn-agregar:hover:not(:disabled) {
+  background-color: var(--terracota-600);
+  box-shadow: 0 4px 12px rgba(192, 83, 43, 0.34);
+  transform: translateY(-1px);
+}
+
+.catalogo-tarjeta__btn-agregar:hover:not(:disabled)::after {
+  left: 140%;
+  transition: left 540ms ease;
+}
+
+.catalogo-tarjeta__btn-agregar:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.catalogo-tarjeta__btn-agregar:disabled {
+  background-color: var(--kraft);
+  color: var(--tinta-faint);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.catalogo-tarjeta__btn-agregar:focus-visible,
+.catalogo-tarjeta__stepper-btn:focus-visible {
+  outline: 2px solid var(--terracota);
+  outline-offset: 2px;
+}
+
+.catalogo-tarjeta__btn-mas {
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* --- Stepper [ − N + ] --- */
 .catalogo-tarjeta__stepper {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 38px;
-  background-color: var(--color-primario-suave);
-  border: 1px solid var(--color-primario-borde);
-  border-radius: var(--radio-md);
-  padding: 2px;
-  box-shadow: var(--sombra-xs);
-  box-sizing: border-box;
-  animation: catalogoStepperEntrada var(--transicion-rapida) ease-out;
+  height: 42px;
+  background-color: var(--terracota-50);
+  border: 1.5px solid var(--terracota);
+  border-radius: var(--r-sm);
+  padding: 3px;
+  box-shadow: var(--shadow-sm);
+  animation: catalogoStepperEntrada 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes catalogoStepperEntrada {
   from {
-    opacity: 0.7;
-    transform: scale(0.96);
+    opacity: 0.6;
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
@@ -221,143 +456,128 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  min-width: 38px;
-  height: 34px;
-  min-height: 34px;
-  background-color: var(--color-primario);
-  color: var(--color-sobre-primario);
-  border: none;
-  border-radius: var(--radio-sm);
-  font-family: var(--fuente-base);
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-negrita);
+  width: 36px;
+  min-width: 36px;
+  height: 32px;
+  border-radius: 7px;
+  background-color: var(--terracota);
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 800;
   line-height: 1;
-  cursor: pointer;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
   transition:
     background-color var(--transicion-rapida),
-    transform var(--transicion-rapida),
-    opacity var(--transicion-rapida),
-    box-shadow var(--transicion-rapida);
+    transform var(--transicion-rapida);
 }
 
 .catalogo-tarjeta__stepper-btn:hover:not(:disabled) {
-  background-color: var(--color-primario-hover);
-  box-shadow: var(--sombra-xs);
+  background-color: var(--terracota-600);
 }
 
 .catalogo-tarjeta__stepper-btn:active:not(:disabled) {
-  background-color: var(--color-primario-activo);
   transform: scale(0.92);
 }
 
-.catalogo-tarjeta__stepper-btn:focus-visible {
-  outline: none;
-  box-shadow: var(--anillo-foco);
-}
-
 .catalogo-tarjeta__stepper-btn:disabled {
-  background-color: var(--color-borde);
-  color: var(--color-texto-tenue);
-  opacity: 0.45;
+  background-color: var(--hairline-2);
+  color: var(--tinta-faint);
+  opacity: 0.55;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 .catalogo-tarjeta__stepper-info {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: var(--esp-1);
-  padding: 0 var(--esp-1);
-  user-select: none;
-  min-width: 0;
+  gap: 5px;
   flex: 1;
+  min-width: 0;
+  user-select: none;
 }
 
 .catalogo-tarjeta__stepper-cantidad {
-  font-size: var(--texto-base);
-  font-weight: var(--peso-extra);
-  color: var(--color-primario);
-  line-height: 1;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--terracota);
 }
 
 .catalogo-tarjeta__stepper-etiqueta {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-medio);
-  color: var(--color-texto-suave);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--tinta-soft);
   white-space: nowrap;
 }
 
-@media (max-width: 360px) {
-  .catalogo-tarjeta__stepper-btn {
-    width: 32px;
-    min-width: 32px;
-    height: 32px;
-  }
-
-  .catalogo-tarjeta__stepper-etiqueta {
-    font-size: var(--texto-2xs);
-  }
-}
-
 /* ============================================================================
- * MEJORA DE HOVER · elevación más marcada y foco visible
- * ----------------------------------------------------------------------------
- * La tarjeta ya subía 2px; ahora sube más y proyecta una sombra mayor, que es
- * lo que da la sensación de "levantarse" de un e-commerce cuidado. Se anima
- * solo transform y box-shadow, nada que recalcule el layout.
+ * 4. CLON ANIMADO "VUELA AL CARRITO"
  * ==========================================================================*/
-
-.catalogo-tarjeta:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--sombra-lg);
-  border-color: var(--color-primario-borde);
+.catalogo-vuelo-clon {
+  position: fixed;
+  z-index: 9998;
+  pointer-events: none;
+  border-radius: 50%;
+  background-color: var(--panel);
+  border: 2px solid var(--terracota);
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
 }
 
-/* Al soltar el mouse vuelve un poco más lento: se siente menos brusco. */
-.catalogo-tarjeta {
-  transition:
-    transform var(--transicion-lenta),
-    box-shadow var(--transicion-lenta),
-    border-color var(--transicion);
+.catalogo-vuelo-clon__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* Mismo realce al llegar con el teclado, no solo con el mouse. */
-.catalogo-tarjeta:focus-within {
-  transform: translateY(-4px);
-  box-shadow: var(--sombra-md);
-  border-color: var(--color-primario-borde);
+.catalogo-vuelo-clon__icono {
+  font-size: 1.5rem;
+  line-height: 1;
 }
 
-/* El zoom de la foto acompaña un poco más. */
-.catalogo-tarjeta:hover .catalogo-tarjeta__imagen {
-  transform: scale(1.07);
+/* Sacudida sutil en el carrito del Navbar al recibir el producto */
+.header-pill--carrito-recibe {
+  animation: carrito-recibe-pulso 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* El botón de agregar se tiñe del color de marca al acercarse a la tarjeta. */
-.catalogo-tarjeta__pie .ui-boton {
-  transition:
-    background-color var(--transicion-rapida),
-    box-shadow var(--transicion-rapida),
-    transform var(--transicion-rapida);
+@keyframes carrito-recibe-pulso {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-.catalogo-tarjeta:hover .catalogo-tarjeta__pie .ui-boton {
-  box-shadow: var(--sombra-sm);
+@media (max-width: 420px) {
+  .catalogo-tarjeta__cuerpo {
+    padding: 12px 12px 10px;
+  }
+  .catalogo-tarjeta__pie {
+    padding: 0 12px 12px;
+  }
+  .catalogo-tarjeta__precio {
+    font-size: 1.22rem;
+  }
+  .catalogo-tarjeta__stepper-etiqueta {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .catalogo-tarjeta,
   .catalogo-tarjeta:hover,
   .catalogo-tarjeta:focus-within {
     transform: none;
   }
-
   .catalogo-tarjeta:hover .catalogo-tarjeta__imagen {
     transform: none;
+  }
+  .catalogo-tarjeta__visual::after,
+  .catalogo-tarjeta__btn-agregar::after {
+    display: none;
   }
 }

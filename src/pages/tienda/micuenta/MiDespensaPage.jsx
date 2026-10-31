@@ -58,7 +58,6 @@ function TarjetaDespensaItem({ item, onAgregar }) {
     producto,
     disponible,
     stock,
-    pocoStock,
     nombre,
     precio,
     imagen,
@@ -66,7 +65,7 @@ function TarjetaDespensaItem({ item, onAgregar }) {
     cantidadTotal,
   } = item;
 
-  const stockMaximo = Math.max(1, stock);
+  const stockMaximo = stock != null && stock > 0 ? Math.max(1, stock) : 99;
 
   const handleDisminuir = () => {
     setCantidad((prev) => Math.max(1, prev - 1));
@@ -99,15 +98,11 @@ function TarjetaDespensaItem({ item, onAgregar }) {
 
         {/* Badges de estado en esquina superior izquierda */}
         <div className="despensa-tarjeta__badge-pos">
-          {!disponible ? (
+          {!disponible && (
             <Badge variante="neutro" tamano="sm">
-              No disponible por ahora
+              Agotado
             </Badge>
-          ) : pocoStock ? (
-            <Badge variante="advertencia" tamano="sm" punto>
-              ¡Últimas {stock} unid.!
-            </Badge>
-          ) : null}
+          )}
         </div>
 
         {/* Botón interactivo de favoritos arriba a la derecha */}
@@ -321,17 +316,26 @@ export function MiDespensaPage() {
       const prodActual = obtenerProducto ? obtenerProducto(item.productoId) : null;
       const existe = !!prodActual;
       const activo = existe && prodActual.activo !== false;
-      const stock = existe ? Number(prodActual.stock) || 0 : 0;
-      const stockMinimo = existe ? Number(prodActual.stockMinimo) || 5 : 5;
-      const disponible = existe && activo && stock > 0;
-      const pocoStock = disponible && stock <= stockMinimo;
+      const tieneStockNum =
+        existe &&
+        prodActual.stock !== undefined &&
+        prodActual.stock !== null &&
+        Number.isFinite(Number(prodActual.stock));
+      const stock = tieneStockNum ? Number(prodActual.stock) : null;
+      const disponible =
+        existe &&
+        activo &&
+        (typeof prodActual.disponible === "boolean"
+          ? prodActual.disponible
+          : tieneStockNum
+            ? stock > 0
+            : true);
 
       return {
         ...item,
         producto: prodActual,
         disponible,
         stock,
-        pocoStock,
         nombre: prodActual?.nombre || item.nombreSnapshot || "Producto",
         precio: prodActual?.precio != null ? prodActual.precio : item.precioSnapshot,
         imagen: prodActual?.imagen || item.imagenSnapshot,
@@ -351,10 +355,20 @@ export function MiDespensaPage() {
       const prodActual = obtenerProducto ? obtenerProducto(idStr) : null;
       const existe = !!prodActual;
       const activo = existe && prodActual.activo !== false;
-      const stock = existe ? Number(prodActual.stock) || 0 : 0;
-      const stockMinimo = existe ? Number(prodActual.stockMinimo) || 5 : 5;
-      const disponible = existe && activo && stock > 0;
-      const pocoStock = disponible && stock <= stockMinimo;
+      const tieneStockNum =
+        existe &&
+        prodActual.stock !== undefined &&
+        prodActual.stock !== null &&
+        Number.isFinite(Number(prodActual.stock));
+      const stock = tieneStockNum ? Number(prodActual.stock) : null;
+      const disponible =
+        existe &&
+        activo &&
+        (typeof prodActual.disponible === "boolean"
+          ? prodActual.disponible
+          : tieneStockNum
+            ? stock > 0
+            : true);
 
       // Si también tiene historial de compras, adjuntamos la métrica
       const historial = mapaFrecuencias.get(idStr);
@@ -364,7 +378,6 @@ export function MiDespensaPage() {
         producto: prodActual,
         disponible,
         stock,
-        pocoStock,
         nombre: prodActual?.nombre || historial?.nombreSnapshot || "Producto",
         precio: prodActual?.precio != null ? prodActual.precio : historial?.precioSnapshot,
         imagen: prodActual?.imagen || historial?.imagenSnapshot,

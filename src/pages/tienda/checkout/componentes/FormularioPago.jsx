@@ -8,7 +8,7 @@ import { listarEstrategiasPago, obtenerEstrategiaPago } from "../pagos";
  * Este componente no tiene lógica condicional para cada medio de pago.
  * Simplemente:
  * 1. Obtiene la lista de estrategias registradas con `listarEstrategiasPago()`.
- * 2. Muestra los botones/tarjetas de selección.
+ * 2. Muestra los botones/tarjetas de selección con identidad visual de marca.
  * 3. Recupera la estrategia activa y renderiza su componente `Formulario`
  *    delegando en ella los datos y los errores.
  * ==========================================================================*/
@@ -24,6 +24,7 @@ export function FormularioPago({
   const estrategias = listarEstrategiasPago();
   const estrategiaActual = obtenerEstrategiaPago(metodoSeleccionado);
   const ComponenteFormulario = estrategiaActual.Formulario;
+  const metodoSlug = String(metodoSeleccionado || "").toLowerCase();
 
   return (
     <Card className="checkout-seccion-card">
@@ -37,32 +38,68 @@ export function FormularioPago({
         }
       />
       <CardCuerpo>
-        {/* Selector de estrategias */}
-        <div className="checkout-pagos-grid" role="radiogroup" aria-label="Medios de pago">
+        {/* Selector de estrategias con identidad de marca por método */}
+        <div
+          className="checkout-pagos-grid"
+          role="radiogroup"
+          aria-label="Medios de pago"
+        >
           {estrategias.map((est) => {
             const estaActivo = est.id === metodoSeleccionado;
+            const slug = String(est.id || "").toLowerCase();
             return (
               <button
                 key={est.id}
                 type="button"
                 role="radio"
                 aria-checked={estaActivo}
-                className={`checkout-pago-tarjeta ${estaActivo ? "checkout-pago-tarjeta--activa" : ""}`}
+                data-metodo={est.id}
+                className={`checkout-pago-tarjeta checkout-pago-tarjeta--${slug} ${
+                  estaActivo ? "checkout-pago-tarjeta--activa" : ""
+                }`}
                 onClick={() => onSeleccionarMetodo(est.id)}
               >
-                <span className="checkout-pago-tarjeta__icono" aria-hidden="true">{est.icono}</span>
-                <span className="checkout-pago-tarjeta__nombre">{est.nombre}</span>
+                <span
+                  className="checkout-pago-tarjeta__check"
+                  aria-hidden="true"
+                >
+                  {estaActivo ? "✓" : ""}
+                </span>
+                <span
+                  className="checkout-pago-tarjeta__icono"
+                  aria-hidden="true"
+                >
+                  {est.icono}
+                </span>
+                <span className="checkout-pago-tarjeta__nombre">
+                  {est.nombre}
+                </span>
               </button>
             );
           })}
         </div>
 
         {/* Formulario encapsulado de la estrategia seleccionada */}
-        <div className="checkout-pago-detalle">
+        <div
+          className={`checkout-pago-detalle checkout-pago-detalle--${metodoSlug}`}
+          data-metodo={metodoSeleccionado}
+        >
           <div className="checkout-estrategia-banner">
-            <span className="checkout-estrategia-banner__tag">Estrategia activa:</span>
-            <strong className="checkout-estrategia-banner__nombre">{estrategiaActual.nombre}</strong>
-            <span className="checkout-estrategia-banner__desc"> — {estrategiaActual.descripcion}</span>
+            <span className="checkout-estrategia-banner__icono" aria-hidden="true">
+              {estrategiaActual.icono}
+            </span>
+            <div className="checkout-estrategia-banner__textos">
+              <span className="checkout-estrategia-banner__tag">
+                Estrategia activa:
+              </span>{" "}
+              <strong className="checkout-estrategia-banner__nombre">
+                {estrategiaActual.nombre}
+              </strong>
+              <span className="checkout-estrategia-banner__desc">
+                {" "}
+                — {estrategiaActual.descripcion}
+              </span>
+            </div>
           </div>
 
           <ComponenteFormulario

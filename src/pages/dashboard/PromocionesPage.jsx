@@ -25,6 +25,7 @@ import {
   Badge,
   Alerta,
   Modal,
+  Drawer,
   Cargando,
   EstadoVacio,
 } from "../../components/ui";
@@ -68,7 +69,7 @@ function obtenerEstadoPromocion(promo) {
   return { texto: "Vigente", variante: "exito" };
 }
 
-function ModalPromocion({
+function DrawerPromocion({
   abierto,
   promocion = null,
   productos = [],
@@ -163,18 +164,49 @@ function ModalPromocion({
   };
 
   return (
-    <Modal
+    <Drawer
       abierto={abierto}
       alCerrar={alCerrar}
       titulo={editando ? "Editar promoción" : "Nueva promoción"}
+      subtitulo={
+        editando
+          ? `Modifica los parámetros y condiciones de "${promocion.nombre}"`
+          : "Configura una regla de descuento automático para tienda y mostrador"
+      }
+      tamano="md"
+      pie={
+        <div className="drawer-promocion__pie">
+          <Boton
+            variante="contorno"
+            onClick={alCerrar}
+            type="button"
+            disabled={guardando}
+          >
+            Cancelar
+          </Boton>
+          <Boton
+            variante="primario"
+            type="submit"
+            form="form-drawer-promocion"
+            cargando={guardando}
+          >
+            {editando ? "Guardar cambios" : "Crear promoción"}
+          </Boton>
+        </div>
+      }
     >
       {error && (
-        <Alerta variante="peligro" onClose={() => setError(null)} style={{ marginBottom: "var(--esp-4)" }}>
+        <Alerta
+          variante="peligro"
+          onClose={() => setError(null)}
+          style={{ marginBottom: "var(--esp-4)" }}
+        >
           {error}
         </Alerta>
       )}
 
       <form
+        id="form-drawer-promocion"
         onSubmit={handleSubmit}
         className="promociones-page__form"
         autoComplete="off"
@@ -208,7 +240,11 @@ function ModalPromocion({
 
         {requiereValor && (
           <Input
-            etiqueta={formulario.tipo === TIPOS_PROMOCION.PORCENTAJE ? "Porcentaje de descuento" : "Monto de descuento"}
+            etiqueta={
+              formulario.tipo === TIPOS_PROMOCION.PORCENTAJE
+                ? "Porcentaje de descuento"
+                : "Monto de descuento"
+            }
             type="number"
             min="0"
             step="any"
@@ -361,17 +397,8 @@ function ModalPromocion({
             onChange={(e) => setFormulario((prev) => ({ ...prev, hasta: e.target.value }))}
           />
         </div>
-
-        <div className="promociones-page__form-botones">
-          <Boton variante="contorno" onClick={alCerrar} type="button">
-            Cancelar
-          </Boton>
-          <Boton variante="primario" type="submit" cargando={guardando}>
-            {editando ? "Actualizar" : "Crear"}
-          </Boton>
-        </div>
       </form>
-    </Modal>
+    </Drawer>
   );
 }
 
@@ -382,7 +409,7 @@ export function PromocionesPage() {
   const [categoriasConId, setCategoriasConId] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
-  const [modalAbierto, setModalAbierto] = useState(false);
+  const [drawerAbierto, setDrawerAbierto] = useState(false);
   const [editando, setEditando] = useState(null);
   const [productoPreview, setProductoPreview] = useState(null);
 
@@ -429,13 +456,13 @@ export function PromocionesPage() {
     };
   }, []);
 
-  const abrirModal = useCallback((promo = null) => {
+  const abrirDrawer = useCallback((promo = null) => {
     setEditando(promo);
-    setModalAbierto(true);
+    setDrawerAbierto(true);
   }, []);
 
-  const cerrarModal = useCallback(() => {
-    setModalAbierto(false);
+  const cerrarDrawer = useCallback(() => {
+    setDrawerAbierto(false);
     setEditando(null);
   }, []);
 
@@ -509,6 +536,28 @@ export function PromocionesPage() {
     }
   };
 
+  const metricasPromociones = useMemo(() => {
+    let vigentes = 0;
+    let programadas = 0;
+    let vencidas = 0;
+    let inactivas = 0;
+
+    promociones.forEach((promo) => {
+      const estado = obtenerEstadoPromocion(promo);
+      if (estado.texto === "Vigente") vigentes++;
+      else if (estado.texto === "Programada") programadas++;
+      else if (estado.texto === "Vencida") vencidas++;
+      else inactivas++;
+    });
+
+    return {
+      total: promociones.length,
+      vigentes,
+      programadas,
+      vencidasOInactivas: vencidas + inactivas,
+    };
+  }, [promociones]);
+
   return (
     <div className="promociones-page">
       <header className="promociones-page__header">
@@ -518,10 +567,51 @@ export function PromocionesPage() {
             Gestiona reglas de descuento dinámicas aplicadas en el mostrador y la tienda web (patrón Decorator).
           </p>
         </div>
-        <Boton variante="primario" onClick={() => abrirModal()}>
+        <Boton variante="primario" onClick={() => abrirDrawer()}>
           + Nueva promoción
         </Boton>
       </header>
+
+      {/* Franja de resumen de métricas reales */}
+      <section className="promociones-page__metricas" aria-label="Métricas de promociones">
+        <div className="promociones-page__metrica-card">
+          <div className="promociones-page__metrica-top">
+            <span className="promociones-page__metrica-label">Total promociones</span>
+            <div className="promociones-page__metrica-icono" aria-hidden="true">🏷️</div>
+          </div>
+          <div className="promociones-page__metrica-valor serif">{metricasPromociones.total}</div>
+          <span className="promociones-page__metrica-pie">Reglas registradas</span>
+        </div>
+
+        <div className="promociones-page__metrica-card promociones-page__metrica-card--vigentes">
+          <div className="promociones-page__metrica-top">
+            <span className="promociones-page__metrica-label">Vigentes / Activas</span>
+            <div className="promociones-page__metrica-icono" aria-hidden="true">🟢</div>
+          </div>
+          <div className="promociones-page__metrica-valor serif promociones-page__metrica-valor--verde">
+            {metricasPromociones.vigentes}
+          </div>
+          <span className="promociones-page__metrica-pie">Aplicando descuentos hoy</span>
+        </div>
+
+        <div className="promociones-page__metrica-card">
+          <div className="promociones-page__metrica-top">
+            <span className="promociones-page__metrica-label">Programadas</span>
+            <div className="promociones-page__metrica-icono" aria-hidden="true">📅</div>
+          </div>
+          <div className="promociones-page__metrica-valor serif">{metricasPromociones.programadas}</div>
+          <span className="promociones-page__metrica-pie">Inician próximamente</span>
+        </div>
+
+        <div className="promociones-page__metrica-card">
+          <div className="promociones-page__metrica-top">
+            <span className="promociones-page__metrica-label">Inactivas / Vencidas</span>
+            <div className="promociones-page__metrica-icono" aria-hidden="true">⏸️</div>
+          </div>
+          <div className="promociones-page__metrica-valor serif">{metricasPromociones.vencidasOInactivas}</div>
+          <span className="promociones-page__metrica-pie">Pausadas o caducadas</span>
+        </div>
+      </section>
 
       {error && (
         <Alerta variante="peligro" onClose={() => setError(null)}>
@@ -620,7 +710,7 @@ export function PromocionesPage() {
                   </div>
 
                   <div className="promociones-page__acciones">
-                    <Boton variante="fantasma" tamano="sm" onClick={() => abrirModal(promo)}>
+                    <Boton variante="fantasma" tamano="sm" onClick={() => abrirDrawer(promo)}>
                       Editar
                     </Boton>
                     <Boton variante="peligro" tamano="sm" onClick={() => eliminar(promo.id)}>
@@ -634,14 +724,69 @@ export function PromocionesPage() {
         </div>
       )}
 
-      {/* Modal de creación/edición */}
-      <ModalPromocion
-        key={editando?.id ?? (modalAbierto ? "nuevo" : "cerrado")}
-        abierto={modalAbierto}
+      {/* Panel Informativo: Cómo funcionan las promociones */}
+      <section className="promociones-guia" aria-label="Cómo funcionan las promociones">
+        <div className="promociones-guia__cabecera">
+          <div className="promociones-guia__icono" aria-hidden="true">💡</div>
+          <div className="promociones-guia__titulos">
+            <h2 className="promociones-guia__titulo">¿Cómo funcionan las promociones en El Trigal?</h2>
+            <p className="promociones-guia__subtitulo">
+              El motor de precios calcula los descuentos dinámicos mediante un patrón Decorator modular y transparente.
+            </p>
+          </div>
+        </div>
+
+        <div className="promociones-guia__grid">
+          <div className="promociones-guia__item">
+            <div className="promociones-guia__item-header">
+              <span className="promociones-guia__item-num">01</span>
+              <h3 className="promociones-guia__item-titulo">Tipos de descuento</h3>
+            </div>
+            <p className="promociones-guia__item-texto">
+              Aplica reducciones por <strong>Porcentaje (%)</strong> o un <strong>Monto Fijo (S/)</strong> directo sobre el precio unitario del producto.
+            </p>
+          </div>
+
+          <div className="promociones-guia__item">
+            <div className="promociones-guia__item-header">
+              <span className="promociones-guia__item-num">02</span>
+              <h3 className="promociones-guia__item-titulo">Prioridad de aplicación</h3>
+            </div>
+            <p className="promociones-guia__item-texto">
+              Las promociones con <strong>mayor prioridad</strong> se ejecutan primero envolviendo el precio base sucesivamente.
+            </p>
+          </div>
+
+          <div className="promociones-guia__item">
+            <div className="promociones-guia__item-header">
+              <span className="promociones-guia__item-num">03</span>
+              <h3 className="promociones-guia__item-titulo">Acumulabilidad</h3>
+            </div>
+            <p className="promociones-guia__item-texto">
+              Si una promoción es <em>no acumulable</em>, bloquea descuentos de menor prioridad para ese mismo producto o categoría.
+            </p>
+          </div>
+
+          <div className="promociones-guia__item">
+            <div className="promociones-guia__item-header">
+              <span className="promociones-guia__item-num">04</span>
+              <h3 className="promociones-guia__item-titulo">Alcance y vigencia</h3>
+            </div>
+            <p className="promociones-guia__item-texto">
+              Configura descuentos a nivel global (todos), por categorías enteras o seleccionando productos específicos dentro de un rango de fechas.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Drawer lateral de creación/edición */}
+      <DrawerPromocion
+        key={editando?.id ?? (drawerAbierto ? "nuevo" : "cerrado")}
+        abierto={drawerAbierto}
         promocion={editando}
         productos={productos}
         categorias={categoriasConId}
-        alCerrar={cerrarModal}
+        alCerrar={cerrarDrawer}
         alGuardar={guardar}
       />
 

@@ -18,6 +18,7 @@ export const CLAVES = {
   SESION: `${PREFIJO}:sesion`,
   CARRITO: `${PREFIJO}:carrito`,
   CARRITO_DUENO: `${PREFIJO}:carrito_dueno`,
+  TEMA: `${PREFIJO}:tema`,
   VERSION_DATOS: `${PREFIJO}:version`,
 };
 

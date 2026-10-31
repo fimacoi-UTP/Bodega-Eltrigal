@@ -1,4 +1,4 @@
-/* Badge · etiquetas de estado */
+/* Badge · etiquetas de estado con tokens de la Fase 0 */
 
 .ui-badge {
   display: inline-flex;
@@ -13,7 +13,7 @@
 
 .ui-badge--sm {
   font-size: var(--texto-2xs);
-  padding: 3px var(--esp-2);
+  padding: 4px 10px;
 }
 
 .ui-badge--md {
@@ -29,45 +29,63 @@
   flex-shrink: 0;
 }
 
-/* --- Variantes ---------------------------------------------------------- */
+/* --- Variantes (usan tokens semánticos El Trigal) ----------------------- */
 .ui-badge--neutro {
-  background-color: var(--neutro-100);
-  color: var(--neutro-600);
-  border-color: var(--neutro-200);
+  background-color: var(--kraft);
+  color: var(--tinta-soft);
+  border-color: var(--hairline-2);
 }
 
 .ui-badge--marca {
-  background-color: var(--color-primario-suave);
-  color: var(--ladrillo-700);
-  border-color: var(--ladrillo-100);
+  background-color: var(--terracota-50);
+  color: var(--terracota);
+  border-color: var(--hairline-2);
 }
 
 .ui-badge--acento {
-  background-color: var(--trigo-50);
-  color: var(--trigo-800);
-  border-color: var(--trigo-100);
+  background-color: var(--oro-50);
+  color: var(--tinta);
+  border-color: var(--oro);
 }
 
 .ui-badge--exito {
-  background-color: var(--campo-50);
-  color: var(--campo-700);
-  border-color: var(--campo-100);
+  background-color: var(--verde-50);
+  color: var(--verde);
+  border-color: var(--verde);
 }
 
 .ui-badge--advertencia {
-  background-color: var(--ambar-50);
-  color: var(--ambar-600);
-  border-color: var(--ambar-100);
+  background-color: var(--oro-50);
+  color: var(--tinta);
+  border-color: var(--oro);
+}
+
+.ui-badge--advertencia .ui-badge__punto {
+  background-color: var(--oro);
 }
 
 .ui-badge--peligro {
   background-color: var(--rojo-50);
-  color: var(--rojo-600);
-  border-color: var(--rojo-100);
+  color: var(--rojo);
+  border-color: var(--rojo);
 }
 
 .ui-badge--info {
-  background-color: var(--azul-50);
-  color: var(--azul-600);
+  background-color: var(--color-info-suave);
+  color: var(--color-info);
   border-color: var(--azul-100);
+}
+
+/* --- Modo Oscuro (Capas 2 y 3) ------------------------------------------ */
+@media (prefers-color-scheme: dark) {
+
+  :root:not([data-theme="light"]) .ui-badge--acento,
+  :root:not([data-theme="light"]) .ui-badge--advertencia {
+    color: var(--oro);
+  }
+}
+
+:root[data-theme="dark"] .ui-badge--acento,
+:root[data-theme="dark"] .ui-badge--advertencia {
+  color: var(--oro);
 }

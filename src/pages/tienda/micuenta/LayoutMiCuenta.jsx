@@ -106,7 +106,7 @@ export function LayoutMiCuenta() {
                 className="mi-cuenta-avatar mi-cuenta-avatar--foto"
               />
             ) : (
-              <div className="mi-cuenta-avatar" aria-hidden="true">
+              <div className="mi-cuenta-avatar serif" aria-hidden="true">
                 {obtenerIniciales(nombreMostrar)}
               </div>
             )}
@@ -120,7 +120,7 @@ export function LayoutMiCuenta() {
               </span>
             </div>
 
-            <h1 className="mi-cuenta-nombre">{nombreMostrar}</h1>
+            <h1 className="mi-cuenta-nombre serif">{nombreMostrar}</h1>
             <p className="mi-cuenta-correo">{usuario?.email || usuario?.correo || ""}</p>
           </div>
         </div>

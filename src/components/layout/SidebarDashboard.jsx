@@ -76,6 +76,12 @@ const SECCIONES = [
     icono: "👥",
     roles: [ROLES.ADMIN], // solo el administrador
   },
+  {
+    a: RUTAS.DASHBOARD_RECLAMOS,
+    texto: "Libro de Reclamaciones",
+    icono: "⚖️",
+    roles: [ROLES.ADMIN], // solo el administrador
+  },
 ];
 
 export function SidebarDashboard({

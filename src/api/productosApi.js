@@ -39,6 +39,14 @@ import { marcasApi } from "./marcasApi";
 export function mapProductoDesdeApi(api) {
   if (!api) return null;
 
+  const tieneStock = api.stock !== undefined && api.stock !== null;
+  const disponible =
+    typeof api.disponible === "boolean"
+      ? api.disponible
+      : tieneStock
+        ? Number(api.stock) > 0
+        : true;
+
   return {
     id: String(api.id),
     nombre: api.nombre,
@@ -46,14 +54,15 @@ export function mapProductoDesdeApi(api) {
     precio: api.precio,
     stock: api.stock,
     stockMinimo: api.stockMinimo,
+    disponible,
     costo: api.costo != null ? Number(api.costo) : (api.precioCosto != null ? Number(api.precioCosto) : null),
     unidad: api.unidadMedida,
     categoria: api.categoriaNombre,
     marca: api.marcaNombre,
     color: api.color,
     imagen: api.imagen,
-    activo: api.visibleWeb,
-    visibleWeb: api.visibleWeb,
+    activo: api.visibleWeb !== false,
+    visibleWeb: api.visibleWeb ?? true,
     categoriaId: api.categoriaId,
     marcaId: api.marcaId,
     codigoBarras: api.codigoBarras,
