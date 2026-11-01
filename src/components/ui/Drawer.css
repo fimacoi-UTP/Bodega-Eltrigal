@@ -31,12 +31,12 @@
   width: 100%;
   max-width: 100%;
   height: 100%;
-  background-color: var(--color-superficie);
+  background-color: var(--panel, var(--color-superficie));
   box-shadow: var(--sombra-xl);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: drawer-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: drawer-slide-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (min-width: 640px) {
@@ -67,8 +67,8 @@
   justify-content: space-between;
   gap: var(--esp-3);
   padding: var(--esp-5) var(--esp-6);
-  border-bottom: 1px solid var(--color-borde);
-  background-color: var(--color-superficie);
+  border-bottom: 1px solid var(--hairline, var(--color-borde));
+  background-color: var(--panel, var(--color-superficie));
   flex-shrink: 0;
 }
 
@@ -81,14 +81,14 @@
 .ui-drawer__titulo {
   font-size: var(--texto-lg);
   font-weight: var(--peso-negrita);
-  color: var(--color-texto);
+  color: var(--tinta, var(--color-texto));
   margin: 0;
   line-height: var(--interlineado-ajustado);
 }
 
 .ui-drawer__subtitulo {
   font-size: var(--texto-sm);
-  color: var(--color-texto-tenue);
+  color: var(--tinta-soft, var(--color-texto-tenue));
   margin: 0;
 }
 
@@ -103,7 +103,7 @@
   border: 1px solid transparent;
   border-radius: var(--radio-md);
   background-color: transparent;
-  color: var(--color-texto-suave);
+  color: var(--tinta-soft, var(--color-texto-suave));
   font-size: 1.125rem;
   cursor: pointer;
   flex-shrink: 0;
@@ -111,8 +111,8 @@
 }
 
 .ui-drawer__cerrar:hover {
-  background-color: var(--color-superficie-hover);
-  color: var(--color-texto);
+  background-color: var(--crema, var(--color-superficie-hover));
+  color: var(--tinta, var(--color-texto));
 }
 
 .ui-drawer__cerrar:focus-visible {
@@ -136,7 +136,39 @@
   justify-content: flex-end;
   gap: var(--esp-3);
   padding: var(--esp-4) var(--esp-6);
-  border-top: 1px solid var(--color-borde);
-  background-color: var(--color-superficie);
+  border-top: 1px solid var(--hairline, var(--color-borde));
+  background-color: var(--panel, var(--color-superficie));
   flex-shrink: 0;
+}
+
+/* ────────────────────────────────────────────────── Modo Oscuro (3 capas) ────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ui-drawer,
+  :root:not([data-theme="light"]) .ui-drawer__cabecera,
+  :root:not([data-theme="light"]) .ui-drawer__pie {
+    background-color: var(--panel);
+    border-color: var(--hairline);
+  }
+  :root:not([data-theme="light"]) .ui-drawer__cerrar:hover {
+    background-color: var(--crema);
+  }
+}
+
+:root[data-theme="dark"] .ui-drawer,
+:root[data-theme="dark"] .ui-drawer__cabecera,
+:root[data-theme="dark"] .ui-drawer__pie {
+  background-color: var(--panel);
+  border-color: var(--hairline);
+}
+:root[data-theme="dark"] .ui-drawer__cerrar:hover {
+  background-color: var(--crema);
+}
+
+/* ────────────────────────────────────────────────── Accesibilidad / Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .ui-drawer__fondo,
+  .ui-drawer {
+    animation: none !important;
+    transform: none !important;
+  }
 }

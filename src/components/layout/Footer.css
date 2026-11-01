@@ -1,12 +1,279 @@
-/* Footer · MOBILE-FIRST: una columna apilada; en tablet pasa a 2 y en
-   escritorio a 4 columnas. */
+/* ============================================================================
+ * Footer.css · Pie completo de la tienda web (FASE 8)
+ * ----------------------------------------------------------------------------
+ * Mobile-first utilizando los tokens de la Fase 0.
+ * Incluye la banda superior extra (App stores, Call center, Redes sociales y
+ * Libro de Reclamaciones) + el cuerpo de 4 columnas + la base legal.
+ * ==========================================================================*/
 
 .pie {
-  margin-top: auto; /* empuja el pie al fondo aunque la página sea corta */
-  background-color: var(--neutro-900);
-  color: var(--neutro-300);
+  margin-top: auto;
+  background-color: #1F1915;
+  color: #DFD5C8;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* ---------------------------------------------------------------------------
+ * BANDA EXTRA SUPERIOR (FASE 8: App · Call Center · Redes · Reclamaciones)
+ * ------------------------------------------------------------------------ */
+.pie__banda-extra {
+  background-color: #27201B;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-block: 28px;
+}
+
+.pie__banda-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 640px) {
+  .pie__banda-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 28px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .pie__banda-grid {
+    grid-template-columns: 1.3fr 1.1fr 1fr 1.15fr;
+    gap: 28px;
+  }
+}
+
+.pie__extra-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pie__extra-subtexto {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #AFA192;
+  line-height: 1.45;
+}
+
+/* 1. Badges decorativos Google Play y App Store */
+.pie__stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pie__store-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 13px;
+  border-radius: var(--r);
+  background-color: #16120F;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #FAF5EC;
+  user-select: none;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.pie__store-badge:hover {
+  border-color: var(--oro);
+  background-color: #1D1713;
+  transform: translateY(-2px);
+}
+
+.pie__store-icono {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  color: var(--oro);
+}
+
+.pie__store-textos {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.12;
+}
+
+.pie__store-textos small {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #BFB2A3;
+  text-transform: uppercase;
+}
+
+.pie__store-textos strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+/* 2. Ayuda Call Center */
+.pie__callcenter-numero {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fuente-titulo);
+  font-size: 1.42rem;
+  font-weight: 700;
+  color: #FFFDF9;
+  text-decoration: none;
+  line-height: 1.15;
+  width: fit-content;
+  transition: color 160ms ease;
+}
+
+.pie__callcenter-numero:hover {
+  color: var(--oro);
+}
+
+.pie__callcenter-chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background-color: rgba(46, 158, 91, 0.16);
+  border: 1px solid rgba(46, 158, 91, 0.35);
+  color: #7EE2A8;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* 3. Síguenos (Facebook, YouTube, X, Instagram con color de marca al hover) */
+.pie__redes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pie__red-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #FAF5EC;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms ease;
+}
+
+.pie__red-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pie__red-btn:hover {
+  color: #FFFFFF;
+  transform: translateY(-3px) scale(1.06);
+}
+
+.pie__red-btn--facebook:hover {
+  background: #1877F2;
+  border-color: #1877F2;
+  box-shadow: 0 6px 16px rgba(24, 119, 242, 0.4);
+}
+
+.pie__red-btn--youtube:hover {
+  background: #FF0000;
+  border-color: #FF0000;
+  box-shadow: 0 6px 16px rgba(255, 0, 0, 0.38);
+}
+
+.pie__red-btn--x:hover {
+  background: #0F1419;
+  border-color: #536471;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.pie__red-btn--instagram:hover {
+  background: radial-gradient(circle at 30% 107%,
+      #fdf497 0%,
+      #fdf497 5%,
+      #fd5949 45%,
+      #d6249f 60%,
+      #285AEB 90%);
+  border-color: #E1306C;
+  box-shadow: 0 6px 16px rgba(225, 48, 108, 0.4);
+}
+
+/* 4. Libro de Reclamaciones (requisito legal peruano) */
+.pie__libro-reclamaciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg,
+      rgba(217, 164, 65, 0.14) 0%,
+      rgba(192, 83, 43, 0.14) 100%);
+  border: 1px solid rgba(217, 164, 65, 0.36);
+  color: #FAF5EC;
+  text-decoration: none;
+  margin-top: 2px;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.pie__libro-reclamaciones:hover {
+  border-color: var(--oro);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.pie__libro-icono {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-sm);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.pie__libro-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pie__libro-textos strong {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #FFFDF9;
+  line-height: 1.2;
+}
+
+.pie__libro-textos small {
+  font-size: 0.72rem;
+  color: #D9CBB8;
+}
+
+/* ---------------------------------------------------------------------------
+ * CUERPO PRINCIPAL DE 4 COLUMNAS (Marca · Tienda · Contacto · Horario)
+ * ------------------------------------------------------------------------ */
 .pie__contenido {
   display: grid;
   grid-template-columns: 1fr;
@@ -40,10 +307,12 @@
 }
 
 .pie__nombre {
-  font-size: var(--texto-xl);
-  font-weight: var(--peso-extra);
+  font-family: var(--fuente-titulo);
+  font-size: 1.35rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--neutro-0);
+  color: #FFFDF9;
+  margin: 0;
 }
 
 .pie__lema {
@@ -51,34 +320,37 @@
   font-weight: var(--peso-semi);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--color-acento);
+  color: var(--oro);
+  margin: 0;
 }
 
 .pie__titulo {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-semi);
+  font-size: 0.73rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--neutro-0);
-  margin-bottom: var(--esp-2);
+  color: #FFFDF9;
+  margin: 0 0 4px;
 }
 
 .pie__texto {
   font-size: var(--texto-sm);
   line-height: 1.6;
-  color: var(--neutro-400);
+  color: #B9AC9E;
   text-wrap: pretty;
+  margin: 0;
 }
 
 .pie__enlace {
   font-size: var(--texto-sm);
-  color: var(--neutro-300);
+  color: #DFD5C8;
   width: fit-content;
+  text-decoration: none;
   transition: color var(--transicion-rapida);
 }
 
 .pie__enlace:hover {
-  color: var(--color-acento);
+  color: var(--oro);
 }
 
 .pie__whatsapp {
@@ -89,22 +361,28 @@
   height: 40px;
   padding-inline: var(--esp-4);
   font-size: var(--texto-sm);
-  font-weight: var(--peso-semi);
-  color: var(--neutro-900);
-  background-color: var(--color-acento);
-  border-radius: var(--radio-md);
+  font-weight: 700;
+  color: #1F1915;
+  background-color: var(--oro);
+  border-radius: var(--r-sm);
   width: fit-content;
-  transition: background-color var(--transicion-rapida);
+  text-decoration: none;
+  transition:
+    background-color var(--transicion-rapida),
+    transform var(--transicion-rapida);
 }
 
 .pie__whatsapp:hover {
-  background-color: var(--trigo-300);
-  color: var(--neutro-900);
+  background-color: #E5B454;
+  color: #1F1915;
+  transform: translateY(-1px);
 }
 
-/* --- Base --------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+ * BASE LEGAL Y CRÉDITOS
+ * ------------------------------------------------------------------------ */
 .pie__base {
-  border-top: 1px solid var(--neutro-800);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .pie__base-contenido {
@@ -113,7 +391,7 @@
   gap: var(--esp-1);
   padding-block: var(--esp-5);
   font-size: var(--texto-xs);
-  color: var(--neutro-500);
+  color: #9A8D7F;
   text-align: center;
 }
 
@@ -126,5 +404,5 @@
 }
 
 .pie__creditos {
-  color: var(--neutro-600);
+  color: #7E7266;
 }

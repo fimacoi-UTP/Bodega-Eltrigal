@@ -12,10 +12,14 @@
  * las que están como cascarón.
  * ==========================================================================*/
 
+import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import BarraFlotanteCarrito from "./BarraFlotanteCarrito";
+import CarritoDrawer from "./CarritoDrawer";
+import FlotantesTienda from "./FlotantesTienda";
+import AvisosTienda from "./AvisosTienda";
 import { useCarrito } from "../../context/CarritoContext";
 import { RUTAS } from "../../routes/rutas";
 import "./LayoutTienda.css";
@@ -23,6 +27,21 @@ import "./LayoutTienda.css";
 export function LayoutTienda() {
   const { items } = useCarrito();
   const location = useLocation();
+  const [preloaderOculto, setPreloaderOculto] = useState(false);
+  const [preloaderDesmontado, setPreloaderDesmontado] = useState(false);
+
+  useEffect(() => {
+    const tOcultar = setTimeout(() => {
+      setPreloaderOculto(true);
+    }, 320);
+    const tDesmontar = setTimeout(() => {
+      setPreloaderDesmontado(true);
+    }, 780);
+    return () => {
+      clearTimeout(tOcultar);
+      clearTimeout(tDesmontar);
+    };
+  }, []);
 
   const cantidadTotal = items?.reduce((acc, item) => acc + (item.cantidad || 0), 0) || 0;
   const esPaginaCarritoOCheckout =
@@ -31,6 +50,20 @@ export function LayoutTienda() {
 
   return (
     <div className={`layout-tienda ${mostrarBarra ? "layout-tienda--con-barra-flotante" : ""}`}>
+      {/* Preloader de bienvenida */}
+      {!preloaderDesmontado && (
+        <div
+          className={`preloader-trigal ${preloaderOculto ? "preloader-trigal--oculto" : ""}`}
+          aria-hidden="true"
+        >
+          <div className="preloader-trigal__marca">
+            <span className="preloader-trigal__icono">🌾</span>
+            <span className="preloader-trigal__texto serif">El Trigal</span>
+          </div>
+          <span className="preloader-trigal__subtitulo">Bodega · Piura</span>
+        </div>
+      )}
+
       {/* Accesibilidad: permite saltarse el menú con el teclado (aparece al tabular). */}
       <a href="#contenido-principal" className="salto-contenido">
         Saltar al contenido
@@ -45,6 +78,9 @@ export function LayoutTienda() {
       <Footer />
 
       {mostrarBarra && <BarraFlotanteCarrito />}
+      <CarritoDrawer />
+      <FlotantesTienda conBarraMovil={mostrarBarra} />
+      <AvisosTienda conBarraMovil={mostrarBarra} />
     </div>
   );
 }

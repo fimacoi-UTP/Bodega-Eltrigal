@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * MÓDULO CHECKOUT · Finalizar Compra en Bodega El Trigal
+ * MÓDULO CHECKOUT · Finalizar Compra en Bodega El Trigal (Rediseño Premium)
  * ----------------------------------------------------------------------------
  * Este módulo orquesta la compra de productos por la tienda web integrando:
  *
@@ -25,7 +25,7 @@
  * ==========================================================================*/
 
 import { useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useInventario } from "../../hooks/useInventario";
 import { useAuth } from "../../hooks/useAuth";
 import { useCarrito } from "../../context/CarritoContext";
@@ -74,6 +74,7 @@ function FormularioCheckoutPrincipal({
   onPedidoCreado,
   refrescar: refrescarProp,
   onCargarProductosEjemplo,
+  mostrarAyudasDemo = false,
 }) {
   const { refrescar: refrescarInventario } = useInventario();
   const refrescar = refrescarProp || refrescarInventario;
@@ -266,7 +267,9 @@ function FormularioCheckoutPrincipal({
         onNuevaCompra={() => {
           setPedidoCompletado(null);
           setPaso(1);
-          onCargarProductosEjemplo?.();
+          if (mostrarAyudasDemo) {
+            onCargarProductosEjemplo?.();
+          }
         }}
       />
     );
@@ -274,24 +277,38 @@ function FormularioCheckoutPrincipal({
 
   return (
     <>
-      {/* Banner de ayuda para pruebas */}
-      <div className="checkout-prueba-banner">
-        <p className="checkout-prueba-banner__texto">
-          🧪 <strong>Modo demostración:</strong> Prueba las 4 estrategias de pago y las opciones de entrega.
-        </p>
-        <Boton variante="fantasma" tamano="sm" onClick={onCargarProductosEjemplo}>
-          Recargar productos de prueba
-        </Boton>
-      </div>
+      {/* Banner de ayuda para pruebas (solo en DEV o con ?demo=1) */}
+      {mostrarAyudasDemo && (
+        <div className="checkout-prueba-banner">
+          <div className="checkout-prueba-banner__izquierda">
+            <span className="checkout-prueba-banner__icono" aria-hidden="true">
+              🧪
+            </span>
+            <p className="checkout-prueba-banner__texto">
+              <strong>Modo demostración:</strong> Prueba las 4 estrategias de pago
+              (Yape, Plin, Tarjeta y Efectivo) y las opciones de entrega.
+            </p>
+          </div>
+          <Boton
+            variante="contorno"
+            tamano="sm"
+            onClick={onCargarProductosEjemplo}
+            className="checkout-prueba-banner__btn"
+          >
+            Recargar productos de prueba
+          </Boton>
+        </div>
+      )}
 
       {errorGlobal && (
-        <Alerta
-          variante="peligro"
-          alCerrar={() => setErrorGlobal(null)}
-          style={{ marginBottom: "var(--esp-6)" }}
-        >
-          {errorGlobal}
-        </Alerta>
+        <div className="checkout-alerta-global">
+          <Alerta
+            variante="peligro"
+            alCerrar={() => setErrorGlobal(null)}
+          >
+            {errorGlobal}
+          </Alerta>
+        </div>
       )}
 
       <div className="checkout-layout">
@@ -324,7 +341,7 @@ function FormularioCheckoutPrincipal({
           />
         </div>
 
-        {/* Resumen lateral */}
+        {/* Resumen lateral sticky */}
         <aside className="checkout-columna-resumen">
           <ResumenItems
             items={items}
@@ -340,21 +357,22 @@ function FormularioCheckoutPrincipal({
             bloque
             cargando={procesando}
             onClick={handleConfirmarCompra}
+            className="checkout-btn-confirmar"
           >
-            Confirmar y pagar {formatearSoles(total)}
+            Confirmar y pagar {formatearSoles(total)} →
           </Boton>
 
-          <div className="checkout-confianza-caja">
+          <div className="checkout-confianza-caja" aria-label="Garantías de compra">
             <div className="checkout-confianza-item">
-              <span>🔒</span>
+              <span className="checkout-confianza-item__icono" aria-hidden="true">🔒</span>
               <span>Compra segura respaldada por Bodega El Trigal</span>
             </div>
             <div className="checkout-confianza-item">
-              <span>⚡</span>
+              <span className="checkout-confianza-item__icono" aria-hidden="true">⚡</span>
               <span>Atención y despacho inmediato en Piura</span>
             </div>
             <div className="checkout-confianza-item">
-              <span>🌾</span>
+              <span className="checkout-confianza-item__icono" aria-hidden="true">🌾</span>
               <span>Productos frescos y de calidad garantizada</span>
             </div>
           </div>
@@ -367,6 +385,9 @@ function FormularioCheckoutPrincipal({
 export function CheckoutPage() {
   const { productosActivos, cargando: cargandoInventario, refrescar } = useInventario();
   const { usuario, estaAutenticado, cargando: cargandoAuth } = useAuth();
+  const [parametrosUrl] = useSearchParams();
+  const mostrarAyudasDemo =
+    Boolean(import.meta.env.DEV) || parametrosUrl.get("demo") === "1";
 
   /* 🛒 FUENTE ÚNICA DEL PEDIDO
      Antes el checkout guardaba sus propios `items` en un useState local que
@@ -380,7 +401,13 @@ export function CheckoutPage() {
   /* Los productos de demostración también entran al carrito REAL, para que no
      vuelva a existir una lista paralela dentro del checkout. */
   const cargarProductosEjemplo = useCallback(() => {
-    const candidatos = productosActivos.filter((p) => Number(p.stock) > 0).slice(0, 2);
+    const candidatos = productosActivos
+      .filter((p) =>
+        typeof p.disponible === "boolean"
+          ? p.disponible
+          : Number(p.stock ?? 1) > 0,
+      )
+      .slice(0, 2);
     candidatos.forEach((producto) => agregar(producto, 1));
   }, [productosActivos, agregar]);
 
@@ -398,19 +425,12 @@ export function CheckoutPage() {
     return (
       <div className="contenedor checkout-pagina">
         {pedidoConfirmado.codigo && (
-          <div style={{ marginBottom: "var(--esp-4)", textAlign: "right" }}>
+          <div className="checkout-seguimiento-toplink">
             <Link
               to={aRuta.seguimiento(pedidoConfirmado.codigo)}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "var(--esp-1)",
-                fontWeight: 600,
-                color: "var(--color-primario, #c2410c)",
-                textDecoration: "underline",
-              }}
+              className="checkout-seguimiento-toplink__enlace"
             >
-              Ver seguimiento de mi pedido
+              Ver seguimiento de mi pedido →
             </Link>
           </div>
         )}
@@ -419,7 +439,9 @@ export function CheckoutPage() {
           onActualizarPedido={setPedidoConfirmado}
           onNuevaCompra={() => {
             setPedidoConfirmado(null);
-            cargarProductosEjemplo();
+            if (mostrarAyudasDemo) {
+              cargarProductosEjemplo();
+            }
           }}
         />
       </div>
@@ -435,11 +457,11 @@ export function CheckoutPage() {
           titulo="Tu pedido está vacío"
           descripcion="No tienes productos agregados para realizar el checkout. Elige productos de nuestra bodega para continuar."
           accion={
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--esp-3)", alignItems: "center" }}>
+            <div className="checkout-vacio-acciones">
               <Boton como={Link} to={RUTAS.INICIO} variante="primario">
                 Ver catálogo de la bodega
               </Boton>
-              {productosActivos.length > 0 && (
+              {mostrarAyudasDemo && productosActivos.length > 0 && (
                 <Boton variante="contorno" onClick={cargarProductosEjemplo}>
                   Probar checkout con productos de ejemplo
                 </Boton>
@@ -454,16 +476,48 @@ export function CheckoutPage() {
   return (
     <div className="contenedor checkout-pagina">
       <header className="checkout-cabecera">
-        <Link to={RUTAS.CARRITO} className="checkout-cabecera__volver">
-          ← Volver al carrito
-        </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--esp-2)", flexWrap: "wrap" }}>
-          <h1 className="checkout-cabecera__titulo">Finalizar compra</h1>
-          <Badge variante="marca" tamano="sm">Tienda Web</Badge>
+        <div className="checkout-cabecera__top">
+          <Link to={RUTAS.CARRITO} className="checkout-cabecera__volver">
+            <span aria-hidden="true">←</span>
+            <span>Volver al carrito</span>
+          </Link>
+
+          {/* Indicador de pasos (1 Datos · 2 Entrega · 3 Pago) */}
+          <nav
+            className="checkout-pasos-indicador"
+            aria-label="Pasos para finalizar tu compra"
+          >
+            <div className="checkout-paso-chip checkout-paso-chip--activo">
+              <span className="checkout-paso-chip__num">1</span>
+              <span className="checkout-paso-chip__txt">Datos</span>
+            </div>
+            <span className="checkout-paso-separador" aria-hidden="true">·</span>
+            <div className="checkout-paso-chip checkout-paso-chip--activo">
+              <span className="checkout-paso-chip__num">2</span>
+              <span className="checkout-paso-chip__txt">Entrega</span>
+            </div>
+            <span className="checkout-paso-separador" aria-hidden="true">·</span>
+            <div className="checkout-paso-chip checkout-paso-chip--activo">
+              <span className="checkout-paso-chip__num">3</span>
+              <span className="checkout-paso-chip__txt">Pago</span>
+            </div>
+          </nav>
         </div>
-        <p className="checkout-cabecera__subtitulo">
-          Completa tus datos de entrega y realiza el pago seguro para procesar tu pedido.
-        </p>
+
+        <div className="checkout-cabecera__principal">
+          <div className="checkout-cabecera__titulo-fila">
+            <h1 className="checkout-cabecera__titulo serif">
+              Finalizar compra
+            </h1>
+            <Badge variante="marca" tamano="sm">
+              Tienda Web
+            </Badge>
+          </div>
+          <p className="checkout-cabecera__subtitulo">
+            Completa tus datos de entrega y realiza el pago seguro para procesar
+            tu pedido.
+          </p>
+        </div>
       </header>
 
       <FormularioCheckoutPrincipal
@@ -476,6 +530,7 @@ export function CheckoutPage() {
         onPedidoCreado={setPedidoConfirmado}
         refrescar={refrescar}
         onCargarProductosEjemplo={cargarProductosEjemplo}
+        mostrarAyudasDemo={mostrarAyudasDemo}
       />
     </div>
   );

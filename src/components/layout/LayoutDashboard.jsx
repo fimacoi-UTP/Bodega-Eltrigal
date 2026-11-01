@@ -32,6 +32,7 @@ const TITULOS = {
   [RUTAS.DASHBOARD_VENTAS]: "Ventas en tienda",
   [RUTAS.DASHBOARD_PEDIDOS]: "Pedidos web",
   [RUTAS.DASHBOARD_USUARIOS]: "Gestión de usuarios",
+  [RUTAS.DASHBOARD_RECLAMOS]: "Libro de Reclamaciones",
 };
 
 export function LayoutDashboard() {

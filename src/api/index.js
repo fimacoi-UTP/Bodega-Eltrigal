@@ -10,3 +10,5 @@ export * from "./promocionesApi";
 export * from "./imagenesApi";
 export * from "./usuariosApi";
 export * from "./direccionesApi";
+export * from "./reclamosApi";
+export * from "./dashboardApi";

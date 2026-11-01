@@ -166,12 +166,20 @@
 }
 
 /* ---------------------------------------------------------------------------
- * MODAL DE FORMULARIO Y VISTA PREVIA
+ * DRAWER / MODAL DE FORMULARIO Y VISTA PREVIA
  * ------------------------------------------------------------------------ */
 .promociones-page__form {
   display: flex;
   flex-direction: column;
   gap: var(--esp-4);
+}
+
+.drawer-promocion__pie {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--esp-3);
+  width: 100%;
 }
 
 .promociones-page__form-botones {
@@ -271,12 +279,12 @@
 }
 
 .promociones-page__multiselect-caja {
-  max-height: 150px;
+  max-height: 160px;
   overflow-y: auto;
-  border: 1px solid var(--color-borde);
+  border: 1px solid var(--hairline, var(--color-borde));
   border-radius: var(--radio-md);
   padding: var(--esp-2);
-  background: var(--color-superficie);
+  background: var(--panel, var(--color-superficie));
   display: flex;
   flex-direction: column;
   gap: var(--esp-1);
@@ -289,15 +297,260 @@
   padding: var(--esp-1) var(--esp-2);
   border-radius: var(--radio-sm);
   font-size: var(--texto-xs);
+  color: var(--tinta, var(--color-texto));
   cursor: pointer;
   transition: background var(--transicion-rapida);
 }
 
 .promociones-page__multiselect-item:hover {
-  background: var(--color-superficie-suave);
+  background: var(--crema, var(--color-superficie-suave));
 }
 
 .promociones-page__multiselect-item input[type="checkbox"] {
   accent-color: var(--color-primario);
   cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------------
+ * RESUMEN DE MÉTRICAS (STAT TILES)
+ * ------------------------------------------------------------------------ */
+.promociones-page__metricas {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3);
+}
+
+@media (min-width: 768px) {
+  .promociones-page__metricas {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--esp-4);
+  }
+}
+
+.promociones-page__metrica-card {
+  position: relative;
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  padding: var(--esp-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  transition:
+    transform var(--transicion-rapida),
+    box-shadow var(--transicion-rapida),
+    border-color var(--transicion-rapida);
+}
+
+.promociones-page__metrica-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--hairline-2);
+}
+
+.promociones-page__metrica-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+}
+
+.promociones-page__metrica-label {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tinta-soft);
+}
+
+.promociones-page__metrica-icono {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: var(--crema);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+}
+
+.promociones-page__metrica-valor {
+  font-size: clamp(1.6rem, 2vw, 2rem);
+  font-weight: var(--peso-negrita);
+  line-height: 1.1;
+  color: var(--terracota);
+  font-variant-numeric: tabular-nums;
+}
+
+.promociones-page__metrica-valor--verde {
+  color: var(--verde, #16a34a);
+}
+
+.promociones-page__metrica-pie {
+  font-size: 0.75rem;
+  color: var(--tinta-soft);
+  line-height: 1.2;
+}
+
+/* ---------------------------------------------------------------------------
+ * PANEL INFORMATIVO: CÓMO FUNCIONAN LAS PROMOCIONES
+ * ------------------------------------------------------------------------ */
+.promociones-guia {
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xl);
+  padding: var(--esp-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  margin-top: var(--esp-2);
+}
+
+.promociones-guia__cabecera {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+}
+
+.promociones-guia__icono {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  background: var(--oro-50);
+  border: 1px solid rgba(184, 134, 11, 0.25);
+  border-radius: var(--r-md);
+  flex-shrink: 0;
+}
+
+.promociones-guia__titulos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.promociones-guia__titulo {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-negrita);
+  color: var(--tinta);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.promociones-guia__subtitulo {
+  font-size: var(--texto-xs);
+  color: var(--tinta-soft);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.promociones-guia__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-3);
+}
+
+@media (min-width: 640px) {
+  .promociones-guia__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .promociones-guia__grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--esp-4);
+  }
+}
+
+.promociones-guia__item {
+  background: var(--crema);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: var(--esp-3) var(--esp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  transition:
+    transform var(--transicion-rapida),
+    border-color var(--transicion-rapida);
+}
+
+.promociones-guia__item:hover {
+  transform: translateY(-2px);
+  border-color: var(--hairline-2);
+}
+
+.promociones-guia__item-header {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.promociones-guia__item-num {
+  font-family: var(--fuente-mono);
+  font-size: 0.7rem;
+  font-weight: var(--peso-negrita);
+  color: var(--terracota);
+  background: var(--terracota-50);
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  line-height: 1;
+}
+
+.promociones-guia__item-titulo {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+  color: var(--tinta);
+  margin: 0;
+}
+
+.promociones-guia__item-texto {
+  font-size: 0.775rem;
+  color: var(--tinta-soft);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.promociones-guia__item-texto strong {
+  color: var(--tinta);
+  font-weight: var(--peso-semi);
+}
+
+/* ────────────────────────────────────────────────── Modo Oscuro (3 capas) ────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .promociones-page__metrica-card,
+  :root:not([data-theme="light"]) .promociones-guia,
+  :root:not([data-theme="light"]) .promociones-page__multiselect-caja {
+    background-color: var(--panel);
+    border-color: var(--hairline);
+  }
+  :root:not([data-theme="light"]) .promociones-guia__item,
+  :root:not([data-theme="light"]) .promociones-page__metrica-icono {
+    background-color: var(--crema);
+    border-color: var(--hairline);
+  }
+  :root:not([data-theme="light"]) .promociones-page__multiselect-item:hover {
+    background-color: var(--panel);
+  }
+}
+
+:root[data-theme="dark"] .promociones-page__metrica-card,
+:root[data-theme="dark"] .promociones-guia,
+:root[data-theme="dark"] .promociones-page__multiselect-caja {
+  background-color: var(--panel);
+  border-color: var(--hairline);
+}
+:root[data-theme="dark"] .promociones-guia__item,
+:root[data-theme="dark"] .promociones-page__metrica-icono {
+  background-color: var(--crema);
+  border-color: var(--hairline);
+}
+:root[data-theme="dark"] .promociones-page__multiselect-item:hover {
+  background-color: var(--panel);
 }

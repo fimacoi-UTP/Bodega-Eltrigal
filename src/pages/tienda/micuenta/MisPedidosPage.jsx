@@ -94,28 +94,49 @@ export function MisPedidosPage() {
 
   return (
     <div className="mis-pedidos-seccion">
-      {/* Tira de resumen de pedidos (3 tiles estilo casero) */}
+      {/* Tira de resumen de pedidos (3 tiles estilo casero premium) */}
       <div className="mis-pedidos-resumen">
         <div className="mis-pedidos-tile">
-          <span className="mis-pedidos-tile__numero">{resumen.total}</span>
+          <div className="mis-pedidos-tile__top">
+            <span className="mis-pedidos-tile__numero serif">{resumen.total}</span>
+            <span
+              className="mis-pedidos-tile__icono mis-pedidos-tile__icono--terracota"
+              aria-hidden="true"
+            >
+              📦
+            </span>
+          </div>
           <div className="mis-pedidos-tile__etiqueta-fila">
-            <span className="mis-pedidos-tile__icono" aria-hidden="true">📦</span>
             <span className="mis-pedidos-tile__etiqueta">Pedidos</span>
           </div>
         </div>
 
         <div className="mis-pedidos-tile">
-          <span className="mis-pedidos-tile__numero">{resumen.enCamino}</span>
+          <div className="mis-pedidos-tile__top">
+            <span className="mis-pedidos-tile__numero serif">{resumen.enCamino}</span>
+            <span
+              className="mis-pedidos-tile__icono mis-pedidos-tile__icono--oro"
+              aria-hidden="true"
+            >
+              🚚
+            </span>
+          </div>
           <div className="mis-pedidos-tile__etiqueta-fila">
-            <span className="mis-pedidos-tile__icono" aria-hidden="true">🚚</span>
             <span className="mis-pedidos-tile__etiqueta">En camino</span>
           </div>
         </div>
 
         <div className="mis-pedidos-tile">
-          <span className="mis-pedidos-tile__numero">{resumen.entregados}</span>
+          <div className="mis-pedidos-tile__top">
+            <span className="mis-pedidos-tile__numero serif">{resumen.entregados}</span>
+            <span
+              className="mis-pedidos-tile__icono mis-pedidos-tile__icono--verde"
+              aria-hidden="true"
+            >
+              ✅
+            </span>
+          </div>
           <div className="mis-pedidos-tile__etiqueta-fila">
-            <span className="mis-pedidos-tile__icono" aria-hidden="true">✅</span>
             <span className="mis-pedidos-tile__etiqueta">Entregados</span>
           </div>
         </div>
@@ -139,7 +160,7 @@ export function MisPedidosPage() {
       ) : (
         <>
           <div className="mis-pedidos-cabecera">
-            <h2 className="mis-pedidos-titulo">Mis Pedidos</h2>
+            <h2 className="mis-pedidos-titulo serif">Mis Pedidos</h2>
             <span className="mis-pedidos-total-contador">
               {pedidos.length} {pedidos.length === 1 ? "pedido" : "pedidos"}
             </span>
@@ -171,7 +192,7 @@ export function MisPedidosPage() {
 
                         <div className="mis-pedidos-info-principal">
                           <div className="mis-pedidos-codigo-linea">
-                            <strong className="mis-pedidos-codigo">
+                            <strong className="mis-pedidos-codigo serif">
                               Pedido #{pedido.codigo || pedido.id}
                             </strong>
                             <Badge variante={estadoVariante} punto tamano="sm">
@@ -190,7 +211,7 @@ export function MisPedidosPage() {
                       <div className="mis-pedidos-acciones">
                         <div className="mis-pedidos-monto-bloque">
                           <span className="mis-pedidos-monto-label">Total</span>
-                          <strong className="mis-pedidos-monto">
+                          <strong className="mis-pedidos-monto serif">
                             {formatearSoles(pedido.total)}
                           </strong>
                         </div>

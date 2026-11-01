@@ -1,9 +1,9 @@
 /**
  * ============================================================================
- * SkeletonTarjeta.css · Estilos y animación Shimmer del Skeleton
+ * SkeletonTarjeta.css · Estilos y animación Shimmer del Skeleton (FASE 4)
  * ----------------------------------------------------------------------------
- * Réplica exacta de la estructura de TarjetaProducto para evitar saltos
- * de layout (Cumulative Layout Shift) durante la carga.
+ * Réplica de las proporciones de TarjetaProducto (imagen 1:1, radios --r-lg,
+ * tokens de la Fase 0) para evitar saltos de layout durante la carga.
  * ==========================================================================*/
 
 @keyframes shimmer-brillo {
@@ -18,73 +18,74 @@
 .skeleton-shimmer {
   background: linear-gradient(
     90deg,
-    var(--color-superficie-suave) 0%,
-    var(--color-borde) 50%,
-    var(--color-superficie-suave) 100%
+    var(--crema) 0%,
+    var(--kraft) 50%,
+    var(--crema) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer-brillo 1.6s ease-in-out infinite;
+  animation: shimmer-brillo 1.5s ease-in-out infinite;
 }
 
 .skeleton-tarjeta {
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-radius: var(--radio-lg);
-  border: 1px solid var(--color-borde);
-  background-color: var(--color-superficie);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--hairline);
+  background-color: var(--panel);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   position: relative;
   pointer-events: none;
   user-select: none;
 }
 
-/* Área visual (imagen) */
+/* Área visual (imagen cuadrada 1:1 igual que TarjetaProducto) */
 .skeleton-tarjeta__visual {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .skeleton-tarjeta__insignia {
   position: absolute;
-  top: var(--esp-3);
-  right: var(--esp-3);
-  width: 70px;
-  height: 20px;
-  border-radius: var(--radio-pastilla);
-  background: var(--color-borde);
-  opacity: 0.8;
+  top: 12px;
+  left: 12px;
+  width: 64px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--hairline-2);
+  opacity: 0.7;
 }
 
 /* Cuerpo de textos */
 .skeleton-tarjeta__cuerpo {
   display: flex;
   flex-direction: column;
-  padding: var(--esp-4);
+  padding: 14px 16px 10px;
   flex: 1;
-  gap: var(--esp-1);
+  gap: 6px;
 }
 
 .skeleton-tarjeta__marca {
-  width: 35%;
-  height: 12px;
-  border-radius: var(--radio-sm);
+  width: 42%;
+  height: 11px;
+  border-radius: 999px;
   margin-bottom: 2px;
 }
 
 .skeleton-tarjeta__titulo-linea1 {
-  width: 90%;
-  height: 16px;
-  border-radius: var(--radio-sm);
-  margin-top: var(--esp-1);
+  width: 92%;
+  height: 15px;
+  border-radius: 6px;
+  margin-top: 2px;
 }
 
 .skeleton-tarjeta__titulo-linea2 {
-  width: 60%;
-  height: 16px;
-  border-radius: var(--radio-sm);
-  margin-top: 4px;
+  width: 64%;
+  height: 15px;
+  border-radius: 6px;
 }
 
 /* Fila de precio */
@@ -92,37 +93,37 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--esp-2);
+  gap: 8px;
   margin-top: auto;
-  padding-top: var(--esp-3);
+  padding-top: 10px;
 }
 
 .skeleton-tarjeta__precio {
-  width: 74px;
-  height: 24px;
-  border-radius: var(--radio-sm);
+  width: 84px;
+  height: 26px;
+  border-radius: 8px;
 }
 
 .skeleton-tarjeta__unidad {
-  width: 46px;
+  width: 48px;
   height: 12px;
-  border-radius: var(--radio-sm);
+  border-radius: 6px;
 }
 
 /* Botón inferior */
 .skeleton-tarjeta__pie {
-  padding: 0 var(--esp-4) var(--esp-4);
+  padding: 6px 16px 16px;
 }
 
 .skeleton-tarjeta__boton {
   width: 100%;
-  height: 36px;
-  border-radius: var(--radio-md);
+  height: 40px;
+  border-radius: var(--r);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .skeleton-shimmer {
     animation: none;
-    background: var(--color-superficie-suave);
+    background: var(--kraft);
   }
 }

@@ -5,77 +5,113 @@
  * AQUÍ y en ningún otro lado. Cualquier componente del proyecto debe usar estas
  * variables en vez de escribir valores fijos ("hardcodeados").
  *
- *   ✅ color: var(--color-primario);
- *   ❌ color: #B0441F;
+ *   ✅ color: var(--terracota); / var(--color-primario);
+ *   ❌ color: #C0532B;
  *
- * ¿Por qué? Porque si mañana el grupo decide cambiar el color de marca, se
- * cambia en una sola línea y todo el proyecto se actualiza. Eso es coherencia
- * visual y es lo que mantiene los 5 módulos viéndose como UNA sola plataforma.
- *
- * PALETA: cálida y confiable, inspirada en el trigo (de ahí "El Trigal"),
- * el ladrillo de las casas piuranas y el verde del campo.
+ * PALETA EL TRIGAL (Premium 2.0):
+ * Cálida, editorial y artesanal, inspirada en el trigo piurano, la terracota,
+ * el papel kraft y el verde fresco del campo. Soporta Modo Día y Modo Noche
+ * en 3 capas (:root, prefers-color-scheme, y [data-theme="dark"]).
  * ==========================================================================*/
 
+/* -------------------------------------------------------------------------- */
+/* CAPA 1: MODO CLARO (Por defecto en :root)                                  */
+/* -------------------------------------------------------------------------- */
 :root {
+  /* --- 1. TOKENS PRINCIPALES EL TRIGAL (Modo Claro) ----------------------- */
+  --terracota: #C0532B;
+  --terracota-600: #A8481F;
+  --terracota-50: #FBEEE7;
+
+  --crema: #FAF5EC;
+  --panel: #FFFFFF;
+  --kraft: #EADDC6;
+  --kraft-2: #E4D5BB;
+
+  --oro: #D9A441;
+  --oro-50: #FBF2DC;
+
+  --tinta: #3A2E26;
+  --tinta-soft: #7A6A5D;
+  --tinta-faint: #A8998B;
+
+  --verde: #2E9E5B;
+  --verde-50: #E6F4EC;
+  --rojo: #D6482F;
+  --rojo-50: #FCEBE7;
+
+  --hairline: #ECE3D8;
+  --hairline-2: #E0D4C4;
+
+  /* --- Radios El Trigal --- */
+  --r-sm: 10px;
+  --r: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+
+  /* --- Sombras El Trigal --- */
+  --shadow-sm: 0 1px 2px rgba(58, 46, 38, 0.06), 0 2px 8px rgba(58, 46, 38, 0.05);
+  --shadow-md: 0 4px 14px rgba(58, 46, 38, 0.08), 0 10px 30px rgba(58, 46, 38, 0.07);
+  --shadow-lg: 0 10px 24px rgba(58, 46, 38, 0.12), 0 24px 60px rgba(58, 46, 38, 0.12);
+
   /* ---------------------------------------------------------------------- */
-  /* 1. PALETA CRUDA (escalas de color · no usar directo si hay un token     */
-  /*    semántico equivalente más abajo)                                     */
+  /* 2. ESCALAS DE COLOR Y COMPATIBILIDAD                                    */
+  /*    Mapeadas a la paleta El Trigal para no romper pantallas existentes   */
   /* ---------------------------------------------------------------------- */
 
-  /* Ladrillo — color de marca principal */
-  --ladrillo-50: #fdf4f1;
+  /* Ladrillo / Terracota — color de marca principal */
+  --ladrillo-50: var(--terracota-50);
   --ladrillo-100: #fae3dc;
   --ladrillo-200: #f3c5b7;
   --ladrillo-300: #e9a08a;
   --ladrillo-400: #dc7554;
-  --ladrillo-500: #c9532f;
-  --ladrillo-600: #b0441f;
-  --ladrillo-700: #8f3719;
+  --ladrillo-500: var(--terracota);
+  --ladrillo-600: var(--terracota);
+  --ladrillo-700: var(--terracota-600);
   --ladrillo-800: #74301a;
   --ladrillo-900: #5f2b1a;
 
-  /* Trigo — color de acento (ofertas, destacados, detalles) */
-  --trigo-50: #fef9ec;
+  /* Trigo / Oro — color de acento (ofertas, destacados, detalles) */
+  --trigo-50: var(--oro-50);
   --trigo-100: #fcefc7;
   --trigo-200: #f9de8e;
   --trigo-300: #f5c94f;
-  --trigo-400: #f0b429;
-  --trigo-500: #e09a0e;
-  --trigo-600: #c27803;
+  --trigo-400: var(--oro);
+  --trigo-500: var(--oro);
+  --trigo-600: #b88424;
   --trigo-700: #9c5b07;
   --trigo-800: #7f470d;
   --trigo-900: #6b3b0e;
 
-  /* Campo — verde para estados positivos (stock disponible, venta exitosa) */
-  --campo-50: #eefaf3;
+  /* Campo / Verde — estados positivos (stock disponible, venta exitosa) */
+  --campo-50: var(--verde-50);
   --campo-100: #d3f2e0;
   --campo-200: #a8e5c2;
   --campo-400: #45b579;
-  --campo-500: #2f9e5f;
-  --campo-600: #237a4a;
+  --campo-500: var(--verde);
+  --campo-600: var(--verde);
   --campo-700: #1b5e3a;
 
-  /* Neutros cálidos — grises con un toque de tierra, no grises fríos */
-  --neutro-0: #ffffff;
-  --neutro-50: #faf8f5;
-  --neutro-100: #f4f0ea;
-  --neutro-200: #e7e1d8;
-  --neutro-300: #d5ccc0;
-  --neutro-400: #a99e8f;
-  --neutro-500: #7c7264;
-  --neutro-600: #5c5348;
-  --neutro-700: #433c34;
-  --neutro-800: #2b2621;
+  /* Neutros cálidos mapeados a Crema / Kraft / Tinta */
+  --neutro-0: var(--panel);
+  --neutro-50: var(--crema);
+  --neutro-100: var(--kraft);
+  --neutro-200: var(--hairline);
+  --neutro-300: var(--hairline-2);
+  --neutro-400: var(--tinta-faint);
+  --neutro-500: var(--tinta-faint);
+  --neutro-600: var(--tinta-soft);
+  --neutro-700: var(--tinta);
+  --neutro-800: var(--tinta);
   --neutro-900: #1a1714;
 
-  /* Funcionales */
-  --rojo-50: #fef2f2;
+  /* Funcionales adicionales */
   --rojo-100: #fee2e2;
-  --rojo-500: #dc2626;
-  --rojo-600: #b91c1c;
-  --ambar-50: #fffbeb;
+  --rojo-500: var(--rojo);
+  --rojo-600: var(--rojo);
+  --ambar-50: var(--oro-50);
   --ambar-100: #fef3c7;
-  --ambar-500: #d97706;
+  --ambar-500: var(--oro);
   --ambar-600: #b45309;
   --azul-50: #eff6ff;
   --azul-100: #dbeafe;
@@ -83,51 +119,51 @@
   --azul-600: #1d4ed8;
 
   /* ---------------------------------------------------------------------- */
-  /* 2. TOKENS SEMÁNTICOS (los que se usan en el día a día)                  */
+  /* 3. TOKENS SEMÁNTICOS (conectados a los tokens El Trigal)                */
   /* ---------------------------------------------------------------------- */
 
   /* Superficies y fondos */
-  --color-fondo: var(--neutro-50);
-  --color-superficie: var(--neutro-0);
-  --color-superficie-suave: var(--neutro-100);
-  --color-superficie-hover: var(--neutro-100);
+  --color-fondo: var(--crema);
+  --color-superficie: var(--panel);
+  --color-superficie-suave: var(--kraft);
+  --color-superficie-hover: var(--kraft-2);
 
   /* Bordes */
-  --color-borde: var(--neutro-200);
-  --color-borde-fuerte: var(--neutro-300);
+  --color-borde: var(--hairline);
+  --color-borde-fuerte: var(--hairline-2);
 
   /* Texto */
-  --color-texto: var(--neutro-800);
-  --color-texto-suave: var(--neutro-600);
-  --color-texto-tenue: var(--neutro-500);
-  --color-texto-invertido: var(--neutro-0);
+  --color-texto: var(--tinta);
+  --color-texto-suave: var(--tinta-soft);
+  --color-texto-tenue: var(--tinta-faint);
+  --color-texto-invertido: #ffffff;
 
   /* Marca / acciones principales */
-  --color-primario: var(--ladrillo-600);
-  --color-primario-hover: var(--ladrillo-700);
-  --color-primario-activo: var(--ladrillo-800);
-  --color-primario-suave: var(--ladrillo-50);
-  --color-primario-borde: var(--ladrillo-200);
-  --color-sobre-primario: var(--neutro-0);
+  --color-primario: var(--terracota);
+  --color-primario-hover: var(--terracota-600);
+  --color-primario-activo: #8f3719;
+  --color-primario-suave: var(--terracota-50);
+  --color-primario-borde: var(--hairline-2);
+  --color-sobre-primario: #ffffff;
 
   /* Acento */
-  --color-acento: var(--trigo-400);
-  --color-acento-fuerte: var(--trigo-600);
-  --color-acento-suave: var(--trigo-50);
+  --color-acento: var(--oro);
+  --color-acento-fuerte: #b88424;
+  --color-acento-suave: var(--oro-50);
 
   /* Estados */
-  --color-exito: var(--campo-600);
-  --color-exito-suave: var(--campo-50);
-  --color-advertencia: var(--ambar-600);
-  --color-advertencia-suave: var(--ambar-50);
-  --color-peligro: var(--rojo-600);
+  --color-exito: var(--verde);
+  --color-exito-suave: var(--verde-50);
+  --color-advertencia: var(--oro);
+  --color-advertencia-suave: var(--oro-50);
+  --color-peligro: var(--rojo);
   --color-peligro-suave: var(--rojo-50);
   --color-info: var(--azul-600);
   --color-info-suave: var(--azul-50);
 
   /* Anillo de foco (accesibilidad: siempre visible al navegar con teclado) */
-  --color-foco: var(--ladrillo-400);
-  --anillo-foco: 0 0 0 3px var(--ladrillo-100);
+  --color-foco: var(--terracota);
+  --anillo-foco: 0 0 0 3px var(--terracota-50);
 
   /* Alias semánticos y de compatibilidad */
   --color-marca: var(--color-primario);
@@ -136,10 +172,13 @@
   --color-fondo-suave: var(--color-superficie-suave);
 
   /* ---------------------------------------------------------------------- */
-  /* 3. TIPOGRAFÍA                                                           */
+  /* 4. TIPOGRAFÍA (Fraunces para títulos/marca + Inter para UI/cuerpo)      */
   /* ---------------------------------------------------------------------- */
+  --fuente-serif: "Fraunces", Georgia, "Times New Roman", serif;
   --fuente-base: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+  --fuente-titulo: var(--fuente-serif);
+  --fuente-cuerpo: var(--fuente-base);
   --fuente-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
     "Liberation Mono", monospace;
 
@@ -174,7 +213,7 @@
   --interlineado-amplio: 1.7;
 
   /* ---------------------------------------------------------------------- */
-  /* 4. ESPACIADO (escala de 4px)                                            */
+  /* 5. ESPACIADO (escala de 4px)                                            */
   /* ---------------------------------------------------------------------- */
   --esp-1: 0.25rem; /*  4px */
   --esp-2: 0.5rem; /*   8px */
@@ -189,30 +228,31 @@
   --esp-20: 5rem; /*   80px */
 
   /* ---------------------------------------------------------------------- */
-  /* 5. RADIOS Y SOMBRAS                                                     */
+  /* 6. RADIOS Y SOMBRAS (mapeados a los tokens El Trigal)                   */
   /* ---------------------------------------------------------------------- */
   --radio-sm: 6px;
-  --radio-md: 10px;
-  --radio-lg: 14px;
-  --radio-xl: 20px;
+  --radio-md: var(--r-sm);
+  --radio-lg: var(--r);
+  --radio-xl: var(--r-lg);
+  --radio-2xl: var(--r-xl);
   --radio-pastilla: 999px;
 
-  /* Sombras con tinte cálido (no negro puro) para que combinen con la paleta */
-  --sombra-xs: 0 1px 2px rgba(67, 60, 52, 0.06);
-  --sombra-sm: 0 1px 3px rgba(67, 60, 52, 0.08), 0 1px 2px rgba(67, 60, 52, 0.04);
-  --sombra-md: 0 4px 12px rgba(67, 60, 52, 0.08), 0 2px 4px rgba(67, 60, 52, 0.04);
-  --sombra-lg: 0 12px 28px rgba(67, 60, 52, 0.12), 0 4px 8px rgba(67, 60, 52, 0.05);
-  --sombra-xl: 0 24px 48px rgba(67, 60, 52, 0.16);
+  /* Sombras con tinte cálido de tinta */
+  --sombra-xs: 0 1px 2px rgba(58, 46, 38, 0.06);
+  --sombra-sm: var(--shadow-sm);
+  --sombra-md: var(--shadow-md);
+  --sombra-lg: var(--shadow-lg);
+  --sombra-xl: 0 24px 48px rgba(58, 46, 38, 0.16);
 
   /* ---------------------------------------------------------------------- */
-  /* 6. MOVIMIENTO                                                           */
+  /* 7. MOVIMIENTO                                                           */
   /* ---------------------------------------------------------------------- */
   --transicion-rapida: 120ms ease;
   --transicion: 200ms ease;
   --transicion-lenta: 320ms cubic-bezier(0.22, 1, 0.36, 1);
 
   /* ---------------------------------------------------------------------- */
-  /* 7. CAPAS (z-index) — centralizadas para no pelearnos entre módulos      */
+  /* 8. CAPAS (z-index) — centralizadas para no pelearnos entre módulos      */
   /* ---------------------------------------------------------------------- */
   --z-base: 1;
   --z-navegacion: 100;
@@ -221,13 +261,59 @@
   --z-aviso: 400;
 
   /* ---------------------------------------------------------------------- */
-  /* 8. MEDIDAS DE LAYOUT                                                    */
+  /* 9. MEDIDAS DE LAYOUT                                                    */
   /* ---------------------------------------------------------------------- */
-  --ancho-contenedor: 1200px;
+  --ancho-contenedor: 1240px;
   --ancho-contenedor-angosto: 720px;
   --alto-navbar: 58px;
   --ancho-sidebar: 248px;
   --gutter: var(--esp-4); /* margen lateral en móvil */
+}
+
+/* -------------------------------------------------------------------------- */
+/* CAPA 2: MODO NOCHE AUTOMÁTICO (Preferencia del sistema operativo)          */
+/* -------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --crema: #201A15;
+    --panel: #2A231D;
+    --kraft: #352B22;
+    --kraft-2: #3E3328;
+    --tinta: #F3E9DD;
+    --tinta-soft: #C3B3A3;
+    --tinta-faint: #8C7C6C;
+    --hairline: #3A2F26;
+    --hairline-2: #443629;
+    --terracota-50: #3A251B;
+    --oro-50: #3A3017;
+    --verde-50: #1C3326;
+    --rojo-50: #3A211B;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.22);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.36), 0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.45), 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* CAPA 3: MODO NOCHE MANUAL (:root[data-theme="dark"])                       */
+/* -------------------------------------------------------------------------- */
+:root[data-theme="dark"] {
+  --crema: #201A15;
+  --panel: #2A231D;
+  --kraft: #352B22;
+  --kraft-2: #3E3328;
+  --tinta: #F3E9DD;
+  --tinta-soft: #C3B3A3;
+  --tinta-faint: #8C7C6C;
+  --hairline: #3A2F26;
+  --hairline-2: #443629;
+  --terracota-50: #3A251B;
+  --oro-50: #3A3017;
+  --verde-50: #1C3326;
+  --rojo-50: #3A211B;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.36), 0 10px 30px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.45), 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
 /* Escalado del layout en pantallas grandes (MOBILE-FIRST: esto es la mejora,

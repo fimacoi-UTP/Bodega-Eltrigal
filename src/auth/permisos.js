@@ -95,3 +95,13 @@ export function puedeEliminarProducto(usuario) {
 export function puedeAjustarStock(usuario) {
   return esAdmin(usuario) || esCajero(usuario);
 }
+
+/**
+ * ¿Tiene permiso para gestionar el Libro de Reclamaciones?
+ * Solo ADMIN.
+ * @param {object|null} usuario
+ * @returns {boolean}
+ */
+export function puedeGestionarReclamos(usuario) {
+  return esAdmin(usuario);
+}

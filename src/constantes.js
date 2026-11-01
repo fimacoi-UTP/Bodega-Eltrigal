@@ -157,6 +157,9 @@ export const BODEGA = {
 /** Moneda con la que trabaja todo el sistema. */
 export const MONEDA = { codigo: "PEN", simbolo: "S/" };
 
+/** Monto mínimo en soles para obtener delivery gratis en la tienda web. */
+export const UMBRAL_DELIVERY_GRATIS = 50;
+
 /* ---------------------------------------------------------------------------
  * INVENTARIO
  * ------------------------------------------------------------------------ */
@@ -174,7 +177,6 @@ export const MONEDA = { codigo: "PEN", simbolo: "S/" };
  * src/pages/dashboard/gestion/utilesInventario.js
  */
 export const UMBRAL_STOCK_BAJO = 10;
-
 
 /* ---------------------------------------------------------------------------
  * PROMOCIONES

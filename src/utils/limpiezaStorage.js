@@ -24,6 +24,9 @@ export const CLAVES_OFICIALES = {
 
   // Preferencias de usuario
   SONIDO_PEDIDOS: "trigal:sonido_pedidos",   // Booleano de alertas sonoras en Dashboard
+  TEMA: "trigal:tema",                       // Preferencia de modo claro/oscuro ("light" | "dark")
+  COOKIES_ACEPTADAS: "trigal:cookies-aceptadas", // Consentimiento de cookies en la tienda web
+  NOTIF_VISTA: "trigal:notif-vista",         // Estado de visualización del popup de notificaciones
 
   // Colecciones y control de esquema (Repositorios / Semilla)
   VERSION_DATOS: "trigal:version",           // Control de versión de migración de datos

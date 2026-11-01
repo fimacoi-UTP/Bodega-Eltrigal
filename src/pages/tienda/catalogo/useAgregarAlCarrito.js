@@ -9,29 +9,15 @@
  * catálogo: qué tarjeta está "cargando" y qué producto se agregó al final,
  * para el aviso de confirmación.
  *
- * Firma del carrito (definida en CarritoProvider):
- *   agregar(producto, cantidad = 1)
- * Guarda el objeto completo del producto más su `cantidad`, y lo identifica
- * por `producto.id`. Por eso aquí le pasamos el producto tal cual viene del
- * inventario, sin transformarlo.
- *
- * ⚠️ HISTORIA DE UN BUG (no repetir):
- * Antes, mientras el módulo de carrito aún no existía, esta función solo
- * emitía un CustomEvent 'carrito:agregar' en window y buscaba un
- * `window.__elTrigalCarrito`. Nadie escuchaba ese evento ni definía ese
- * objeto, así que el producto NUNCA llegaba al carrito: el usuario veía el
- * mensaje "¡Agregado!" (que era estado local de este archivo) pero el ícono
- * del navbar seguía en cero y /carrito salía vacía.
- *
- * La regla que evita esto: el estado compartido vive en el Context, no en
- * `window` ni en implementaciones paralelas.
+ * En la tienda pública el backend devuelve `disponible` (booleano) sin exponer
+ * el `stock` numérico exacto; por ello aquí evaluamos `producto.disponible`
+ * cuando no existe `stock` numérico.
  * ==========================================================================*/
 
 import { useCallback, useState } from "react";
 import { useCarrito } from "../../../context/CarritoContext";
 
 export function useAgregarAlCarrito() {
-  // ⬇️ La conexión de verdad: el mismo carrito que leen el Navbar y /carrito.
   const { agregar } = useCarrito();
 
   const [ultimoAgregado, setUltimoAgregado] = useState(null);
@@ -39,7 +25,21 @@ export function useAgregarAlCarrito() {
 
   const agregarAlCarrito = useCallback(
     async (producto, cantidad = 1) => {
-      if (!producto || producto.stock <= 0) return;
+      if (!producto) return;
+
+      const tieneStockNumerico =
+        producto.stock !== undefined &&
+        producto.stock !== null &&
+        Number.isFinite(Number(producto.stock));
+
+      const estaDisponible =
+        typeof producto.disponible === "boolean"
+          ? producto.disponible
+          : tieneStockNumerico
+            ? Number(producto.stock) > 0
+            : true;
+
+      if (!estaDisponible) return;
 
       setAgregandoId(producto.id);
 

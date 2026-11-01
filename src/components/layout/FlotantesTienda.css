@@ -1,0 +1,501 @@
+/* ============================================================================
+ * FlotantesTienda.css · Elementos Flotantes Globales de la Tienda (FASE 7)
+ * ----------------------------------------------------------------------------
+ * Usa tokens de la Fase 0 (--panel, --crema, --kraft, --terracota, --oro,
+ * --verde, --tinta, --hairline, --r-*, --shadow-*).
+ * Coherente en modo claro y modo oscuro de 3 capas.
+ * ==========================================================================*/
+
+/* ---------------------------------------------------------------------------
+ * 3) BARRA DE PROGRESO DE SCROLL (fija arriba, degradado terracota -> oro)
+ * ------------------------------------------------------------------------ */
+.scroll-progreso {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  z-index: calc(var(--z-navegacion) + 15);
+  background: transparent;
+  pointer-events: none;
+}
+
+.scroll-progreso__barra {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--terracota) 0%, var(--oro) 100%);
+  box-shadow: 0 1px 6px rgba(192, 83, 43, 0.35);
+  transition: width 80ms linear;
+}
+
+/* ---------------------------------------------------------------------------
+ * CONTENEDOR DE ELEMENTOS FLOTANTES (abajo-derecha)
+ * ------------------------------------------------------------------------ */
+.flotantes-tienda {
+  position: fixed;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: calc(var(--z-navegacion) + 8);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  pointer-events: none;
+  transition:
+    bottom 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+/* En móvil, cuando la BarraFlotanteCarrito está activa, sube para no chocar */
+@media (max-width: 767px) {
+  .flotantes-tienda {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .flotantes-tienda--con-barra-movil {
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Cuando el CarritoDrawer está abierto, se oculta suavemente */
+.flotantes-tienda--oculto {
+  opacity: 0;
+  pointer-events: none !important;
+  transform: translateY(10px);
+}
+
+.flotantes-tienda__acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2) BOTÓN "VOLVER ARRIBA" (aparece a los ~500px de scroll)
+ * ------------------------------------------------------------------------ */
+.btn-volver-arriba {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--panel);
+  border: 1.5px solid var(--hairline-2);
+  color: var(--tinta);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.9);
+  pointer-events: none;
+  transition:
+    opacity 220ms ease,
+    visibility 220ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.btn-volver-arriba--visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.btn-volver-arriba:hover {
+  background-color: var(--terracota);
+  border-color: var(--terracota);
+  color: #FFFFFF;
+  transform: translateY(-3px) scale(1.04);
+}
+
+/* ---------------------------------------------------------------------------
+ * 1) BOTÓN FLOTANTE DE WHATSAPP (~62px + anillo pulso + tooltip)
+ * ------------------------------------------------------------------------ */
+.wa-boton-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.wa-boton__tooltip {
+  position: absolute;
+  right: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background-color: var(--panel);
+  border: 1px solid var(--hairline-2);
+  color: var(--tinta);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 200ms ease,
+    visibility 200ms ease,
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wa-boton-wrapper:hover .wa-boton__tooltip,
+.wa-boton-wrapper:focus-within .wa-boton__tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+@media (max-width: 520px) {
+  .wa-boton__tooltip {
+    display: none;
+  }
+}
+
+.wa-boton {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #25D366 0%, #1DA851 100%);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow:
+    0 8px 22px rgba(29, 168, 81, 0.38),
+    0 2px 6px rgba(0, 0, 0, 0.14);
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease;
+}
+
+.wa-boton:hover {
+  transform: scale(1.06) translateY(-2px);
+  box-shadow:
+    0 12px 28px rgba(29, 168, 81, 0.46),
+    0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+.wa-boton--activo {
+  background: linear-gradient(135deg, #1E8E48 0%, #156C35 100%);
+}
+
+/* Anillo de pulso continuo */
+.wa-boton__pulso {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(37, 211, 102, 0.65);
+  animation: wa-anillo-pulso 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  pointer-events: none;
+}
+
+.wa-boton--activo .wa-boton__pulso {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes wa-anillo-pulso {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+  75% {
+    transform: scale(1.36);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.36);
+    opacity: 0;
+  }
+}
+
+.wa-boton__svg {
+  width: 32px;
+  height: 32px;
+}
+
+.wa-boton__icono-cerrar {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------------------
+ * PANEL MINI-CHAT DE WHATSAPP (~340px, fade + slide-up)
+ * ------------------------------------------------------------------------ */
+.wa-minichat {
+  width: 342px;
+  max-width: calc(100vw - 32px);
+  border-radius: var(--r-xl);
+  background-color: var(--panel);
+  border: 1px solid var(--hairline-2);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(16px) scale(0.96);
+  transform-origin: bottom right;
+  transition:
+    opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wa-minichat--abierto {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+/* Cabecera verde */
+.wa-minichat__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #1E8E48 0%, #25B85C 100%);
+  color: #FFFFFF;
+}
+
+.wa-minichat__identidad {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.wa-minichat__avatar {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.wa-minichat__textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wa-minichat__nombre {
+  font-family: var(--fuente-titulo);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.15;
+}
+
+.wa-minichat__estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.wa-minichat__punto-online {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #A7F3D0;
+  box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.28);
+}
+
+.wa-minichat__cerrar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background-color: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+  font-size: 1.2rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.wa-minichat__cerrar:hover {
+  background-color: rgba(255, 255, 255, 0.28);
+}
+
+/* Cuerpo del mini-chat */
+.wa-minichat__cuerpo {
+  padding: 16px;
+  background-color: var(--crema);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wa-minichat__burbuja {
+  align-self: flex-start;
+  max-width: 92%;
+  padding: 11px 14px;
+  border-radius: 4px 16px 16px 16px;
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wa-minichat__burbuja-autor {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--verde);
+  letter-spacing: 0.02em;
+}
+
+.wa-minichat__burbuja-texto {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--tinta);
+  line-height: 1.42;
+}
+
+.wa-minichat__burbuja-hora {
+  align-self: flex-end;
+  font-size: 0.68rem;
+  color: var(--tinta-faint);
+}
+
+/* 3 chips de respuesta rápida */
+.wa-minichat__chips {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.wa-minichat__chip {
+  padding: 7px 13px;
+  border-radius: 999px;
+  background-color: var(--panel);
+  border: 1px solid var(--hairline-2);
+  color: var(--tinta);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.wa-minichat__chip:hover {
+  background-color: var(--verde-50);
+  border-color: var(--verde);
+  color: var(--verde);
+  transform: translateX(3px);
+}
+
+/* Formulario inferior: caja de texto + botón enviar */
+.wa-minichat__formulario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: var(--panel);
+  border-top: 1px solid var(--hairline);
+}
+
+.wa-minichat__input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background-color: var(--crema);
+  border: 1px solid var(--hairline-2);
+  color: var(--tinta);
+  font-family: var(--fuente-cuerpo);
+  font-size: 0.83rem;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.wa-minichat__input::placeholder {
+  color: var(--tinta-faint);
+}
+
+.wa-minichat__input:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px var(--verde-50);
+}
+
+.wa-minichat__enviar {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background-color: #25D366;
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.wa-minichat__enviar:hover {
+  background-color: #1DA851;
+  transform: scale(1.05);
+}
+
+.wa-minichat__enviar svg {
+  width: 17px;
+  height: 17px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wa-boton__pulso {
+    animation: none;
+  }
+
+  .wa-minichat,
+  .btn-volver-arriba,
+  .scroll-progreso__barra {
+    transition: none;
+  }
+}
+

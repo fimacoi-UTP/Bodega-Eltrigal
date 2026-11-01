@@ -1,17 +1,24 @@
+/* ============================================================================
+ * MisPedidosPage.css · Tarjetas de Stats y Lista "Mis Pedidos" Premium
+ * ----------------------------------------------------------------------------
+ * Usa exclusivamente los design tokens de la Fase 0 (--panel, --crema, --kraft,
+ * --hairline, --terracota, --oro, --tinta, --tinta-soft, --tinta-faint,
+ * --verde, --rojo, --r, --r-lg, --r-xl) y soporta las 3 capas de Modo Oscuro.
+ * ==========================================================================*/
+
 .mis-pedidos-seccion {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-4);
+  gap: var(--esp-5);
 }
 
 /* ============================================================================
- * TIRA DE RESUMEN · 3 tiles estilo casero
+ * TIRA DE RESUMEN · 3 tarjetas de stats sobre --panel
  * ==========================================================================*/
 .mis-pedidos-resumen {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--esp-3);
-  margin-bottom: var(--esp-2);
 }
 
 @media (min-width: 640px) {
@@ -22,93 +29,139 @@
 }
 
 .mis-pedidos-tile {
-  background: linear-gradient(135deg, var(--trigo-50, #fef9ec) 0%, rgba(254, 249, 236, 0.6) 100%);
-  border: 1px solid var(--trigo-200, #f9de8e);
-  border-radius: var(--radio-xl, 1rem);
-  padding: var(--esp-4) var(--esp-5);
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  padding: var(--esp-5);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(194, 120, 3, 0.05);
-  transition: transform var(--transicion-rapida), box-shadow var(--transicion-rapida);
+  justify-content: space-between;
+  gap: var(--esp-2);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--transicion),
+    box-shadow var(--transicion),
+    border-color var(--transicion),
+    background-color var(--transicion);
 }
 
 .mis-pedidos-tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(194, 120, 3, 0.08);
-  border-color: var(--trigo-300, #f5c94f);
+  box-shadow: var(--shadow-md);
+  border-color: var(--hairline-2);
+}
+
+.mis-pedidos-tile__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
 }
 
 .mis-pedidos-tile__numero {
-  font-size: clamp(2rem, 1.8rem + 0.8vw, 2.5rem);
-  font-weight: 800;
+  font-family: var(--fuente-serif);
+  font-size: clamp(2rem, 1.8rem + 0.85vw, 2.55rem);
+  font-weight: 700;
   line-height: 1;
-  color: var(--trigo-700, #9c5b07);
+  color: var(--terracota);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .mis-pedidos-tile__etiqueta-fila {
   display: flex;
   align-items: center;
   gap: var(--esp-2);
-  margin-top: var(--esp-2);
 }
 
 .mis-pedidos-tile__icono {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radio-sm, 6px);
-  background: rgba(224, 154, 14, 0.14);
-  font-size: 0.85rem;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r);
+  background-color: var(--oro-50);
+  border: 1px solid var(--hairline);
+  font-size: 1.15rem;
   flex-shrink: 0;
+}
+
+.mis-pedidos-tile__icono--terracota {
+  background-color: var(--terracota-50);
+}
+
+.mis-pedidos-tile__icono--oro {
+  background-color: var(--oro-50);
+}
+
+.mis-pedidos-tile__icono--verde {
+  background-color: var(--verde-50);
 }
 
 .mis-pedidos-tile__etiqueta {
   font-size: var(--texto-sm);
-  color: var(--color-texto-suave);
-  font-weight: 500;
-  line-height: 1.2;
+  color: var(--tinta-soft);
+  font-weight: 600;
+  line-height: 1.25;
 }
 
+/* ============================================================================
+ * CABECERA DE LA SECCIÓN "MIS PEDIDOS"
+ * ==========================================================================*/
 .mis-pedidos-cabecera {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--esp-3);
+  padding-top: var(--esp-1);
 }
 
 .mis-pedidos-titulo {
-  font-size: var(--texto-xl);
+  font-family: var(--fuente-serif);
+  font-size: var(--texto-2xl);
   font-weight: 700;
-  color: var(--color-texto);
+  color: var(--tinta);
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .mis-pedidos-total-contador {
-  font-size: var(--texto-sm);
-  color: var(--color-texto-suave);
-  background: var(--color-fondo-suave, #f1f5f9);
-  padding: 2px 10px;
-  border-radius: var(--radio-total, 9999px);
-  font-weight: 500;
+  font-size: var(--texto-xs);
+  color: var(--tinta-soft);
+  background-color: var(--kraft);
+  border: 1px solid var(--hairline-2);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
+/* ============================================================================
+ * LISTA Y TARJETAS DE PEDIDO
+ * ==========================================================================*/
 .mis-pedidos-lista {
   display: flex;
   flex-direction: column;
   gap: var(--esp-3);
 }
 
-.mis-pedidos-card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+.mis-pedidos-card.ui-card {
+  background-color: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--transicion),
+    box-shadow var(--transicion),
+    border-color var(--transicion),
+    background-color var(--transicion);
 }
 
-.mis-pedidos-card:hover {
+.mis-pedidos-card.ui-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--sombra-md);
+  box-shadow: var(--shadow-md);
+  border-color: var(--hairline-2);
 }
 
 .mis-pedidos-fila {
@@ -128,20 +181,20 @@
 }
 
 /* ============================================================================
- * MINIATURA DE PEDIDO · Foto cuadrada con fallback tintado en trigo
+ * MINIATURA DE PEDIDO · Foto cuadrada con fallback cálido en --crema/--kraft
  * ==========================================================================*/
 .mis-pedidos-miniatura-caja {
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   flex-shrink: 0;
-  border-radius: var(--radio-md, 8px);
+  border-radius: var(--r);
   overflow: hidden;
-  border: 1px solid var(--color-borde);
-  background: var(--color-superficie);
+  border: 1px solid var(--hairline);
+  background-color: var(--crema);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .mis-pedidos-miniatura-img {
@@ -152,13 +205,13 @@
 }
 
 .mis-pedidos-miniatura-placeholder {
-  background: linear-gradient(135deg, var(--trigo-100, #fcefc7) 0%, var(--trigo-50, #fef9ec) 100%);
-  border-color: var(--trigo-200, #f9de8e);
-  color: var(--trigo-800, #78450f);
+  background: radial-gradient(circle at 50% 35%, var(--crema) 0%, var(--kraft) 100%);
+  border-color: var(--hairline-2);
+  color: var(--tinta-soft);
 }
 
 .mis-pedidos-miniatura-icono {
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   line-height: 1;
   user-select: none;
 }
@@ -166,7 +219,7 @@
 .mis-pedidos-info-principal {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-1);
+  gap: 4px;
   min-width: 0;
 }
 
@@ -178,47 +231,59 @@
 }
 
 .mis-pedidos-codigo {
-  font-size: var(--texto-base);
-  color: var(--color-texto);
+  font-family: var(--fuente-serif);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--tinta);
+  letter-spacing: -0.01em;
 }
 
 .mis-pedidos-fecha {
   font-size: var(--texto-xs);
-  color: var(--color-texto-suave);
+  color: var(--tinta-soft);
   margin: 0;
 }
 
 .mis-pedidos-entrega {
   font-size: var(--texto-xs);
-  color: var(--color-texto-suave);
+  color: var(--tinta-soft);
+  font-weight: 500;
 }
 
 .mis-pedidos-acciones {
   display: flex;
   align-items: center;
-  gap: var(--esp-4);
+  gap: var(--esp-5);
 }
 
 .mis-pedidos-monto-bloque {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 2px;
 }
 
 .mis-pedidos-monto-label {
-  font-size: var(--texto-xs);
-  color: var(--color-texto-suave);
+  font-size: var(--texto-2xs);
+  color: var(--tinta-faint);
   text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
 }
 
 .mis-pedidos-monto {
-  font-size: var(--texto-lg);
-  color: var(--color-marca, #c2410c);
+  font-family: var(--fuente-serif);
+  font-size: 1.35rem;
+  color: var(--terracota);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  line-height: 1.1;
 }
 
-@media (max-width: 600px) {
+/* ============================================================================
+ * RESPONSIVE MÓVIL
+ * ==========================================================================*/
+@media (max-width: 640px) {
   .mis-pedidos-fila {
     flex-direction: column;
     align-items: stretch;
@@ -231,14 +296,14 @@
   }
 
   .mis-pedidos-miniatura-caja {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
   }
 
   .mis-pedidos-acciones {
     width: 100%;
     justify-content: space-between;
-    border-top: 1px solid var(--color-borde);
+    border-top: 1px solid var(--hairline);
     padding-top: var(--esp-3);
     margin-top: var(--esp-1);
   }

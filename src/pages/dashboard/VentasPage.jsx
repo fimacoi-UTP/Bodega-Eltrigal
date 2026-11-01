@@ -47,6 +47,28 @@ const ICONO_POR_CATEGORIA = {
 };
 
 /**
+ * Meta diaria de ventas en mostrador (S/).
+ * Configurable temporalmente como constante. A futuro puede ser administrada
+ * desde el módulo de configuración o preferencias de la bodega.
+ */
+const META_DIARIA_VENTAS = 500;
+
+function formatearHoraVenta(fechaStr) {
+  if (!fechaStr) return "--:--";
+  try {
+    const d = new Date(fechaStr);
+    if (isNaN(d.getTime())) return "--:--";
+    return d.toLocaleTimeString("es-PE", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  } catch {
+    return "--:--";
+  }
+}
+
+/**
  * ============================================================================
  * Componente Tarjeta de Producto para el Catálogo del POS (con Imagen y Stock)
  * ==========================================================================*/
@@ -56,7 +78,7 @@ function TarjetaProductoPos({ producto, onAgregar }) {
   const stock = Number(producto.stock || 0);
   const stockMinimo = Number(producto.stockMinimo || 5);
   const unidad = (producto.unidad || "UND").toUpperCase();
-  
+
   let stockClase = "pos-card__badge-stock--ok";
   let stockTexto = `${stock} disp.`;
   if (stock <= 0) {
@@ -389,7 +411,7 @@ function TicketVenta({ venta }) {
 }
 
 export function VentasPage() {
-  const { productosActivos, categorias, refrescar, obtenerProducto } = useInventario();
+  const { productos, productosActivos, categorias, refrescar, obtenerProducto } = useInventario();
   const { usuario } = useAuth();
 
   const [busqueda, setBusqueda] = useState("");
@@ -397,7 +419,7 @@ export function VentasPage() {
   const [carrito, setCarrito] = useState([]);
   const inputBusquedaRef = useRef(null);
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
-  
+
   // 🎯 PATRÓN STRATEGY: Estado del medio de pago activo y sus datos
   const [metodoPago, setMetodoPago] = useState(METODOS_PAGO.EFECTIVO);
   const [datosPago, setDatosPago] = useState({});
@@ -405,7 +427,7 @@ export function VentasPage() {
 
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // Modales de visualización de ticket
   const [ventaExitosa, setVentaExitosa] = useState(null);
   const [ventaDetalle, setVentaDetalle] = useState(null);
@@ -451,6 +473,71 @@ export function VentasPage() {
     return lista;
   }, [productosActivos, categoriaSeleccionada, busqueda]);
 
+  // Pestaña activa del widget compacto (Más vendidos / Por reponer)
+  const [pestanaWidgetPos, setPestanaWidgetPos] = useState("masVendidos");
+
+  // 1) Más vendidos del turno (ventasDelDia no anuladas)
+  const masVendidosTurno = useMemo(() => {
+    const conteo = {};
+    const noAnuladas = ventasDelDia.filter((v) => !v.anulada);
+
+    noAnuladas.forEach((v) => {
+      (v.items || []).forEach((item) => {
+        const id = String(item.productoId);
+        if (!conteo[id]) {
+          conteo[id] = {
+            productoId: id,
+            nombre: item.nombre,
+            cantidad: 0,
+            precioUnitario: item.precioUnitario,
+          };
+        }
+        conteo[id].cantidad += Number(item.cantidad || 0);
+      });
+    });
+
+    return Object.values(conteo)
+      .sort((a, b) => b.cantidad - a.cantidad)
+      .slice(0, 5)
+      .map((item) => {
+        const productoReal = productos.find(
+          (p) => String(p.id) === String(item.productoId)
+        );
+        return {
+          ...item,
+          productoReal: productoReal || {
+            id: item.productoId,
+            nombre: item.nombre,
+            precio: item.precioUnitario,
+            stock: 99,
+          },
+        };
+      });
+  }, [ventasDelDia, productos]);
+
+  // 2) Productos por reponer (stock <= stockMinimo)
+  const productosPorReponer = useMemo(() => {
+    return (productos || [])
+      .filter((p) => {
+        const s = Number(p.stock || 0);
+        const sm = Number(p.stockMinimo || 5);
+        return s <= sm;
+      })
+      .sort((a, b) => Number(a.stock || 0) - Number(b.stock || 0))
+      .slice(0, 6);
+  }, [productos]);
+
+  // 3) Últimas ventas del turno (más recientes primero)
+  const ultimasVentasTurno = useMemo(() => {
+    return [...ventasDelDia]
+      .sort(
+        (a, b) =>
+          new Date(b.fecha || b.fechaCreacion || 0) -
+          new Date(a.fecha || a.fechaCreacion || 0)
+      )
+      .slice(0, 10);
+  }, [ventasDelDia]);
+
   // Cargar ventas del día
   useEffect(() => {
     async function cargarVentas() {
@@ -491,10 +578,10 @@ export function VentasPage() {
           carrito.map((item) =>
             item.productoId === producto.id
               ? {
-                  ...item,
-                  cantidad: item.cantidad + 1,
-                  subtotal: item.precioUnitario * (item.cantidad + 1),
-                }
+                ...item,
+                cantidad: item.cantidad + 1,
+                subtotal: item.precioUnitario * (item.cantidad + 1),
+              }
               : item
           )
         );
@@ -536,10 +623,10 @@ export function VentasPage() {
       carrito.map((item) =>
         item.productoId === productoId
           ? {
-              ...item,
-              cantidad: nuevaCantidad,
-              subtotal: item.precioUnitario * nuevaCantidad,
-            }
+            ...item,
+            cantidad: nuevaCantidad,
+            subtotal: item.precioUnitario * nuevaCantidad,
+          }
           : item
       )
     );
@@ -558,6 +645,15 @@ export function VentasPage() {
       .filter((v) => !v.anulada)
       .reduce((sum, v) => sum + (Number(v.total) || 0), 0);
   }, [ventasDelDia]);
+
+  // Conteo de ventas cobradas (no anuladas)
+  const ventasCobradasCount = useMemo(() => {
+    return ventasDelDia.filter((v) => !v.anulada).length;
+  }, [ventasDelDia]);
+
+  // Meta del día (recaudado hoy vs meta)
+  const porcentajeMetaReal = Math.round((totalVendidoHoy / META_DIARIA_VENTAS) * 100);
+  const metaCumplida = totalVendidoHoy >= META_DIARIA_VENTAS;
 
   // Al presionar Enter en el input de búsqueda, si hay 1 solo resultado, agregarlo
   const handleKeyDownBusqueda = (e) => {
@@ -662,23 +758,81 @@ export function VentasPage() {
           <div className="pos-header__titulos">
             <h1 className="pos-header__titulo">Terminal de caja</h1>
             <p className="pos-header__sub">
-              Cajero activo: <strong>{usuario?.nombre || "Cajero en turno"}</strong> · {formatearFecha(new Date().toISOString(), { conHora: false })}
+              Cajero activo: <strong>{usuario?.nombres ? `${usuario.nombres} ${usuario.apellidos || ""}`.trim() : (usuario?.nombre || usuario?.email || "Cajero en turno")}</strong> · {formatearFecha(new Date().toISOString(), { conHora: false })}
             </p>
           </div>
         </div>
 
         <div className="pos-header__der">
-          <div className="pos-header__stats-pill">
-            <span className="pos-header__stats-label">Ventas hoy:</span>
-            <span className="pos-header__stats-valor">{ventasDelDia.filter((v) => !v.anulada).length} ({formatearSoles(totalVendidoHoy)})</span>
+          {/* Tira compacta de KPIs del turno en una sola fila (siempre visible) */}
+          <div className="pos-header__tira-turno" role="region" aria-label="Resumen del turno">
+            {/* 1. Ventas cobradas */}
+            <div className="pos-kpi-tile" title="Ventas cobradas en este turno">
+              <span className="pos-kpi-tile__icono" aria-hidden="true">🧾</span>
+              <div className="pos-kpi-tile__cuerpo">
+                <span className="pos-kpi-tile__label">Cobradas</span>
+                <strong className="pos-kpi-tile__valor serif">{ventasCobradasCount}</strong>
+              </div>
+            </div>
+
+            {/* 2. Recaudado hoy */}
+            <div className="pos-kpi-tile pos-kpi-tile--monto" title="Total recaudado hoy en mostrador">
+              <span className="pos-kpi-tile__icono" aria-hidden="true">💰</span>
+              <div className="pos-kpi-tile__cuerpo">
+                <span className="pos-kpi-tile__label">Recaudado</span>
+                <strong className="pos-kpi-tile__valor pos-kpi-tile__valor--monto">
+                  {formatearSoles(totalVendidoHoy)}
+                </strong>
+              </div>
+            </div>
+
+            {/* 3. Meta del día con barra de progreso slim */}
+            <div
+              className={`pos-kpi-tile pos-kpi-tile--meta ${
+                metaCumplida ? "pos-kpi-tile--meta-cumplida" : ""
+              }`}
+              title={`Meta del día: ${formatearSoles(totalVendidoHoy)} de ${formatearSoles(META_DIARIA_VENTAS)} (${porcentajeMetaReal}%)`}
+            >
+              <span className="pos-kpi-tile__icono" aria-hidden="true">
+                {metaCumplida ? "✓" : "🎯"}
+              </span>
+              <div className="pos-kpi-tile__cuerpo pos-kpi-tile__cuerpo--meta">
+                <div className="pos-kpi-tile__meta-cabecera">
+                  <span className="pos-kpi-tile__label">Meta del día</span>
+                  <strong className="pos-kpi-tile__valor pos-kpi-tile__valor--meta">
+                    {porcentajeMetaReal}%
+                  </strong>
+                </div>
+                <div
+                  className="pos-kpi-tile__barra-slim"
+                  role="progressbar"
+                  aria-valuenow={totalVendidoHoy}
+                  aria-valuemin={0}
+                  aria-valuemax={META_DIARIA_VENTAS}
+                  aria-label="Progreso de meta diaria de ventas"
+                >
+                  <div
+                    className="pos-kpi-tile__barra-relleno"
+                    style={{ width: `${Math.min(porcentajeMetaReal, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Botón Historial del turno */}
+            <button
+              type="button"
+              className={`pos-header__btn-historial ${mostrarHistorial ? "pos-header__btn-historial--activo" : ""}`}
+              onClick={() => setMostrarHistorial(true)}
+              title="Ver historial de comprobantes del turno"
+            >
+              <span className="pos-header__btn-historial-icono" aria-hidden="true">📋</span>
+              <span className="pos-header__btn-historial-texto">Historial del turno</span>
+              <span className="pos-header__btn-historial-badge">
+                {ventasDelDia.length}
+              </span>
+            </button>
           </div>
-          <button
-            type="button"
-            className={`pos-header__btn-historial ${mostrarHistorial ? "pos-header__btn-historial--activo" : ""}`}
-            onClick={() => setMostrarHistorial(true)}
-          >
-            🧾 Historial del turno ({ventasDelDia.filter((v) => !v.anulada).length})
-          </button>
         </div>
       </header>
 
@@ -928,6 +1082,239 @@ export function VentasPage() {
               >
                 Cobrar venta → {formatearSoles(total)}
               </Boton>
+            </div>
+          </div>
+
+          {/* Mini-panel compacto con pestañas: Más vendidos / Por reponer / Últimas ventas */}
+          <div className="pos-widget-compacto">
+            <div className="pos-widget-compacto__tabs" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={pestanaWidgetPos === "masVendidos"}
+                className={`pos-widget-compacto__tab ${pestanaWidgetPos === "masVendidos"
+                  ? "pos-widget-compacto__tab--activo"
+                  : ""
+                  }`}
+                onClick={() => setPestanaWidgetPos("masVendidos")}
+              >
+                <span>🔥 Más vendidos</span>
+                {masVendidosTurno.length > 0 && (
+                  <span className="pos-widget-compacto__contador">
+                    {masVendidosTurno.length}
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={pestanaWidgetPos === "porReponer"}
+                className={`pos-widget-compacto__tab ${pestanaWidgetPos === "porReponer"
+                  ? "pos-widget-compacto__tab--activo"
+                  : ""
+                  }`}
+                onClick={() => setPestanaWidgetPos("porReponer")}
+              >
+                <span>⚠️ Por reponer</span>
+                {productosPorReponer.length > 0 && (
+                  <span className="pos-widget-compacto__contador pos-widget-compacto__contador--alerta">
+                    {productosPorReponer.length}
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={pestanaWidgetPos === "ultimas"}
+                className={`pos-widget-compacto__tab ${pestanaWidgetPos === "ultimas"
+                  ? "pos-widget-compacto__tab--activo"
+                  : ""
+                  }`}
+                onClick={() => setPestanaWidgetPos("ultimas")}
+              >
+                <span>🕒 Últimas</span>
+                {ultimasVentasTurno.length > 0 && (
+                  <span className="pos-widget-compacto__contador">
+                    {ultimasVentasTurno.length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            <div className="pos-widget-compacto__cuerpo">
+              {pestanaWidgetPos === "masVendidos" ? (
+                masVendidosTurno.length === 0 ? (
+                  <div className="pos-widget-compacto__vacio">
+                    <span className="pos-widget-compacto__vacio-icono">🛒</span>
+                    <p className="pos-widget-compacto__vacio-texto">
+                      Aún no hay ventas en el turno
+                    </p>
+                  </div>
+                ) : (
+                  <ul
+                    className="pos-widget-compacto__lista"
+                    aria-label="Productos más vendidos del turno"
+                  >
+                    {masVendidosTurno.map((item) => (
+                      <li key={item.productoId} className="pos-widget-compacto__item">
+                        <div className="pos-widget-compacto__item-info">
+                          <span
+                            className="pos-widget-compacto__item-nombre"
+                            title={item.nombre}
+                          >
+                            {item.nombre}
+                          </span>
+                          <span className="pos-widget-compacto__item-meta">
+                            {item.cantidad} {item.cantidad === 1 ? "und." : "unds."} · {formatearSoles(item.precioUnitario)}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          className="pos-widget-compacto__btn-agregar"
+                          onClick={() => agregarAlCarrito(item.productoReal)}
+                          title={`Agregar "${item.nombre}" a la venta`}
+                          aria-label={`Agregar ${item.nombre}`}
+                        >
+                          +
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )
+              ) : pestanaWidgetPos === "porReponer" ? (
+                productosPorReponer.length === 0 ? (
+                  <div className="pos-widget-compacto__vacio pos-widget-compacto__vacio--optimo">
+                    <span className="pos-widget-compacto__vacio-icono">✅</span>
+                    <p className="pos-widget-compacto__vacio-texto">
+                      Stock en nivel óptimo
+                    </p>
+                  </div>
+                ) : (
+                  <ul
+                    className="pos-widget-compacto__lista"
+                    aria-label="Productos por reponer"
+                  >
+                    {productosPorReponer.map((p) => {
+                      const stockActual = Number(p.stock || 0);
+                      const esAgotado = stockActual <= 0;
+                      return (
+                        <li key={p.id} className="pos-widget-compacto__item">
+                          <div className="pos-widget-compacto__item-info">
+                            <span
+                              className="pos-widget-compacto__item-nombre"
+                              title={p.nombre}
+                            >
+                              {p.nombre}
+                            </span>
+                            <span className="pos-widget-compacto__item-meta">
+                              Mínimo: {p.stockMinimo || 5} {(p.unidad || "UND").toUpperCase()}
+                            </span>
+                          </div>
+                          <span
+                            className={`pos-widget-compacto__badge-stock ${esAgotado
+                              ? "pos-widget-compacto__badge-stock--agotado"
+                              : "pos-widget-compacto__badge-stock--alerta"
+                              }`}
+                          >
+                            {esAgotado ? "Agotado" : `${stockActual} disp.`}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )
+              ) : ultimasVentasTurno.length === 0 ? (
+                <div className="pos-widget-compacto__vacio">
+                  <span className="pos-widget-compacto__vacio-icono">🧾</span>
+                  <p className="pos-widget-compacto__vacio-texto">
+                    Aún no hay ventas en el turno
+                  </p>
+                </div>
+              ) : (
+                <ul
+                  className="pos-widget-compacto__lista"
+                  aria-label="Últimas ventas del turno"
+                >
+                  {ultimasVentasTurno.map((venta) => {
+                    const hora = formatearHoraVenta(venta.fecha || venta.fechaCreacion);
+                    const metodo = (venta.metodoPago || "EFECTIVO").toUpperCase();
+                    let claseMetodo = "pos-widget-compacto__metodo--efectivo";
+                    if (metodo === "YAPE") claseMetodo = "pos-widget-compacto__metodo--yape";
+                    else if (metodo === "PLIN") claseMetodo = "pos-widget-compacto__metodo--plin";
+                    else if (metodo === "TARJETA") claseMetodo = "pos-widget-compacto__metodo--tarjeta";
+
+                    return (
+                      <li
+                        key={venta.id}
+                        className={`pos-widget-compacto__item pos-widget-compacto__item--clickeable ${venta.anulada ? "pos-widget-compacto__item--anulado" : ""
+                          }`}
+                        onClick={() => setVentaDetalle(venta)}
+                        title="Clic para ver comprobante"
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setVentaDetalle(venta);
+                          }
+                        }}
+                      >
+                        <div className="pos-widget-compacto__item-info">
+                          <div className="pos-widget-compacto__item-header-venta">
+                            <span className="pos-widget-compacto__item-hora">
+                              🕒 {hora}
+                            </span>
+                            {venta.anulada ? (
+                              <span className="pos-widget-compacto__badge-anulada">
+                                Anulada
+                              </span>
+                            ) : (
+                              <span className={`pos-widget-compacto__metodo ${claseMetodo}`}>
+                                {ETIQUETAS_METODO_PAGO[metodo] || metodo}
+                              </span>
+                            )}
+                          </div>
+                          <span className="pos-widget-compacto__item-meta">
+                            {venta.items?.length || 0} {venta.items?.length === 1 ? "ítem" : "ítems"} · {venta.codigo || `#${String(venta.id).slice(-4)}`}
+                          </span>
+                        </div>
+                        <span className={`pos-widget-compacto__item-monto ${venta.anulada ? "pos-widget-compacto__item-monto--anulado" : ""
+                          }`}>
+                          {formatearSoles(venta.total)}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          {/* Tarjeta compacta: Atajos de mostrador */}
+          <div className="pos-atajos-card">
+            <div className="pos-atajos-card__cabecera">
+              <span className="pos-atajos-card__icono" aria-hidden="true">⚡</span>
+              <h4 className="pos-atajos-card__titulo">Atajos de mostrador</h4>
+            </div>
+            <div className="pos-atajos-card__grid">
+              <div className="pos-atajos-card__item">
+                <kbd className="pos-kbd">Enter</kbd>
+                <span>Agregar producto buscado</span>
+              </div>
+              <div className="pos-atajos-card__item">
+                <kbd className="pos-kbd">Esc</kbd>
+                <span>Limpiar buscador</span>
+              </div>
+              <div className="pos-atajos-card__item">
+                <button
+                  type="button"
+                  className="pos-atajos-card__btn"
+                  onClick={enfocarBuscador}
+                >
+                  <kbd className="pos-kbd">📷</kbd>
+                  <span>Activar lector de barras</span>
+                </button>
+              </div>
             </div>
           </div>
         </aside>

@@ -1,0 +1,832 @@
+/* ============================================================================
+ * LibroReclamacionesPage.css · Libro de Reclamaciones Virtual (INDECOPI)
+ * Bodega El Trigal · Estilos Premium basados 100% en tokens Fase 0
+ * ==========================================================================*/
+
+/* -------------------------------------------------------------------------- */
+/* 1. LAYOUT PRINCIPAL                                                        */
+/* -------------------------------------------------------------------------- */
+
+.libro-reclamaciones-page {
+  max-width: 920px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: var(--esp-6);
+  padding-bottom: var(--esp-16);
+}
+
+.libro-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-8);
+}
+
+.libro-alerta-global {
+  margin-bottom: var(--esp-6);
+}
+
+.libro-asterisco {
+  color: var(--terracota);
+  font-weight: var(--peso-negrita);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2. CABECERA INSTITUCIONAL                                                  */
+/* -------------------------------------------------------------------------- */
+
+.libro-cabecera {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+  padding: var(--esp-6) var(--esp-6);
+  margin-bottom: var(--esp-8);
+  position: relative;
+  overflow: hidden;
+}
+
+.libro-cabecera::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--terracota) 0%, var(--oro) 50%, var(--terracota) 100%);
+}
+
+.libro-cabecera__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--esp-4);
+  padding-bottom: var(--esp-5);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.libro-cabecera__logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-3);
+  text-decoration: none;
+  color: var(--tinta);
+  transition: transform var(--transicion);
+}
+
+.libro-cabecera__logo-link:hover {
+  transform: translateY(-1px);
+}
+
+.libro-cabecera__logo-isotipo {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-sm);
+  background: var(--terracota-50);
+  border: 1px solid var(--hairline-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.libro-cabecera__logo-textos {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.libro-cabecera__logo-nombre {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-negrita);
+  color: var(--tinta);
+}
+
+.libro-cabecera__logo-lema {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  font-weight: var(--peso-semi);
+  color: var(--tinta-soft);
+}
+
+.libro-cabecera__ley-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--tinta-soft);
+  background: var(--crema);
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--radio-pastilla);
+  padding: 0.35rem 0.85rem;
+}
+
+.libro-cabecera__cuerpo {
+  padding-top: var(--esp-5);
+}
+
+.libro-cabecera__kicker {
+  display: inline-block;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: var(--peso-semi);
+  color: var(--terracota);
+  margin-bottom: var(--esp-2);
+}
+
+.libro-cabecera__titulo {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-negrita);
+  color: var(--tinta);
+  margin: 0 0 var(--esp-3) 0;
+  line-height: 1.15;
+}
+
+.libro-cabecera__descripcion {
+  font-size: var(--texto-base);
+  color: var(--tinta-soft);
+  line-height: var(--interlineado-base);
+  margin: 0 0 var(--esp-5) 0;
+  max-width: 68ch;
+}
+
+.libro-cabecera__datos-proveedor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-4);
+  padding-top: var(--esp-4);
+  border-top: 1px dashed var(--hairline-2);
+}
+
+.libro-dato-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  background: var(--crema);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  padding: 0.4rem 0.75rem;
+  font-size: var(--texto-xs);
+  color: var(--tinta);
+}
+
+.libro-dato-icono {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3. CARDS DE SECCIÓN                                                        */
+/* -------------------------------------------------------------------------- */
+
+.libro-card {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--esp-6);
+  transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+
+.libro-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--hairline-2);
+}
+
+.libro-card__cabecera {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-4);
+  margin-bottom: var(--esp-6);
+  padding-bottom: var(--esp-4);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.libro-card__icono {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-sm);
+  background: var(--terracota-50);
+  border: 1px solid var(--hairline-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: var(--terracota);
+}
+
+.libro-card__titulos {
+  flex: 1;
+}
+
+.libro-card__titulo {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-negrita);
+  color: var(--tinta);
+  margin: 0 0 var(--esp-1) 0;
+  line-height: 1.25;
+}
+
+.libro-card__subtitulo {
+  font-size: var(--texto-sm);
+  color: var(--tinta-soft);
+  margin: 0;
+  line-height: var(--interlineado-base);
+}
+
+.libro-card__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 4. GRIDS Y CAMPOS                                                          */
+/* -------------------------------------------------------------------------- */
+
+.libro-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-5);
+}
+
+.libro-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-5);
+}
+
+@media (min-width: 680px) {
+  .libro-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .libro-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* MICRO-INTERACCIONES: Focus premium idéntico al login */
+.libro-formulario .ui-campo:focus-within .ui-campo__etiqueta {
+  color: var(--terracota);
+  transition: color var(--transicion-rapida);
+}
+
+.libro-formulario .ui-campo__caja:focus-within {
+  background-color: var(--panel);
+  border-color: var(--terracota);
+  box-shadow: 0 0 0 3px rgba(192, 83, 43, 0.18);
+  transition: border-color var(--transicion-rapida), box-shadow var(--transicion-rapida);
+}
+
+.libro-formulario .ui-campo__caja--error {
+  border-color: var(--rojo) !important;
+}
+
+.libro-formulario .ui-campo__caja--error:focus-within {
+  border-color: var(--rojo) !important;
+  box-shadow: 0 0 0 3px rgba(214, 72, 47, 0.18) !important;
+}
+
+/* Grupos y labels */
+.libro-campo-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.libro-label-grupo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  color: var(--tinta);
+}
+
+.libro-label-fila {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-2);
+}
+
+.libro-label-fila .ui-campo__etiqueta {
+  margin-bottom: 0;
+}
+
+.libro-contador-caracteres {
+  font-size: var(--texto-xs);
+  color: var(--tinta-faint);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--peso-medio);
+}
+
+/* Textarea adaptada al estilo ui-campo__caja */
+.libro-caja-textarea {
+  height: auto;
+  min-height: 100px;
+  padding: 0;
+  align-items: stretch;
+}
+
+.libro-textarea {
+  min-height: 90px;
+  width: 100%;
+  resize: vertical;
+  line-height: var(--interlineado-base);
+  padding: var(--esp-3) var(--esp-4);
+  font-family: inherit;
+  font-size: var(--texto-sm);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 5. RADIOS (MOTIVO Y BIEN)                                                  */
+/* -------------------------------------------------------------------------- */
+
+.libro-radios-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 600px) {
+  .libro-radios-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.libro-radio-card {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--r);
+  background: var(--crema);
+  padding: var(--esp-4);
+  transition: all var(--transicion);
+}
+
+.libro-radio-card:hover {
+  border-color: var(--terracota);
+  background: var(--panel);
+  transform: translateY(-1px);
+}
+
+.libro-radio-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.libro-radio-card--activo {
+  border: 2px solid var(--terracota);
+  background: var(--terracota-50);
+  box-shadow: 0 0 0 3px rgba(192, 83, 43, 0.12);
+}
+
+.libro-radio-card__contenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.libro-radio-card__top {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.libro-radio-card__icono {
+  font-size: 1.25rem;
+}
+
+.libro-radio-card__nombre {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-negrita);
+  color: var(--tinta);
+  letter-spacing: 0.05em;
+}
+
+.libro-radio-card--activo .libro-radio-card__nombre {
+  color: var(--terracota);
+}
+
+.libro-radio-card__desc {
+  font-size: var(--texto-xs);
+  color: var(--tinta-soft);
+  line-height: var(--interlineado-base);
+}
+
+/* Radios en fila */
+.libro-radios-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+}
+
+.libro-radio-opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  background: var(--crema);
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--r-sm);
+  padding: 0.55rem 0.95rem;
+  font-size: var(--texto-sm);
+  color: var(--tinta);
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transicion);
+}
+
+.libro-radio-opcion:hover {
+  border-color: var(--terracota);
+  background: var(--panel);
+}
+
+.libro-radio-opcion:has(input[type="radio"]:checked) {
+  border-color: var(--terracota);
+  background: var(--terracota-50);
+  color: var(--terracota-600);
+  font-weight: var(--peso-semi);
+}
+
+.libro-radio-opcion input[type="radio"] {
+  accent-color: var(--terracota);
+  margin: 0;
+  cursor: pointer;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 6. RECUADRO LEGAL INDECOPI                                                 */
+/* -------------------------------------------------------------------------- */
+
+.libro-legal {
+  background: var(--oro-50);
+  border: 1px solid var(--hairline-2);
+  border-left: 4px solid var(--oro);
+  border-radius: var(--r);
+  padding: var(--esp-5) var(--esp-6);
+}
+
+.libro-legal__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-3);
+}
+
+.libro-legal__icono {
+  font-size: 1.25rem;
+}
+
+.libro-legal__titulo {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-negrita);
+  color: var(--tinta);
+}
+
+.libro-legal__lista {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  font-size: var(--texto-sm);
+  color: var(--tinta);
+  line-height: var(--interlineado-base);
+}
+
+.libro-legal__lista strong {
+  color: var(--tinta);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 7. DECLARACIÓN JURADA Y BOTÓN DE ENVÍO                                     */
+/* -------------------------------------------------------------------------- */
+
+.libro-pie-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  padding-top: var(--esp-4);
+}
+
+.libro-declaracion {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  font-size: var(--texto-sm);
+  color: var(--tinta-soft);
+  line-height: var(--interlineado-base);
+  cursor: pointer;
+  user-select: none;
+}
+
+.libro-declaracion input[type="checkbox"] {
+  accent-color: var(--terracota);
+  margin-top: 0.2rem;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.libro-declaracion:hover span {
+  color: var(--tinta);
+}
+
+.libro-error-declaracion {
+  margin-top: calc(-1 * var(--esp-2));
+}
+
+.libro-btn-enviar {
+  position: relative;
+  overflow: hidden;
+  font-weight: var(--peso-semi);
+}
+
+.libro-btn-enviar:not(:disabled):hover .libro-btn-flecha {
+  transform: translateX(4px);
+}
+
+.libro-btn-flecha {
+  display: inline-block;
+  margin-left: var(--esp-2);
+  transition: transform var(--transicion);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 8. PANTALLA DE CONFIRMACIÓN (SUB-VISTA)                                    */
+/* -------------------------------------------------------------------------- */
+
+.libro-confirmacion-vista {
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: var(--esp-8);
+  padding-bottom: var(--esp-16);
+}
+
+.libro-confirmacion-card {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--esp-8) var(--esp-6);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: libroEntrada 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes libroEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.libro-confirmacion-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--verde) 0%, var(--oro) 50%, var(--terracota) 100%);
+}
+
+.libro-confirmacion-icono {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--verde-50);
+  border: 2px solid var(--verde);
+  color: var(--verde);
+  font-size: 2rem;
+  font-weight: var(--peso-extra);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--esp-4) auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.libro-confirmacion-chip {
+  display: inline-block;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: var(--peso-semi);
+  color: var(--verde);
+  background: var(--verde-50);
+  border: 1px solid var(--verde);
+  border-radius: var(--radio-pastilla);
+  padding: 0.3rem 0.85rem;
+  margin-bottom: var(--esp-3);
+}
+
+.libro-confirmacion-titulo {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-negrita);
+  color: var(--tinta);
+  margin: 0 0 var(--esp-2) 0;
+}
+
+.libro-confirmacion-bajada {
+  font-size: var(--texto-base);
+  color: var(--tinta-soft);
+  max-width: 48ch;
+  margin: 0 auto var(--esp-6) auto;
+  line-height: var(--interlineado-base);
+}
+
+/* Código correlativo */
+.libro-confirmacion-codigo-caja {
+  background: var(--crema);
+  border: 2px dashed var(--terracota);
+  border-radius: var(--r-lg);
+  padding: var(--esp-5);
+  margin-bottom: var(--esp-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-1);
+}
+
+.libro-confirmacion-codigo-label {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semi);
+  letter-spacing: 0.12em;
+  color: var(--tinta-soft);
+}
+
+.libro-confirmacion-codigo-valor {
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: var(--peso-extra);
+  color: var(--terracota);
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+}
+
+.libro-confirmacion-codigo-ayuda {
+  font-size: var(--texto-xs);
+  color: var(--tinta-faint);
+  margin-top: var(--esp-1);
+}
+
+/* Tabla de detalles */
+.libro-confirmacion-detalles {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r);
+  background: var(--panel);
+  overflow: hidden;
+  text-align: left;
+  margin-bottom: var(--esp-6);
+}
+
+.libro-confirmacion-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--esp-4);
+  padding: var(--esp-3) var(--esp-4);
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--texto-sm);
+}
+
+.libro-confirmacion-fila:last-child {
+  border-bottom: none;
+}
+
+.libro-confirmacion-fila--destacada {
+  background: var(--crema);
+}
+
+.libro-confirmacion-clave {
+  color: var(--tinta-soft);
+  font-weight: var(--peso-medio);
+}
+
+.libro-confirmacion-valor {
+  color: var(--tinta);
+  font-weight: var(--peso-semi);
+  text-align: right;
+}
+
+.libro-confirmacion-valor--plazo {
+  color: var(--terracota-600);
+  font-weight: var(--peso-negrita);
+}
+
+/* Aviso correo y plazos */
+.libro-confirmacion-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  background: var(--terracota-50);
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--r);
+  padding: var(--esp-4);
+  font-size: var(--texto-xs);
+  color: var(--tinta);
+  line-height: var(--interlineado-base);
+  text-align: left;
+  margin-bottom: var(--esp-6);
+}
+
+.libro-confirmacion-aviso-icono {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.libro-confirmacion-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+@media (min-width: 480px) {
+  .libro-confirmacion-acciones {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* 9. MODO OSCURO (CAPAS 2 Y 3)                                               */
+/* -------------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .libro-radio-card--activo {
+    background: rgba(192, 83, 43, 0.2);
+  }
+
+  :root:not([data-theme="light"]) .libro-radio-opcion:has(input[type="radio"]:checked) {
+    background: rgba(192, 83, 43, 0.2);
+    color: var(--tinta);
+  }
+
+  :root:not([data-theme="light"]) .libro-confirmacion-codigo-caja {
+    background: var(--panel);
+  }
+
+  :root:not([data-theme="light"]) .libro-confirmacion-aviso {
+    background: rgba(192, 83, 43, 0.15);
+  }
+
+  :root:not([data-theme="light"]) .libro-confirmacion-chip {
+    background: rgba(46, 158, 91, 0.2);
+    border-color: var(--verde);
+  }
+}
+
+:root[data-theme="dark"] .libro-radio-card--activo {
+  background: rgba(192, 83, 43, 0.2);
+}
+
+:root[data-theme="dark"] .libro-radio-opcion:has(input[type="radio"]:checked) {
+  background: rgba(192, 83, 43, 0.2);
+  color: var(--tinta);
+}
+
+:root[data-theme="dark"] .libro-confirmacion-codigo-caja {
+  background: var(--panel);
+}
+
+:root[data-theme="dark"] .libro-confirmacion-aviso {
+  background: rgba(192, 83, 43, 0.15);
+}
+
+:root[data-theme="dark"] .libro-confirmacion-chip {
+  background: rgba(46, 158, 91, 0.2);
+  border-color: var(--verde);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 10. ACCESIBILIDAD (PREFERS-REDUCED-MOTION)                                 */
+/* -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .libro-confirmacion-card {
+    animation: none;
+  }
+
+  .libro-card,
+  .libro-radio-card,
+  .libro-btn-enviar,
+  .libro-btn-flecha {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+

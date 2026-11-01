@@ -30,6 +30,17 @@ export const CarritoProvider = ({ children }) => {
   // Estado local para los productos añadidos al carrito (restaurado de localStorage)
   const [items, setItems] = useState(() => leerCarritoStorage());
 
+  // Estado del Drawer lateral del carrito (FASE 6)
+  const [drawerAbierto, setDrawerAbierto] = useState(false);
+
+  const abrirDrawerCarrito = useCallback(() => {
+    setDrawerAbierto(true);
+  }, []);
+
+  const cerrarDrawerCarrito = useCallback(() => {
+    setDrawerAbierto(false);
+  }, []);
+
   /**
    * Remueve todos los elementos del carrito de compras (en memoria y storage).
    */
@@ -145,6 +156,9 @@ export const CarritoProvider = ({ children }) => {
     cambiarCantidad,
     vaciar,
     total,
+    drawerAbierto,
+    abrirDrawerCarrito,
+    cerrarDrawerCarrito,
   };
 
   return (

@@ -50,6 +50,7 @@ import LoginPage from "../pages/tienda/LoginPage";
 import RegistroPage from "../pages/tienda/RegistroPage";
 import NosotrosPage from "../pages/tienda/NosotrosPage";
 import UbicacionPage from "../pages/tienda/UbicacionPage";
+import LibroReclamacionesPage from "../pages/tienda/LibroReclamacionesPage";
 
 // Páginas de Mi Cuenta
 import LayoutMiCuenta from "../pages/tienda/micuenta/LayoutMiCuenta";
@@ -66,6 +67,7 @@ import PedidosPage from "../pages/dashboard/PedidosPage";
 import PromocionesPage from "../pages/dashboard/PromocionesPage";
 import VentasPage from "../pages/dashboard/VentasPage";
 import GestionUsuariosPage from "../pages/dashboard/GestionUsuariosPage";
+import ReclamosAdminPage from "../pages/dashboard/ReclamosAdminPage";
 
 // Páginas del sistema
 import NoEncontradaPage from "../pages/NoEncontradaPage";
@@ -95,6 +97,7 @@ export function AppRouter() {
           <Route path={RUTAS.CARRITO} element={<CarritoPage />} />
           <Route path={RUTAS.NOSOTROS} element={<NosotrosPage />} />
           <Route path={RUTAS.UBICACION} element={<UbicacionPage />} />
+          <Route path={RUTAS.LIBRO_RECLAMACIONES} element={<LibroReclamacionesPage />} />
 
           {/* El checkout exige estar logueado (cualquier rol), pero no un rol
               concreto: un ADMIN también puede comprar como cliente.
@@ -165,6 +168,14 @@ export function AppRouter() {
             element={
               <RutaProtegida rol={ROLES.ADMIN}>
                 <GestionUsuariosPage />
+              </RutaProtegida>
+            }
+          />
+          <Route
+            path="reclamos"
+            element={
+              <RutaProtegida rol={ROLES.ADMIN}>
+                <ReclamosAdminPage />
               </RutaProtegida>
             }
           />

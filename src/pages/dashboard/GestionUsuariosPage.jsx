@@ -694,7 +694,7 @@ export function GestionUsuariosPage() {
                 👥
               </div>
             </div>
-            <div className="usuarios-gestion__metrica-valor usuarios-gestion__metrica-valor--total">
+            <div className="usuarios-gestion__metrica-valor usuarios-gestion__metrica-valor--total serif">
               {metricas.total}
             </div>
             <div className="usuarios-gestion__metrica-pill-wrapper">
@@ -717,7 +717,7 @@ export function GestionUsuariosPage() {
                 🛡️
               </div>
             </div>
-            <div className="usuarios-gestion__metrica-valor usuarios-gestion__metrica-valor--admin">
+            <div className="usuarios-gestion__metrica-valor usuarios-gestion__metrica-valor--admin serif">
               {metricas.admins}
             </div>
             <div className="usuarios-gestion__metrica-pill-wrapper">
@@ -740,7 +740,7 @@ export function GestionUsuariosPage() {
                 🧾
               </div>
             </div>
-            <div className="usuarios-gestion__metrica-valor usuarios-gestion__metrica-valor--cajeros">
+            <div className="usuarios-gestion__metrica-valor usuarios-gestion__metrica-valor--cajeros serif">
               {metricas.cajeros}
             </div>
             <div className="usuarios-gestion__metrica-pill-wrapper">
@@ -763,7 +763,7 @@ export function GestionUsuariosPage() {
                 🛍️
               </div>
             </div>
-            <div className="usuarios-gestion__metrica-valor usuarios-gestion__metrica-valor--clientes">
+            <div className="usuarios-gestion__metrica-valor usuarios-gestion__metrica-valor--clientes serif">
               {metricas.clientes}
             </div>
             <div className="usuarios-gestion__metrica-pill-wrapper">

@@ -38,6 +38,20 @@ const COLORES_DONUT = [
   "#64748b", // pizarra
 ];
 
+const ICONO_POR_CATEGORIA = {
+  Abarrotes: "🍚",
+  Lácteos: "🥛",
+  Bebidas: "🥤",
+  Snacks: "🍿",
+  Limpieza: "🧼",
+  Cuidado: "🧴",
+  Panadería: "🥖",
+  Frutas: "🍎",
+  Verduras: "🥦",
+  Carnes: "🥩",
+  Embutidos: "🌭",
+};
+
 export function PanelComboInventario({
   productoSeleccionado = null,
   alDeseleccionar,
@@ -152,21 +166,33 @@ export function PanelComboInventario({
         {/* Card Principal: Datos, foto y precios */}
         <Card className="panel-combo__card-detalle" padding="md">
           <div className="panel-combo__perfil-bloque">
-            <div className="panel-combo__foto-contenedor">
-              {p.imagen ? (
+            {/* Contenedor fotográfico protagonista centrado */}
+            <div className="panel-combo__foto-contenedor" title={p.nombre}>
+              {p.imagen && (
                 <img
                   src={urlImagen(p.imagen)}
                   alt={p.nombre}
                   className="panel-combo__foto-img"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    if (e.currentTarget.nextElementSibling) {
+                      e.currentTarget.nextElementSibling.style.display = "flex";
+                    }
+                  }}
                 />
-              ) : (
-                <div
-                  className="panel-combo__foto-fallback"
-                  style={{ backgroundColor: p.color || "var(--ladrillo-500, #8b4513)" }}
-                >
-                  {p.nombre.slice(0, 2).toUpperCase()}
-                </div>
               )}
+              <div
+                className="panel-combo__foto-fallback"
+                style={{ display: p.imagen ? "none" : "flex" }}
+              >
+                <span className="panel-combo__foto-fallback-icono" aria-hidden="true">
+                  {ICONO_POR_CATEGORIA[p.categoria] || "🌾"}
+                </span>
+                <span className="panel-combo__foto-fallback-texto">
+                  {p.categoria || "Sin imagen"}
+                </span>
+              </div>
             </div>
 
             <div className="panel-combo__info-principal">

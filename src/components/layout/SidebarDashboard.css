@@ -106,20 +106,64 @@
 
 /* Avatar grande circular centrado con anillo por rol y micro-sombra/glow */
 .panel-lateral__avatar-wrap {
+  --avatar-onda-color: var(--terracota, #c0532b);
+  --avatar-onda-opacidad: 0.48;
   width: min(180px, 100%);
   height: auto;
   aspect-ratio: 1 / 1;
   border-radius: 9999px;
-  overflow: hidden;
+  overflow: visible;
   flex-shrink: 0;
   display: grid;
   place-items: center;
   position: relative;
+  isolation: isolate;
   margin: 0 auto;
   box-shadow:
     0 0 0 2px var(--neutro-900, #1c1917),
     0 0 0 4px rgba(217, 119, 6, 0.4),
     0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Ondas circulares concéntricas (efecto pulso/radar) detrás del avatar */
+.panel-lateral__avatar-wrap::before,
+.panel-lateral__avatar-wrap::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--avatar-onda-color);
+  box-shadow: 0 0 10px rgba(192, 83, 43, 0.2);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: scale(1);
+  transform-origin: center;
+  box-sizing: border-box;
+}
+
+.panel-lateral__avatar-wrap::before {
+  animation: avatarOndaPulso 2.8s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+}
+
+.panel-lateral__avatar-wrap::after {
+  animation: avatarOndaPulso 2.8s cubic-bezier(0.2, 0.6, 0.35, 1) infinite 1.4s;
+}
+
+@keyframes avatarOndaPulso {
+  0% {
+    transform: scale(1);
+    opacity: var(--avatar-onda-opacidad, 0.48);
+  }
+
+  50% {
+    opacity: calc(var(--avatar-onda-opacidad, 0.48) * 0.55);
+  }
+
+  100% {
+    transform: scale(1.22);
+    opacity: 0;
+  }
 }
 
 .panel-lateral__avatar-wrap--admin {
@@ -143,6 +187,9 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 9999px;
+  position: relative;
+  z-index: 2;
 }
 
 /* Fallback a iniciales proporcionadas al avatar grande */
@@ -151,6 +198,9 @@
   height: 100%;
   display: grid;
   place-items: center;
+  border-radius: 9999px;
+  position: relative;
+  z-index: 2;
   background: linear-gradient(135deg, #fbe7d5 0%, #f4cca9 100%);
   color: #7c2d12;
   font-size: 3.25rem;
@@ -428,4 +478,24 @@
   .panel-lateral__cerrar {
     display: none;
   }
+}
+
+/* ────────────────────────────────── ACCESIBILIDAD Y MODO OSCURO ─────── */
+@media (prefers-reduced-motion: reduce) {
+
+  .panel-lateral__avatar-wrap::before,
+  .panel-lateral__avatar-wrap::after {
+    animation: none !important;
+    display: none !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .panel-lateral__avatar-wrap {
+    --avatar-onda-opacidad: 0.32;
+  }
+}
+
+:root[data-theme="dark"] .panel-lateral__avatar-wrap {
+  --avatar-onda-opacidad: 0.32;
 }

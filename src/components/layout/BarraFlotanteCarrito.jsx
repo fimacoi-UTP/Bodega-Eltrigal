@@ -4,22 +4,21 @@
  * ----------------------------------------------------------------------------
  * Aparece en la parte inferior de la pantalla en dispositivos móviles cuando el
  * carrito tiene al menos 1 producto. Permite ver la cantidad acumulada, el total
- * en soles y navegar directamente a la página del carrito con un solo toque.
+ * en soles y abrir el drawer lateral del carrito con un solo toque.
  *
  * Se oculta automáticamente en pantallas de escritorio (donde el carrito es
  * accesible desde el navbar) y en las vistas de carrito y checkout.
  * ==========================================================================*/
 
-import { Link } from "react-router-dom";
 import { useCarrito } from "../../context/CarritoContext";
-import { RUTAS } from "../../routes/rutas";
 import { formatearSoles } from "../../utils/formato";
 import "./BarraFlotanteCarrito.css";
 
 export function BarraFlotanteCarrito() {
-  const { items, total } = useCarrito();
+  const { items, total, abrirDrawerCarrito } = useCarrito();
 
-  const cantidadTotal = items?.reduce((acc, item) => acc + (item.cantidad || 0), 0) || 0;
+  const cantidadTotal =
+    items?.reduce((acc, item) => acc + (item.cantidad || 0), 0) || 0;
 
   if (cantidadTotal === 0) return null;
 
@@ -31,21 +30,32 @@ export function BarraFlotanteCarrito() {
       className="barra-flotante-carrito"
       aria-label="Acceso rápido al carrito de compras"
     >
-      <Link
-        to={RUTAS.CARRITO}
+      <button
+        type="button"
+        onClick={abrirDrawerCarrito}
         className="barra-flotante-carrito__caja"
-        aria-label={`Ver carrito: ${textoProductos}, total ${formatearSoles(total)}`}
+        style={{ width: "100%", border: "none", textAlign: "left" }}
+        aria-haspopup="dialog"
+        aria-controls="carrito-drawer-lateral"
+        aria-label={`Abrir carrito: ${textoProductos}, total ${formatearSoles(total)}`}
       >
         <div className="barra-flotante-carrito__info">
           <span className="barra-flotante-carrito__icono" aria-hidden="true">
             🛒
           </span>
           <div className="barra-flotante-carrito__textos">
-            <span className="barra-flotante-carrito__conteo">{textoProductos}</span>
-            <span className="barra-flotante-carrito__separador" aria-hidden="true">
+            <span className="barra-flotante-carrito__conteo">
+              {textoProductos}
+            </span>
+            <span
+              className="barra-flotante-carrito__separador"
+              aria-hidden="true"
+            >
               ·
             </span>
-            <span className="barra-flotante-carrito__total">{formatearSoles(total)}</span>
+            <span className="barra-flotante-carrito__total">
+              {formatearSoles(total)}
+            </span>
           </div>
         </div>
 
@@ -55,7 +65,7 @@ export function BarraFlotanteCarrito() {
             →
           </span>
         </span>
-      </Link>
+      </button>
     </aside>
   );
 }
